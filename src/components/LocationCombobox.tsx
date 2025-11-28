@@ -3,7 +3,7 @@ import { ChevronsUpDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import type { Location } from "../lib/sneakerService";
+import type { Location } from "@/data/sneakerService";
 
 interface LocationComboboxProps {
     locations: Location[];
@@ -25,21 +25,21 @@ export function LocationCombobox({ locations, value, onChange }: LocationCombobo
                     className="w-full justify-between hover:text-white bg-white/5 hover:bg-white/7 border-white/10"
                 >
                     {value ? selectedLocation?.name : "Select location..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="size-4 ml-2 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0 bg-zinc-950 border-zinc-800">
+            <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-zinc-950 border-zinc-800">
                 <Command className="bg-transparent">
                     <CommandList>
-                        <CommandEmpty>No location found.</CommandEmpty>
+                        <CommandEmpty>No locations found</CommandEmpty>
                         <CommandGroup>
                             {locations.map((location) => (
                                 <CommandItem
                                     key={location.id}
                                     value={location.name}
                                     onSelect={() => {
-                                        onChange(location.id)
-                                        setOpen(false)
+                                        onChange(location.id);
+                                        setOpen(false);
                                     }}
                                     className="text-zinc-300 aria-selected:bg-white/10 aria-selected:text-white cursor-pointer"
                                 >
