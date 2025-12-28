@@ -14,7 +14,7 @@ export const login = createServerFn({ method: "POST" })
         else if (password === BLUE_PASSWORD)
             person = 1;
 
-        if (person) {
+        if (person !== undefined) {
             const session = await useAppSession();
             await session.update({ isAuthenticated: true, person });
             return { success: true };
