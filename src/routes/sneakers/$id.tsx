@@ -40,7 +40,7 @@ function SneakerDetails() {
     if (!auth || !sneaker)
         throw redirect({ to: "/" })
 
-    const momentAcqDate = moment(sneaker.pick_date);
+    const momentAcqDate = moment(sneaker.date);
 
     const handlePick = async (mine: boolean) => {
         if (!persons) return;
