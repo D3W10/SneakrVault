@@ -1,11 +1,13 @@
-import { HeadContent, Scripts, createRootRoute, redirect } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, redirect, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { checkAuth } from "@/data/auth";
+import type { QueryClient } from "@tanstack/react-query";
 import appCss from "../styles.css?url";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+    queryClient: QueryClient;
+}>()({
     beforeLoad: async ({ location }) => {
         if (location.pathname === "/login") {
             const { isAuthenticated } = await checkAuth();
@@ -31,7 +33,7 @@ export const Route = createRootRoute({
                 content: "width=device-width, initial-scale=1",
             },
             {
-                title: "SneakLookup",
+                title: "SneakrVault",
             },
         ],
         links: [
@@ -53,17 +55,13 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-    const queryClient = new QueryClient();
-
     return (
         <html lang="en">
             <head>
                 <HeadContent />
             </head>
             <body>
-                <QueryClientProvider client={queryClient}>
-                    {children}
-                </QueryClientProvider>
+                {children}
                 <TanStackDevtools
                     config={{
                         position: "bottom-right",

@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export function Headbar({ children }: { children: React.ReactNode }) {
+interface HeaderProps {
+    children?: React.ReactNode;
+}
+
+export function Header({ children }: HeaderProps) {
     const [scrolling, setScrolling] = useState(false);
 
     useEffect(() => {
@@ -19,10 +24,12 @@ export function Headbar({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-        <div className={`w-full sticky top-0 ring ${!scrolling ? "bg-background ring-transparent" : "bg-secondary ring-border/50"} z-10 transition duration-300`}>
+        <div className={cn("w-full sticky top-0 ring z-10 transition duration-300", !scrolling ? "bg-background ring-transparent" : "bg-muted ring-border")}>
             <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl text-transparent font-bold bg-linear-to-r/oklch from-cyan-500 from-10% via-primary via-50% to-amber-500 to-90% bg-clip-text tracking-tight">SneakLookup</h1>
-                {children}
+                <h1 className="text-3xl text-primary font-extrabold tracking-tight drop-shadow-lg drop-shadow-primary/40">SneakrVault</h1>
+                <div className="flex gap-2">
+                    {children}
+                </div>
             </div>
         </div>
     );

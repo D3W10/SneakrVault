@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Cake, LayoutGrid, Search } from "lucide-react";
-import moment from "moment";
-import { Headbar } from "@/components/Headbar";
-import { SneakerCard } from "@/components/SneakerCard";
-import { SneakerCardSkeleton } from "@/components/SneakerCardSkeleton";
-import { SneakerPhoto } from "@/components/SneakerPhoto";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { convexQuery } from "@convex-dev/react-query";
+import { IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { authIf, cn } from "@/lib/utils";
-import { getSneakers, getPersons, getLocations } from "@/data/sneakerService";
-import type { Sneaker } from "@/data/sneakerService";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { BirthdayBlock } from "@/components/blocks/BirthdayBlock";
+import { GridBlock } from "@/components/blocks/GridBlock";
+import { Header } from "@/components/Header";
+import { api } from "@db/api";
+import type { Search } from "@/lib/models";
 
 export const Route = createFileRoute("/")({
     component: Index,
@@ -20,24 +18,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
     const { auth } = Route.useRouteContext();
-    const [search, setSearch] = useState("");
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [locationFilter, setLocationFilter] = useState<string | null>(null);
-    const [sneakers, setSneakers] = useState<Sneaker[]>([]);
-    const [pickedMine, setPickedMine] = useState<Sneaker | undefined>();
-    const [pickedOther, setPickedOther] = useState<Sneaker | undefined>();
-    const { data: rawSneakers } = useQuery({
-        queryKey: ["sneakers"],
-        queryFn: () => getSneakers(),
-    });
-    const { data: persons } = useQuery({
-        queryKey: ["persons"],
-        queryFn: () => getPersons(),
-    });
-    const { data: locations } = useQuery({
-        queryKey: ["locations"],
-        queryFn: () => getLocations(),
-    });
+    const [search, setSearch] = useState<Search>({ term: "" });
+    const { data: brands } = useSuspenseQuery(convexQuery(api.brands.get, {}));
+    const { data: locations } = useSuspenseQuery(convexQuery(api.locations.get, {}));
+    const { data: owners } = useSuspenseQuery(convexQuery(api.users.get, {}));
 
     if (!auth)
         return;
@@ -79,47 +63,50 @@ function Index() {
 
     return (
         <div className="min-h-screen">
-            <Headbar>
-                <Popover open={searchOpen} onOpenChange={setSearchOpen} modal={false}>
-                    <PopoverAnchor asChild>
-                        <InputGroup className="w-full md:w-96 bg-secondary">
+            <Header>
+                <Popover>
+                    <PopoverTrigger id={searchTriggerId} nativeButton={false} render={<div className="w-full md:w-88" />}>
+                        <InputGroup className="w-full bg-secondary">
                             <InputGroupAddon>
-                                <Search className="size-4 text-muted-foreground" />
+                                <IconSearch className="size-4 text-muted-foreground" />
                             </InputGroupAddon>
                             <InputGroupInput
-                                value={search}
+                                id={searchInputId}
+                                value={search.term}
                                 placeholder="Search sneakers..."
-                                onFocus={() => setSearchOpen(true)}
-                                onChange={e => setSearch(e.target.value)}
+                                onChange={e => setSearch({ ...search, term: e.target.value })}
                             />
                         </InputGroup>
-                    </PopoverAnchor>
-                    <PopoverContent align="start" className="w-(--radix-popper-anchor-width) p-3 pt-2 space-y-2" onOpenAutoFocus={(e) => e.preventDefault()}>
-                        <h4 className="font-medium text-sm text-muted-foreground">Filter by Location</h4>
-                        <div className="flex flex-wrap gap-2">
-                            <Button
-                                size="sm"
-                                variant={locationFilter === null ? "default" : "outline"}
-                                onClick={() => setLocationFilter(null)}
-                                className="h-7 text-xs rounded-full"
-                            >
-                                All
-                            </Button>
-                            {(locations ?? []).map(l => (
-                                <Button
-                                    key={l}
-                                    size="sm"
-                                    variant={locationFilter === l ? "default" : "outline"}
-                                    onClick={() => setLocationFilter(l === locationFilter ? null : l)}
-                                    className="h-7 text-xs rounded-full"
-                                >
-                                    {l}
-                                </Button>
-                            ))}
-                        </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-(--anchor-width) px-3 py-2.5" initialFocus={false} finalFocus={false}>
+                        <FilterGroup
+                            name="Location"
+                            current={search.location}
+                            options={[...locations.map(l => ({ id: l._id, label: l.name })), { id: "outside", label: "Outside" }] as { id: Id<"locations"> | "outside" | undefined; label: string }[]}
+                            setFilter={l => setSearch({ ...search, location: l })}
+                        />
+                        <FilterGroup
+                            name="Brand"
+                            current={search.brand}
+                            options={brands.map(b => ({ id: b._id, label: b.name }))}
+                            setFilter={b => setSearch({ ...search, brand: b })}
+                        />
+                        <FilterGroup
+                            name="Owner"
+                            current={search.owner}
+                            options={owners.map(o => ({ id: o._id, label: o.username }))}
+                            setFilter={o => setSearch({ ...search, owner: o })}
+                        />
+                        <FilterGroup
+                            name="Decommissioned"
+                            current={search.decommissioned}
+                            options={[{ id: true, label: "List" }, { id: false, label: "All" }]}
+                            unsetText="Hidden"
+                            setFilter={o => setSearch({ ...search, decommissioned: o })}
+                        />
                     </PopoverContent>
                 </Popover>
-            </Headbar>
+            </Header>
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
                 {search.length === 0 && !locationFilter && (
                     <div className="px-6 md:px-8 pt-px pb-4 flex gap-6 overflow-x-auto">
@@ -146,48 +133,46 @@ function Index() {
                             </div>
                         </Link>
                     </div>
-                )}
-                {search.length === 0 && !locationFilter && upcomingBirthdays.length !== 0 && (
-                    <div className="px-6 md:px-8 flex flex-col gap-4">
-                        <div className="flex items-center gap-2">
-                            <Cake className="size-5 text-primary" />
-                            <h2 className="text-xl font-bold text-white">Upcoming Birthdays</h2>
-                        </div>
-                        <div className="p-px pb-4 flex gap-4 overflow-x-auto">
-                            {upcomingBirthdays.map(s => (
-                                <SneakerCard 
-                                    key={s.id} 
-                                    sneaker={s} 
-                                    birthday 
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-                <div className="px-6 md:px-8 flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                        {search.length === 0 && !locationFilter ? (
-                            <LayoutGrid className="size-5 text-primary" />
-                        ) : (
-                            <Search className="size-5 text-primary" />
-                        )}
-                        <h2 className="text-xl font-bold text-white">{search.length === 0 && !locationFilter ? "All Sneakers" : "Search Results"}</h2>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {!rawSneakers ? (
-                            Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
-                        ) : sneakers.length !== 0 ? (
-                            sneakers.map(sneaker => (
-                                <SneakerCard
-                                    key={sneaker.id}
-                                    sneaker={sneaker}
-                                />
-                            ))
-                        ) : (
-                            <span className="py-20 col-span-full text-center text-muted-foreground">No sneakers found matching "{search}"</span>
-                        )}
-                    </div>
-                </div>
+
+                <BirthdayBlock search={search} />
+                <GridBlock search={search} />
+            </div>
+        </div>
+    );
+}
+
+interface FilterGroupProps<T> {
+    name: string;
+    current: T | undefined;
+    options: { id: T; label: string }[];
+    unsetText?: string;
+    setFilter: (filter: T | undefined) => void;
+}
+
+function FilterGroup<T>({ name, current, options, unsetText, setFilter }: FilterGroupProps<T>) {
+    return (
+        <div className="space-y-1.5">
+            <h4 className="font-semibold text-xs text-muted-foreground">{name}</h4>
+            <div className="flex flex-wrap gap-1.5">
+                <Button
+                    className="h-7 text-xs rounded-full"
+                    size="sm"
+                    variant={current === undefined ? "default" : "outline"}
+                    onClick={() => setFilter(undefined)}
+                >
+                    {unsetText ?? "All"}
+                </Button>
+                {options.map((l, i) => (
+                    <Button
+                        key={i}
+                        className="h-7 text-xs rounded-full"
+                        size="sm"
+                        variant={current === l.id ? "default" : "outline"}
+                        onClick={() => setFilter(l.id)}
+                    >
+                        {l.label}
+                    </Button>
+                ))}
             </div>
         </div>
     );

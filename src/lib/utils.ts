@@ -1,10 +1,22 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Search } from "@/lib/models";
+import type { Doc } from "@db/dataModel";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function authIf(id: number, i1: string, i2: string) {
-    return id === 0 ? i1 : id === 1 ? i2 : "";
+export function hasSearched(search: Search) {
+    return search.term.length > 0 || search.location || search.brand || search.owner || search.decommissioned !== undefined;
+}
+
+export function filterBySearch(sneakers: Doc<"sneakers">[], search: Search) {
+    return sneakers.filter(sneaker => 
+        sneaker.name.toLowerCase().includes(search.term.toLowerCase()) &&
+        (!search.location || sneaker.location === search.location) &&
+        (!search.brand || sneaker.brand === search.brand) &&
+        (!search.owner || sneaker.owner === search.owner) &&
+        (!search.decommissioned && !sneaker.decommissioned)
+    );
 }
