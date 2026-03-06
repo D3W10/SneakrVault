@@ -9,17 +9,24 @@ export const Route = createRootRouteWithContext<{
     queryClient: QueryClient;
 }>()({
     beforeLoad: async ({ location }) => {
+        const auth = await checkAuth();
+        const redirectPath = auth.role === "admin" ? "/manage" : "/";
+
         if (location.pathname === "/login") {
-            const { isAuthenticated } = await checkAuth();
-            if (isAuthenticated)
-                throw redirect({ to: "/" });
+            if (auth.isAuthenticated)
+                throw redirect({ to: redirectPath });
 
             return {};
         }
 
-        const auth = await checkAuth();
         if (!auth.isAuthenticated)
             throw redirect({ to: "/login" });
+
+        if (auth.role === "admin" && location.pathname !== "/manage")
+            throw redirect({ to: "/manage" });
+
+        if (auth.role !== "admin" && location.pathname !== "/")
+            throw redirect({ to: "/" });
 
         return { auth };
     },

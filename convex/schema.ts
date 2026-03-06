@@ -5,6 +5,7 @@ export default defineSchema({
     users: defineTable({
         username: v.string(),
         passwordHash: v.string(),
+        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
         color: v.string(),
         active: v.boolean(),
     })

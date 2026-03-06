@@ -1,9 +1,10 @@
 import { useSession } from "@tanstack/react-start/server";
+import type { Doc } from "@db/dataModel"
 
 export type SessionState = {
     isAuthenticated: boolean;
-    person?: number;
-    otherPerson?: number;
+    username: Doc<"users">["username"];
+    role: Doc<"users">["role"];
 };
 
 const SESSION_COOKIE_NAME = "sneakrvault_auth";

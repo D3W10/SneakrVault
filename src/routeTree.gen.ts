@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ManageRouteImport } from './routes/manage'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SneakersIdRouteImport } from './routes/sneakers/$id'
 
+const ManageRoute = ManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -32,35 +38,46 @@ const SneakersIdRoute = SneakersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/manage': typeof ManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/manage': typeof ManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/manage': typeof ManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/sneakers/$id'
+  fullPaths: '/' | '/login' | '/manage' | '/sneakers/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/sneakers/$id'
-  id: '__root__' | '/' | '/login' | '/sneakers/$id'
+  to: '/' | '/login' | '/manage' | '/sneakers/$id'
+  id: '__root__' | '/' | '/login' | '/manage' | '/sneakers/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  ManageRoute: typeof ManageRoute
   SneakersIdRoute: typeof SneakersIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/manage': {
+      id: '/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof ManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ManageRoute: ManageRoute,
   SneakersIdRoute: SneakersIdRoute,
 }
 export const routeTree = rootRouteImport

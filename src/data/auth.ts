@@ -1,43 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { useAppSession } from "./session";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@db/api";
+import type { SessionState } from "@/data/session";
 
-async function waitForMinimumDuration(startedAt: number) {
-    const elapsed = Date.now() - startedAt;
+const MAX_USERNAME_LENGTH = 64;
+const MAX_PASSWORD_LENGTH = 256;
+const MIN_AUTH_RESPONSE_MS = 300;
 
-    if (elapsed < MIN_AUTH_RESPONSE_MS)
-        await wait(MIN_AUTH_RESPONSE_MS - elapsed);
-}
-
-function getConvexUrl() {
-    const url = process.env.CONVEX_URL ?? process.env.VITE_CONVEX_URL;
-
-    if (!url)
-        throw new Error("Missing Convex URL. Set CONVEX_URL or VITE_CONVEX_URL to your Convex deployment URL.");
-
-    return url;
-}
-
-function getConvexAdminKey() {
-    const key = process.env.CONVEX_ADMIN_KEY ?? process.env.CONVEX_DEPLOY_KEY;
-
-    if (!key)
-        throw new Error("Missing CONVEX_ADMIN_KEY. Set CONVEX_ADMIN_KEY (or CONVEX_DEPLOY_KEY) for internal auth functions.");
-
-    return key;
-}
-
-function createInternalConvexClient() {
-    const client = new ConvexHttpClient(getConvexUrl(), { logger: false });
-    const internalClient = client as ConvexInternalClient;
-
-    internalClient.setDebug?.(false);
-
-    if (!internalClient.setAdminAuth)
-        throw new Error("This Convex client version does not expose admin auth.");
-
-    internalClient.setAdminAuth(getConvexAdminKey());
-
-    return client;
+export function getDashboardForUser(session: Partial<SessionState>) {
+    return session.role === "admin" ? "/manage" : "/";
 }
 
 export const login = createServerFn({ method: "POST" })
@@ -47,16 +18,151 @@ export const login = createServerFn({ method: "POST" })
         const username = data.username.trim();
         const password = data.password;
 
-        if (username.length === 0 || password.length === 0)
+        if (username.length === 0 || username.length > MAX_USERNAME_LENGTH || password.length === 0 || password.length > MAX_PASSWORD_LENGTH) {
+            await waitForMinimumDuration(startedAt);
             return { success: false, error: "Invalid credentials" };
+        }
 
+        let client: ConvexHttpClient | null = null;
+
+        try {
+            client = getClient();
+
+            const guard = await client.mutation(api.auth.guardLoginAttempt, { username, ...await generateAuthPayload(false) });
+            if (!guard.allowed) {
+                await waitForMinimumDuration(startedAt);
+                return { success: false, error: "Invalid credentials" };
+            }
+
+            const user = await client.query(api.users.getByUsername, { username, ...await generateAuthPayload(false) });
+            if (!user)
+                return { success: false, error: "Invalid credentials" };
+
+            const isMatch = await verifyScryptHash(password, user.passwordHash);
+            await client.mutation(api.auth.recordLoginResult, { username, success: isMatch, ...await generateAuthPayload(false) });
+            await waitForMinimumDuration(startedAt);
+
+            if (isMatch) {
+                const session = await getAppSession();
+                await session.update({
+                    isAuthenticated: true,
+                    username: user.username,
+                    role: user.role,
+                });
+
+                return { success: true };
+            }
+        } catch (error) {
+            if (client) {
+                try {
+                    await client.mutation(api.auth.recordLoginResult, { username, success: false, ...await generateAuthPayload(false) });
+                } catch (recordError) {
+                    console.error("Failed to record login result:", recordError);
+                }
+            }
+
+            console.error("Authentication error:", error);
+            await waitForMinimumDuration(startedAt);
+        }
+
+        return { success: false, error: "Invalid credentials" };
     });
 
 export const logout = createServerFn({ method: "POST" }).handler(async () => {
-    const session = await useAppSession();
+    const session = await getAppSession();
     await session.clear();
 });
 
 export const checkAuth = createServerFn({ method: "GET" }).handler(async () => {
-    return getAuthPayload();
+    return (await getAppSession()).data;
 });
+
+export const getConvexQueryAuthPayload = createServerFn({ method: "GET" }).handler(async () => {
+    return await generateAuthPayload();
+});
+
+export function getClient() {
+    const url = process.env.CONVEX_URL ?? process.env.VITE_CONVEX_URL;
+    if (!url)
+        throw new Error("Missing Convex URL. Set CONVEX_URL or VITE_CONVEX_URL to your Convex deployment URL.");
+
+    return new ConvexHttpClient(url, { logger: false });
+}
+
+function wait(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForMinimumDuration(startedAt: number) {
+    const elapsed = Date.now() - startedAt;
+
+    if (elapsed < MIN_AUTH_RESPONSE_MS)
+        await wait(MIN_AUTH_RESPONSE_MS - elapsed);
+}
+
+export async function generateAuthPayload(requireAuth = true) {
+    const session = await getAppSession();
+    if (requireAuth && !session.data.isAuthenticated)
+        throw new Error("Unauthorized");
+
+    const authRole = session.data.isAuthenticated ? (session.data.role ?? "guest") : "guest";
+
+    const timestamp = Date.now();
+    const secret = process.env.CONVEX_SERVER_SECRET!;
+
+    const data = new TextEncoder().encode(`${secret}:${timestamp}:${authRole}`);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const signature = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+
+    return { signature, timestamp, authRole };
+}
+
+function parseScryptHash(encodedHash: string) {
+    const parts = encodedHash.split("$");
+
+    if (parts.length !== 3 || parts[0] !== "scrypt")
+        return null;
+
+    try {
+        const salt = Buffer.from(parts[1], "base64");
+        const hash = Buffer.from(parts[2], "base64");
+
+        if (salt.length === 0 || hash.length === 0)
+            return null;
+
+        return { salt, hash };
+    } catch {
+        return null;
+    }
+}
+
+async function getCryptoHelpers() {
+    const [{ timingSafeEqual, scrypt: scryptCallback }, { promisify }] = await Promise.all([
+        import("node:crypto"),
+        import("node:util"),
+    ]);
+
+    return {
+        timingSafeEqual,
+        scrypt: promisify(scryptCallback),
+    };
+}
+
+async function getAppSession() {
+    return (await import("./session")).useAppSession();
+}
+
+async function verifyScryptHash(password: string, encodedHash: string) {
+    const { scrypt, timingSafeEqual } = await getCryptoHelpers();
+    const parsed = parseScryptHash(encodedHash);
+    if (!parsed)
+        return false;
+
+    const derived = await scrypt(password, parsed.salt, parsed.hash.length) as Buffer;
+    if (derived.length !== parsed.hash.length)
+        return false;
+
+    return timingSafeEqual(derived, parsed.hash);
+}

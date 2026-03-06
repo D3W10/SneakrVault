@@ -1,0 +1,52 @@
+import { useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
+import { deleteUser } from "@/data/bridge";
+
+interface DeleteUserDialogProps {
+    open: boolean;
+    setOpen: (open: boolean) => unknown;
+    username: string;
+}
+
+export function DeleteUserDialog({ open, setOpen, username }: DeleteUserDialogProps) {
+    const [isSaving, setIsSaving] = useState(false);
+    const queryClient = useQueryClient();
+
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setIsSaving(true);
+
+        const result = await deleteUser({
+            data: {
+                username,
+            },
+        });
+        if (result.success)
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
+
+        setOpen(false);
+        setIsSaving(false);
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent showCloseButton={false}>
+                <form className="contents" onSubmit={handleSubmit}>
+                    <DialogHeader>
+                        <DialogTitle>Delete user</DialogTitle>
+                        <DialogDescription className="text-foreground font-medium">Are you sure you want to delete this user? You cannot recover it after deletion!</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose render={<Button variant="outline">No</Button>} />
+                        <Button type="submit" className="w-14" disabled={isSaving}>
+                            {!isSaving ? "Yes" : <Spinner />}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
