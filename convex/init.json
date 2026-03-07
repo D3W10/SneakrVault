@@ -1,0 +1,9 @@
+[
+    {
+        "username": "admin",
+        "passwordHash": "scrypt$6GXxjs2zIdc3D4L1evNhKg==$L2oB4dOwhFPYXOXCzJ3rRWfUyh3vHs0QxjyVpnlAu/BqdhyT2/tKLQDB2RN8ImDKtABtPbHVy6cCiRK1iOPLvA==",
+        "role": "admin",
+        "color": "black",
+        "active": true
+    }
+]

@@ -1,12 +1,12 @@
 import { v } from "convex/values";
-import { serverMutation } from "./customFunctions";
+import { guestMutation } from "./customFunctions";
 
 const MAX_USERNAME_LENGTH = 64;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 const MAX_FAILED_ATTEMPTS = 5;
 
-export const guardLoginAttempt = serverMutation({
+export const guardLoginAttempt = guestMutation({
     args: {
         username: v.string(),
     },
@@ -38,7 +38,7 @@ export const guardLoginAttempt = serverMutation({
     },
 });
 
-export const recordLoginResult = serverMutation({
+export const recordLoginResult = guestMutation({
     args: {
         username: v.string(),
         success: v.boolean(),

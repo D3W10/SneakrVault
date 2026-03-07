@@ -1,112 +1,65 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
-import { IconSearch } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { IconLogout, IconPlus, IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BirthdayBlock } from "@/components/blocks/BirthdayBlock";
+import { CountBlock } from "@/components/blocks/CountBlock";
 import { GridBlock } from "@/components/blocks/GridBlock";
+import { AddSneakerDialog } from "@/components/overlays/AddSneakerDialog";
 import { Header } from "@/components/Header";
-import { api } from "@db/api";
+import { checkAuth } from "@/data/auth";
+import { getBrands, getLocations, getOwners } from "@/data/bridge";
+import { useLogout } from "@/lib/useLogout";
 import type { Search } from "@/lib/models";
+import type { Id } from "@db/dataModel";
 
 export const Route = createFileRoute("/")({
     component: Index,
+    beforeLoad: () => checkAuth(),
 });
 
 function Index() {
-    const { auth } = Route.useRouteContext();
+    const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [search, setSearch] = useState<Search>({ term: "" });
-    const { data: brands } = useSuspenseQuery(convexQuery(api.brands.get, {}));
-    const { data: locations } = useSuspenseQuery(convexQuery(api.locations.get, {}));
-    const { data: owners } = useSuspenseQuery(convexQuery(api.users.get, {}));
-
-    if (!auth)
-        return;
-
-    const today = moment().startOf("day");
-    const nextWeek = moment().add(7, "days").endOf("day");
-    const upcomingBirthdays = sneakers.filter(s => {
-        const birthdayDate = moment(s.date);
-        const currentYearBirthday = birthdayDate.clone().year(today.year());
-
-        if (currentYearBirthday.isBefore(today, "day"))
-            currentYearBirthday.add(1, "year");
-
-        return currentYearBirthday.isBetween(today, nextWeek, "day", "[]");
-    }).sort((a, b) => {
-        const bdayA = moment(a.date).year(today.year());
-        if (bdayA.isBefore(today, "day")) bdayA.add(1, "year");
-
-        const bdayB = moment(b.date).year(today.year());
-        if (bdayB.isBefore(today, "day")) bdayB.add(1, "year");
-
-        return bdayA.diff(bdayB);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const logout = useLogout();
+    const { data: brands } = useQuery({
+        queryKey: ["brands"],
+        queryFn: getBrands,
     });
+    const { data: locations } = useQuery({
+        queryKey: ["locations"],
+        queryFn: getLocations,
+    });
+    const { data: owners } = useQuery({
+        queryKey: ["owners"],
+        queryFn: getOwners,
+    });
+    const auth = Route.useRouteContext().auth;
 
-    useEffect(() => {
-        if (rawSneakers)
-            setSneakers(rawSneakers.filter(sneaker => 
-                sneaker.name.toLowerCase().includes(search.toLowerCase()) &&
-                (!locationFilter || sneaker.location === locationFilter)
-            ));
-    }, [rawSneakers, search, locations, locationFilter]);
-
-    useEffect(() => {
-        if (rawSneakers && persons) {
-            setPickedMine(rawSneakers.find(s => s.pick_date && moment(s.pick_date).format("YYYY-MM-DD") === moment(Date.now()).format("YYYY-MM-DD") && s.pick_to === persons[auth.mine]));
-            setPickedOther(rawSneakers.find(s => s.pick_date && moment(s.pick_date).format("YYYY-MM-DD") === moment(Date.now()).format("YYYY-MM-DD") && s.pick_to === persons[auth.other]));
-        }
-    }, [rawSneakers, persons]);
+    function addSneaker() {
+        setAddDialogOpen(true);
+    }
 
     return (
         <div className="min-h-screen">
-            <Header>
-                <Popover>
-                    <PopoverTrigger id={searchTriggerId} nativeButton={false} render={<div className="w-full md:w-88" />}>
-                        <InputGroup className="w-full bg-secondary">
-                            <InputGroupAddon>
-                                <IconSearch className="size-4 text-muted-foreground" />
-                            </InputGroupAddon>
-                            <InputGroupInput
-                                id={searchInputId}
-                                value={search.term}
-                                placeholder="Search sneakers..."
-                                onChange={e => setSearch({ ...search, term: e.target.value })}
-                            />
-                        </InputGroup>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-(--anchor-width) px-3 py-2.5" initialFocus={false} finalFocus={false}>
-                        <FilterGroup
-                            name="Location"
-                            current={search.location}
-                            options={[...locations.map(l => ({ id: l._id, label: l.name })), { id: "outside", label: "Outside" }] as { id: Id<"locations"> | "outside" | undefined; label: string }[]}
-                            setFilter={l => setSearch({ ...search, location: l })}
-                        />
-                        <FilterGroup
-                            name="Brand"
-                            current={search.brand}
-                            options={brands.map(b => ({ id: b._id, label: b.name }))}
-                            setFilter={b => setSearch({ ...search, brand: b })}
-                        />
-                        <FilterGroup
-                            name="Owner"
-                            current={search.owner}
-                            options={owners.map(o => ({ id: o._id, label: o.username }))}
-                            setFilter={o => setSearch({ ...search, owner: o })}
-                        />
-                        <FilterGroup
-                            name="Decommissioned"
-                            current={search.decommissioned}
-                            options={[{ id: true, label: "List" }, { id: false, label: "All" }]}
-                            unsetText="Hidden"
-                            setFilter={o => setSearch({ ...search, decommissioned: o })}
-                        />
-                    </PopoverContent>
-                </Popover>
-            </Header>
+            <Header
+                right={
+                    <>
+                        {auth?.role !== "guest" && (
+                            <Button className="max-md:hidden" variant="outline" size="icon" onClick={addSneaker}>
+                                <IconPlus className="size-5" />
+                            </Button>
+                        )}
+                        <Button variant="outline" size="icon" onClick={logout}>
+                            <IconLogout className="size-4.5" />
+                        </Button>
+                    </>
+                }
+            />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
                 {search.length === 0 && !locationFilter && (
                     <div className="px-6 md:px-8 pt-px pb-4 flex gap-6 overflow-x-auto">
@@ -135,7 +88,8 @@ function Index() {
                     </div>
 
                 <BirthdayBlock search={search} />
-                <GridBlock search={search} />
+                <GridBlock search={search} onAdd={addSneaker} auth={auth} />
+                <CountBlock search={search} />
             </div>
         </div>
     );

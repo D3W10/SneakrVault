@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { checkAuth, getDashboardForUser, login } from "@/data/auth";
+import { checkAuth, getDashboardForUser, login, MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from "@/data/auth";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
     component: LoginComponent,
@@ -42,7 +43,8 @@ function LoginComponent() {
     };
 
     return (
-        <div className="w-full min-h-screen flex justify-center items-center">
+        <div className="w-full min-h-screen flex flex-col justify-center items-center">
+            <div className="h-6" />
             <form className="w-full max-w-md p-6" onSubmit={handleSubmit}>
                 <FieldGroup>
                     <FieldSet>
@@ -58,6 +60,7 @@ function LoginComponent() {
                                     type="text"
                                     value={username}
                                     placeholder="Required"
+                                    maxLength={MAX_USERNAME_LENGTH}
                                     required
                                     autoComplete="username"
                                     aria-invalid={!!error}
@@ -74,6 +77,7 @@ function LoginComponent() {
                                     type="password"
                                     value={password}
                                     placeholder="Required"
+                                    maxLength={MAX_PASSWORD_LENGTH}
                                     required
                                     autoComplete="current-password"
                                     aria-invalid={!!error}
@@ -88,6 +92,7 @@ function LoginComponent() {
                     <Button type="submit" disabled={!username || !password || loading}>{loading ? <Spinner /> : "Login"}</Button>
                 </FieldGroup>
             </form>
+            <p className={cn("h-6 text-muted-foreground font-semibold transition-opacity duration-200", !error ? "opacity-0" : "opacity-100")}>{error}</p>
         </div>
     );
 }

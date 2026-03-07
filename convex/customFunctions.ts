@@ -44,7 +44,23 @@ export const guestQuery = customQuery(query, {
     },
 });
 
-export const serverMutation = customMutation(mutation, {
+export const normalQuery = customQuery(query, {
+    args: AUTH_ARGS,
+    input: async (ctx, args) => {
+        await validateAuthInput(args, "normal");
+        return { ctx, args: {} };
+    },
+});
+
+export const adminQuery = customQuery(query, {
+    args: AUTH_ARGS,
+    input: async (ctx, args) => {
+        await validateAuthInput(args, "admin");
+        return { ctx, args: {} };
+    },
+});
+
+export const guestMutation = customMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "guest");
@@ -52,7 +68,7 @@ export const serverMutation = customMutation(mutation, {
     },
 });
 
-export const midRoleMutation = customMutation(mutation, {
+export const normalMutation = customMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "normal");

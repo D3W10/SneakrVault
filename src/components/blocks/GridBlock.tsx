@@ -1,19 +1,23 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { IconLayoutGrid, IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
+import { getSneakers } from "@/data/bridge";
 import { filterBySearch, hasSearched } from "@/lib/utils";
-import { api } from "@db/api";
 import type { Search } from "@/lib/models";
+import type { SessionState } from "@/data/session";
 
 interface GridBlockProps {
     search: Search;
     onAdd: () => unknown;
+    auth?: Partial<SessionState>;
 }
 
-export function GridBlock({ search, onAdd }: GridBlockProps) {
-    const { isPending, data: sneakers } = useSuspenseQuery(convexQuery(api.sneakers.get, {}));
+export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
+    const { isPending, data: sneakers } = useQuery({
+        queryKey: ["sneakers"],
+        queryFn: getSneakers,
+    });
     const searched = hasSearched(search);
 
     return (
@@ -29,8 +33,8 @@ export function GridBlock({ search, onAdd }: GridBlockProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {isPending ? (
                     Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
-                ) : sneakers.length !== 0 ? (
-                    filterBySearch(sneakers, search).map(s => (
+                ) : (sneakers ?? []).length !== 0 ? (
+                    filterBySearch(sneakers ?? [], search).map(s => (
                         <SneakerCard
                             key={s._id}
                             sneaker={s}
@@ -40,8 +44,8 @@ export function GridBlock({ search, onAdd }: GridBlockProps) {
                     <div className="py-20 flex flex-col items-center gap-4 col-span-full font-medium text-center text-muted-foreground">
                         {!searched ? (
                             <>
-                                <p>Your database is empty. Start by adding pairs to your collection!</p>
-                                <Button onClick={onAdd}>Add sneaker</Button>
+                                <p>Your collection is empty. Start by adding pairs to your collection!</p>
+                                {auth?.role !== "guest" && <Button onClick={onAdd}>Add sneaker</Button>}
                             </>
                         ): (
                             <p>No sneakers found matching {search.term ? `"${search.term}"` : "these filters"}</p>

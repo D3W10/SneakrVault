@@ -8,16 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH } from "@/data/auth";
 import { addUser, editUser } from "@/data/bridge";
+import { useLogout } from "@/lib/useLogout";
 import type { Doc } from "@db/dataModel";
 
 interface AddUserDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
     user?: Doc<"users">;
+    isCurrentUser?: boolean;
 }
 
-export function AddUserDialog({ open, setOpen, user }: AddUserDialogProps) {
+export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: AddUserDialogProps) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState<Doc<"users">["role"]>("guest");
@@ -26,6 +29,7 @@ export function AddUserDialog({ open, setOpen, user }: AddUserDialogProps) {
     const [active, setActive] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
+    const logout = useLogout();
     const queryClient = useQueryClient();
 
     function validateColor(color: string) {
@@ -92,6 +96,11 @@ export function AddUserDialog({ open, setOpen, user }: AddUserDialogProps) {
 
         await queryClient.invalidateQueries({ queryKey: ["users"] });
 
+        if (isCurrentUser) {
+            logout();
+            return
+        }
+
         setOpen(false);
         setUsername("");
         setPassword("");
@@ -111,16 +120,16 @@ export function AddUserDialog({ open, setOpen, user }: AddUserDialogProps) {
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="userUsername">Username</Label>
-                            <Input id="userUsername" name="username" placeholder={user?.username ?? "Required"} value={username} onChange={e => setUsername(e.target.value)} />
+                            <Input id="userUsername" name="username" maxLength={MAX_USERNAME_LENGTH} placeholder={user?.username ?? "Required"} value={username} onChange={e => setUsername(e.target.value)} />
                         </Field>
                         <Field>
                             <Label htmlFor="userPassword">Password</Label>
-                            <Input id="userPassword" name="password" type="password" placeholder={!user ? "Required" : "New password"} value={password} onChange={e => setPassword(e.target.value)} />
+                            <Input id="userPassword" name="password" type="password" maxLength={MAX_PASSWORD_LENGTH} placeholder={!user ? "Required" : "New password"} value={password} onChange={e => setPassword(e.target.value)} />
                         </Field>
                         <div className="flex gap-2">
                             <Field className="flex-2">
                                 <Label htmlFor="userRole">Role</Label>
-                                <Select value={role} onValueChange={e => setRole(e ?? "guest")}>
+                                <Select value={role} disabled={isCurrentUser} onValueChange={e => setRole(e ?? "guest")}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
@@ -140,7 +149,7 @@ export function AddUserDialog({ open, setOpen, user }: AddUserDialogProps) {
                             </Field>
                         </div>
                         <Field orientation="horizontal" className="w-fit">
-                            <Checkbox id="userActive" checked={active} onCheckedChange={e => setActive(!!e)} />
+                            <Checkbox id="userActive" checked={active} disabled={isCurrentUser} onCheckedChange={e => setActive(!!e)} />
                             <FieldLabel htmlFor="userActive">Active</FieldLabel>
                         </Field>
                         {error && <p className="text-sm text-destructive">{error}</p>}

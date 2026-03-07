@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { IconCheck, IconLogout, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AddUserDialog } from "@/components/AddUserDialog";
-import { DeleteUserDialog } from "@/components/DeleteUserDialog";
+import { AddUserDialog } from "@/components/overlays/AddUserDialog";
+import { DeleteUserDialog } from "@/components/overlays/DeleteUserDialog";
 import { Header } from "@/components/Header";
-import { checkAuth, logout } from "@/data/auth";
+import { checkAuth } from "@/data/auth";
 import { getUsers } from "@/data/bridge";
+import { useLogout } from "@/lib/useLogout";
 import type { Doc } from "@db/dataModel";
 
 export const Route = createFileRoute("/manage")({
@@ -18,24 +19,17 @@ export const Route = createFileRoute("/manage")({
 
 function ManagePage() {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
-    const navigate = useNavigate();
     const { isPending, data: users } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
     });
-    const queryClient = useQueryClient();
-
-    function handleLogout() {
-        logout();
-        queryClient.invalidateQueries({ queryKey: ["session"] });
-        navigate({ to: "/login" });
-    }
+    const logout = useLogout();
 
     return (
         <div className="min-h-screen">
             <Header
                 right={
-                    <Button variant="ghost" size="icon-lg" className="text-muted-foreground" onClick={handleLogout}>
+                    <Button variant="outline" size="icon" onClick={logout}>
                         <IconLogout className="size-4.5" />
                     </Button>
                 }
@@ -80,6 +74,8 @@ function UserTableRow({ user }: { user: Doc<"users"> }) {
         queryFn: checkAuth,
     });
 
+    const isCurrentUser = session?.username === user.username;
+
     return (
         <TableRow>
             <TableCell className="font-medium">{user.username}</TableCell>
@@ -90,12 +86,12 @@ function UserTableRow({ user }: { user: Doc<"users"> }) {
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setEditDialogOpen(true)}>
                     <IconPencil />
                 </Button>
-                {session && user.username !== session.username && (
+                {!isCurrentUser && (
                     <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setDeleteDialogOpen(true)}>
                         <IconTrash />
                     </Button>
                 )}
-                <AddUserDialog open={editDialogOpen} setOpen={setEditDialogOpen} user={user} />
+                <AddUserDialog open={editDialogOpen} setOpen={setEditDialogOpen} user={user} isCurrentUser={isCurrentUser} />
                 <DeleteUserDialog open={deleteDialogOpen} setOpen={setDeleteDialogOpen} username={user.username} />
             </TableCell>
         </TableRow>

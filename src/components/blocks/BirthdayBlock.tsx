@@ -1,10 +1,9 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { IconCake } from "@tabler/icons-react";
 import { SneakerCard } from "@/components/SneakerCard";
+import { getSneakers } from "@/data/bridge";
 import { hasSearched } from "@/lib/utils";
-import { api } from "@db/api";
 import type { Search } from "@/lib/models";
 
 interface BirthdayBlockProps {
@@ -12,11 +11,14 @@ interface BirthdayBlockProps {
 }
 
 export function BirthdayBlock({ search }: BirthdayBlockProps) {
-    const { data: sneakers } = useSuspenseQuery(convexQuery(api.sneakers.get, {}));
+    const { data: sneakers } = useQuery({
+        queryKey: ["sneakers"],
+        queryFn: getSneakers,
+    });
 
     const today = moment().startOf("day");
     const nextWeek = moment().add(7, "days").endOf("day");
-    const upcomingBirthdays = sneakers.filter(s => {
+    const upcomingBirthdays = (sneakers ?? []).filter(s => {
         const birthdayDate = moment(s.date);
         const currentYearBirthday = birthdayDate.clone().year(today.year());
 

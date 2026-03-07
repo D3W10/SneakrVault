@@ -1,10 +1,17 @@
 import { v } from "convex/values";
-import { adminMutation, guestQuery } from "./customFunctions";
+import { adminMutation, adminQuery, guestQuery } from "./customFunctions";
 
-export const get = guestQuery({
+export const get = adminQuery({
     args: {},
     handler: async ctx => {
         return await ctx.db.query("users").collect();
+    },
+});
+
+export const getOwners = guestQuery({
+    args: {},
+    handler: async ctx => {
+        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "normal")).collect();
     },
 });
 
@@ -13,7 +20,15 @@ export const getByUsername = guestQuery({
         username: v.string(),
     },
     handler: async (ctx, args) => {
-        return await ctx.db.query("users").filter(q => q.eq(q.field("username"), args.username) && q.eq(q.field("active"), true)).first();
+        return await ctx.db
+            .query("users")
+            .filter(q =>
+                q.and(
+                    q.eq(q.field("username"), args.username),
+                    q.eq(q.field("active"), true),
+                ),
+            )
+            .first();
     },
 });
 

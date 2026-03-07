@@ -13,12 +13,48 @@ async function encryptPassword(password: string) {
     return `scrypt$${salt.toString("base64")}$${hash.toString("base64")}`;
 }
 
+export const getSneakers = createServerFn({ method: "GET" })
+    .handler(async () => {
+        try {
+            return await getClient().query(api.sneakers.get, await generateAuthPayload());
+        } catch (error) {
+            throw new Error(error instanceof Error ? error.message : "Failed to get sneakers");
+        }
+    });
+
+export const getBrands = createServerFn({ method: "GET" })
+    .handler(async () => {
+        try {
+            return await getClient().query(api.brands.get, await generateAuthPayload());
+        } catch (error) {
+            throw new Error(error instanceof Error ? error.message : "Failed to get brands");
+        }
+    });
+
+export const getLocations = createServerFn({ method: "GET" })
+    .handler(async () => {
+        try {
+            return await getClient().query(api.locations.get, await generateAuthPayload());
+        } catch (error) {
+            throw new Error(error instanceof Error ? error.message : "Failed to get locations");
+        }
+    });
+
 export const getUsers = createServerFn({ method: "GET" })
     .handler(async () => {
         try {
             return await getClient().query(api.users.get, await generateAuthPayload());
         } catch (error) {
             throw new Error(error instanceof Error ? error.message : "Failed to get users");
+        }
+    });
+
+export const getOwners = createServerFn({ method: "GET" })
+    .handler(async () => {
+        try {
+            return await getClient().query(api.users.getOwners, await generateAuthPayload());
+        } catch (error) {
+            throw new Error(error instanceof Error ? error.message : "Failed to get owners");
         }
     });
 

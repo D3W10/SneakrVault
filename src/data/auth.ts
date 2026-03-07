@@ -3,8 +3,8 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@db/api";
 import type { SessionState } from "@/data/session";
 
-const MAX_USERNAME_LENGTH = 64;
-const MAX_PASSWORD_LENGTH = 256;
+export const MAX_USERNAME_LENGTH = 64;
+export const MAX_PASSWORD_LENGTH = 256;
 const MIN_AUTH_RESPONSE_MS = 300;
 
 export function getDashboardForUser(session: Partial<SessionState>) {
@@ -31,7 +31,7 @@ export const login = createServerFn({ method: "POST" })
             const guard = await client.mutation(api.auth.guardLoginAttempt, { username, ...await generateAuthPayload(false) });
             if (!guard.allowed) {
                 await waitForMinimumDuration(startedAt);
-                return { success: false, error: "Invalid credentials" };
+                return { success: false, error: "Too many attempts. Try again later" };
             }
 
             const user = await client.query(api.users.getByUsername, { username, ...await generateAuthPayload(false) });
