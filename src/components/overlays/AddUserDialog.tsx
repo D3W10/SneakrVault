@@ -28,7 +28,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
     const [isColorValid, setIsColorValid] = useState(false);
     const [active, setActive] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string>();
     const logout = useLogout();
     const queryClient = useQueryClient();
 
@@ -39,22 +39,6 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
     
         return !!isValid;
     }
-
-    useEffect(() => {
-        setIsColorValid(validateColor(color));
-    }, [color]);
-
-    useEffect(() => {
-        if (!open)
-            return;
-
-        setUsername(user?.username ?? "");
-        setPassword("");
-        setRole(user?.role ?? "guest");
-        setColor(user?.color ?? "");
-        setActive(user?.active ?? true);
-        setError("");
-    }, [open, user?.username, user?.role, user?.color, user?.active]);
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -102,13 +86,24 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
         }
 
         setOpen(false);
-        setUsername("");
-        setPassword("");
-        setRole("guest");
-        setColor("");
-        setActive(true);
         setIsSaving(false);
     }
+
+    useEffect(() => {
+        setIsColorValid(validateColor(color));
+    }, [color]);
+
+    useEffect(() => {
+        if (!open)
+            return;
+
+        setUsername(user?.username ?? "");
+        setPassword("");
+        setRole(user?.role ?? "guest");
+        setColor(user?.color ?? "");
+        setActive(user?.active ?? true);
+        setError("");
+    }, [open]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

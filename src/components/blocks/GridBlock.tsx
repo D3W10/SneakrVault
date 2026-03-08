@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
 import { getSneakers } from "@/data/bridge";
 import { filterBySearch, hasSearched } from "@/lib/utils";
-import type { Search } from "@/lib/models";
 import type { SessionState } from "@/data/session";
+import type { Search } from "@/lib/models";
 
 interface GridBlockProps {
     search: Search;

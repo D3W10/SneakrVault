@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AddBrandDialog } from "@/components/overlays/AddBrandDialog";
 import { AddLocationDialog } from "@/components/overlays/AddLocationDialog";
 import { AddUserDialog } from "@/components/overlays/AddUserDialog";
+import { DeleteBrandDialog } from "@/components/overlays/DeleteBrandDialog";
 import { DeleteLocationDialog } from "@/components/overlays/DeleteLocationDialog";
 import { DeleteUserDialog } from "@/components/overlays/DeleteUserDialog";
 import { Header } from "@/components/Header";
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/manage")({
 function ManagePage() {
     const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
     const [addLocationDialogOpen, setAddLocationDialogOpen] = useState(false);
+    const [addBrandDialogOpen, setAddBrandDialogOpen] = useState(false);
     const { isPending: uip, data: users } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
@@ -74,6 +77,13 @@ function ManagePage() {
                                 </Button>
                                 <AddLocationDialog open={addLocationDialogOpen} setOpen={setAddLocationDialogOpen} />
                             </TabsContent>
+                            <TabsContent value="brands">
+                                <Button onClick={() => setAddBrandDialogOpen(true)}>
+                                    <IconPlus className="size-4" data-icon="inline-start" />
+                                    Add brand
+                                </Button>
+                                <AddBrandDialog open={addBrandDialogOpen} setOpen={setAddBrandDialogOpen} />
+                            </TabsContent>
                         </div>
                     </div>
                     <TabsContent value="users">
@@ -106,7 +116,18 @@ function ManagePage() {
                         </Table>
                     </TabsContent>
                     <TabsContent value="brands">
-
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="lg:w-56">Name</TableHead>
+                                    <TableHead>Slug</TableHead>
+                                    <TableHead className="lg:w-20" />
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {(brands ?? []).map(b => <BrandTableRow key={b._id} brand={b} />)}
+                            </TableBody>
+                        </Table>
                     </TabsContent>
                 </Tabs>
             </div>
@@ -162,6 +183,28 @@ function LocationTableRow({ location }: { location: Doc<"locations"> }) {
                 </Button>
                 <AddLocationDialog open={editDialogOpen} setOpen={setEditDialogOpen} location={location} />
                 <DeleteLocationDialog open={deleteDialogOpen} setOpen={setDeleteDialogOpen} _id={location._id} />
+            </TableCell>
+        </TableRow>
+    );
+}
+
+function BrandTableRow({ brand }: { brand: Doc<"brands"> }) {
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+    return (
+        <TableRow>
+            <TableCell>{brand.name}</TableCell>
+            <TableCell>{brand.slug}</TableCell>
+            <TableCell className="p-0 text-right">
+                <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setEditDialogOpen(true)}>
+                    <IconPencil />
+                </Button>
+                <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setDeleteDialogOpen(true)}>
+                    <IconTrash />
+                </Button>
+                <AddBrandDialog open={editDialogOpen} setOpen={setEditDialogOpen} brand={brand} />
+                <DeleteBrandDialog open={deleteDialogOpen} setOpen={setDeleteDialogOpen} _id={brand._id} />
             </TableCell>
         </TableRow>
     );

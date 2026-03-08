@@ -4,16 +4,16 @@ import { IconCalendarEvent, IconMapPin } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton"
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import { cn } from "@/lib/utils";
-import type { Doc } from "@db/dataModel";
+import type { Sneaker } from "@/lib/models";
 
 interface SneakerCardProps {
-    sneaker: Doc<"sneakers">;
+    sneaker: Sneaker;
     birthday?: boolean;
 }
 
 export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
     return (
-        <Link to="/sneakers/$id" params={{ id: sneaker._id }} className={cn("block relative p-2 pr-4 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/50 hover:border-white/20 overflow-hidden transition-shadow duration-300", !birthday ? "w-full" : "shrink-0")}>
+        <Link to="/sneakers/$id" params={{ id: sneaker._id }} className={cn("block relative p-2 pr-4 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300", !birthday ? "w-full" : "shrink-0")}>
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="h-full flex items-center gap-4 relative z-1">
                 <SneakerPhoto sneaker={sneaker} />

@@ -1,4 +1,7 @@
+import type { getSneakers } from "@/data/bridge";
 import type { Doc } from "@db/dataModel";
+
+export type Sneaker = Awaited<ReturnType<typeof getSneakers>>[number];
 
 export interface Search {
     term: string;
