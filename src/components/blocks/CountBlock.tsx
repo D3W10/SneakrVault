@@ -14,11 +14,12 @@ export function CountBlock({ search }: CountBlockProps) {
         queryFn: getSneakers,
     });
     const searched = hasSearched(search);
+    const length = sneakers?.length ?? 0;
 
     if (!searched)
         return (
             <div className="px-6 md:px-8 flex flex-col gap-4">
-                {(sneakers ?? []).length !== 0 && <p className="font-medium text-center text-muted-foreground">{(sneakers ?? []).length}</p>}
+                {length !== 0 && <p className="font-medium text-center text-muted-foreground">{length} {length === 1 ? "sneaker" : "sneakers"}</p>}
             </div>
         );
 }

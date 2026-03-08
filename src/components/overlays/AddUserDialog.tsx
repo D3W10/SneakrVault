@@ -79,7 +79,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
         } else {
             const result = await editUser({
                 data: {
-                    oldUsername: user.username,
+                    _id: user._id,
                     username,
                     password,
                     role,

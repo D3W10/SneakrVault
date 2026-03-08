@@ -3,16 +3,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { deleteUser } from "@/data/bridge";
+import { deleteLocation } from "@/data/bridge";
 import type { Id } from "@db/dataModel";
 
-interface DeleteUserDialogProps {
+interface DeleteLocationDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
-    _id: Id<"users">;
+    _id: Id<"locations">;
 }
 
-export function DeleteUserDialog({ open, setOpen, _id }: DeleteUserDialogProps) {
+export function DeleteLocationDialog({ open, setOpen, _id }: DeleteLocationDialogProps) {
     const [isSaving, setIsSaving] = useState(false);
     const queryClient = useQueryClient();
 
@@ -20,13 +20,13 @@ export function DeleteUserDialog({ open, setOpen, _id }: DeleteUserDialogProps) 
         e.preventDefault();
         setIsSaving(true);
 
-        const result = await deleteUser({
+        const result = await deleteLocation({
             data: {
                 _id,
             },
         });
         if (result.success)
-            await queryClient.invalidateQueries({ queryKey: ["users"] });
+            await queryClient.invalidateQueries({ queryKey: ["locations"] });
 
         setOpen(false);
         setIsSaving(false);
@@ -37,8 +37,8 @@ export function DeleteUserDialog({ open, setOpen, _id }: DeleteUserDialogProps) 
             <DialogContent showCloseButton={false}>
                 <form className="contents" onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Delete user</DialogTitle>
-                        <DialogDescription className="text-foreground font-medium">Are you sure you want to delete this user? You cannot recover it after deletion!</DialogDescription>
+                        <DialogTitle>Delete location</DialogTitle>
+                        <DialogDescription className="text-foreground font-medium">Are you sure you want to delete this location? Make sure no sneakers are stored on this location!</DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <DialogClose render={<Button variant="outline">No</Button>} />

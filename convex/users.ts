@@ -41,15 +41,14 @@ export const insert = adminMutation({
         active: v.boolean(),
     },
     handler: async (ctx, args) => {
-        const { username, passwordHash, role, color, active } = args;
-        await ctx.db.insert("users", { username, passwordHash, role, color, active });
+        await ctx.db.insert("users", args);
         return { success: true };
     },
 });
 
 export const update = adminMutation({
     args: {
-        oldUsername: v.string(),
+        _id: v.id("users"),
         username: v.string(),
         passwordHash: v.optional(v.string()),
         role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
@@ -57,15 +56,7 @@ export const update = adminMutation({
         active: v.boolean(),
     },
     handler: async (ctx, args) => {
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_username", q => q.eq("username", args.oldUsername))
-            .first();
-
-        if (!user)
-            return { success: false, error: "User not found" };
-
-        await ctx.db.patch(user._id, {
+        await ctx.db.patch(args._id, {
             username: args.username,
             role: args.role,
             color: args.color,
@@ -79,18 +70,10 @@ export const update = adminMutation({
 
 export const remove = adminMutation({
     args: {
-        username: v.string(),
+        _id: v.id("users"),
     },
     handler: async (ctx, args) => {
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_username", q => q.eq("username", args.username))
-            .first();
-
-        if (!user)
-            return { success: false, error: "User not found" };
-
-        await ctx.db.delete(user._id);
+        await ctx.db.delete(args._id);
         return { success: true };
     },
 });
