@@ -97,7 +97,7 @@ export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
                     </FieldGroup>
                     <DialogFooter>
                         <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="w-31" disabled={isSaving || !name || !icon}>
+                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !icon}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>
                     </DialogFooter>

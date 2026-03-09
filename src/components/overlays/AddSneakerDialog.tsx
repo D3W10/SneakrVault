@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import bridge from "@/data/bridge";
 
 interface AddSneakerDialogProps {
     open: boolean;
@@ -23,6 +26,10 @@ export function AddSneakerDialog({ open, setOpen }: AddSneakerDialogProps) {
     const [originalOwner, setOriginalOwner] = useState("");
     const [decommissioned, setDecommissioned] = useState(false);
     const [stockxUrl, setStockxUrl] = useState("");
+    const { data: brands } = useQuery({
+        queryKey: ["brands"],
+        queryFn: bridge.brands.get,
+    });
 
 
 
@@ -55,7 +62,28 @@ export function AddSneakerDialog({ open, setOpen }: AddSneakerDialogProps) {
                         </Field>
                         <Field>
                             <Label htmlFor="sneakerColor">Color</Label>
-                            <Input id="sneakerColor" name="color" maxLength={40} placeholder="Required" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
+                            <Input id="sneakerColor" name="color" maxLength={50} placeholder="Required" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
+                        </Field>
+                        <Field>
+                            <Label htmlFor="sneakerBrand">Brand</Label>
+                            <Select value={brand} disabled={isSaving} onValueChange={e => setBrand(e ?? "")}>
+                                <SelectTrigger className="w-full">
+                                    {!selBrand ? "Select a brand" : (
+                                        <div className="flex items-center gap-2">
+                                            {selBrand.iconUrl && <img src={selBrand.iconUrl} alt={selBrand.name} className="size-4 object-contain" />}
+                                            {selBrand.name}
+                                        </div>
+                                    )}
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(brands ?? []).map(b => (
+                                        <SelectItem value={b._id} key={b._id}>
+                                            {b.iconUrl && <img src={b.iconUrl} alt={b.name} className="size-4 object-contain" />}
+                                            {b.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </Field>
                         <Field orientation="horizontal" className="w-fit">
                             <Checkbox id="sneakerDecommissioned" disabled={isSaving} checked={decommissioned} onCheckedChange={e => setDecommissioned(!!e)} />
@@ -65,7 +93,7 @@ export function AddSneakerDialog({ open, setOpen }: AddSneakerDialogProps) {
                     </FieldGroup>
                     <DialogFooter>
                         <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="w-31">
+                        <Button type="submit" className="sm:w-31">
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>
                     </DialogFooter>

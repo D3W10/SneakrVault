@@ -81,7 +81,7 @@ export function AddLocationDialog({ open, setOpen, location }: AddLocationDialog
                     </FieldGroup>
                     <DialogFooter>
                         <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="w-31" disabled={isSaving || !name}>
+                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>
                     </DialogFooter>

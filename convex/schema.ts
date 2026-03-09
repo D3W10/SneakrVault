@@ -7,7 +7,7 @@ export default defineSchema({
         color: v.string(),
         size: v.number(),
         date: v.string(),
-        slug: v.string(),
+        photo: v.optional(v.id("_storage")),
         brand: v.id("brands"),
         location: v.union(v.id("locations"), v.literal("outside")),
         owner: v.optional(v.id("users")),

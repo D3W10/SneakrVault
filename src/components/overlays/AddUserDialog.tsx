@@ -6,9 +6,8 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
 import type { Doc } from "@db/dataModel";
@@ -115,23 +114,23 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="userUsername">Username</Label>
-                            <Input id="userUsername" name="username" maxLength={MAX_USERNAME_LENGTH} placeholder={user?.username ?? "Required"} disabled={isSaving} value={username} onChange={e => setUsername(e.target.value)} />
+                            <Input id="userUsername" name="username" placeholder={user?.username ?? "Required"} disabled={isSaving} value={username} onChange={e => setUsername(e.target.value)} />
                         </Field>
                         <Field>
                             <Label htmlFor="userPassword">Password</Label>
-                            <Input id="userPassword" name="password" type="password" maxLength={MAX_PASSWORD_LENGTH} placeholder={!user ? "Required" : "New password"} disabled={isSaving} value={password} onChange={e => setPassword(e.target.value)} />
+                            <Input id="userPassword" name="password" type="password" placeholder={!user ? "Required" : "New password"} disabled={isSaving} value={password} onChange={e => setPassword(e.target.value)} />
                         </Field>
                         <div className="flex gap-2">
                             <Field className="flex-2">
                                 <Label htmlFor="userRole">Role</Label>
                                 <Select value={role} disabled={isCurrentUser || isSaving} onValueChange={e => setRole(e ?? "guest")}>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select a role" />
+                                        {role[0].toUpperCase() + role.slice(1)}
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="guest">guest</SelectItem>
-                                        <SelectItem value="normal">normal</SelectItem>
-                                        <SelectItem value="admin">admin</SelectItem>
+                                        <SelectItem value="guest">Guest</SelectItem>
+                                        <SelectItem value="normal">Normal</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </Field>
@@ -151,7 +150,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
                     </FieldGroup>
                     <DialogFooter>
                         <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
+                        <Button type="submit" className="sm:w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>
                     </DialogFooter>

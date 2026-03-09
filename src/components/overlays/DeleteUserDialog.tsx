@@ -42,7 +42,7 @@ export function DeleteUserDialog({ open, setOpen, _id }: DeleteUserDialogProps) 
                     </DialogHeader>
                     <DialogFooter>
                         <DialogClose render={<Button variant="outline">No</Button>} />
-                        <Button type="submit" className="w-14" disabled={isSaving}>
+                        <Button type="submit" className="sm:w-14" disabled={isSaving}>
                             {!isSaving ? "Yes" : <Spinner />}
                         </Button>
                     </DialogFooter>

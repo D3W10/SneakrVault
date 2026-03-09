@@ -118,7 +118,7 @@ function ManagePage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="lg:w-10" />
+                                    <TableHead className="lg:w-9" />
                                     <TableHead>Name</TableHead>
                                     <TableHead className="lg:w-20" />
                                 </TableRow>
@@ -194,7 +194,7 @@ function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.bran
     return (
         <TableRow className="h-10">
             <TableCell className="p-0">
-                {brand.iconUrl && <img src={brand.iconUrl} alt={brand.name} className="size-6 object-contain" />}
+                {brand.iconUrl && <img src={brand.iconUrl} alt={brand.name} className="size-5 object-contain" />}
             </TableCell>
             <TableCell>{brand.name}</TableCell>
             <TableCell className="p-0 text-right">

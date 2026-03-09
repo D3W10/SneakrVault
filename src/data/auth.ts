@@ -1,10 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { ConvexHttpClient } from "convex/browser";
+import { z } from "zod";
 import { api } from "@db/api";
 import type { SessionState } from "@/data/session";
 
-export const MAX_USERNAME_LENGTH = 64;
-export const MAX_PASSWORD_LENGTH = 256;
 const MIN_AUTH_RESPONSE_MS = 300;
 
 export function getDashboardForUser(session: Partial<SessionState>) {
@@ -12,34 +11,26 @@ export function getDashboardForUser(session: Partial<SessionState>) {
 }
 
 export const login = createServerFn({ method: "POST" })
-    .inputValidator((data: { username: string; password: string }) => data)
+    .inputValidator(z.object({ username: z.string(), password: z.string() }))
     .handler(async ({ data }) => {
-        const startedAt = Date.now();
-        const username = data.username.trim();
-        const password = data.password;
-
-        if (username.length === 0 || username.length > MAX_USERNAME_LENGTH || password.length === 0 || password.length > MAX_PASSWORD_LENGTH) {
-            await waitForMinimumDuration(startedAt);
-            return { success: false, error: "Invalid credentials" };
-        }
-
         let client: ConvexHttpClient | null = null;
+        const startedAt = Date.now();
 
         try {
             client = getClient();
 
-            const guard = await client.mutation(api.auth.guardLoginAttempt, { username, ...await generateAuthPayload(false) });
+            const guard = await client.mutation(api.auth.guardLoginAttempt, { username: data.username, ...await generateAuthPayload(false) });
             if (!guard.allowed) {
                 await waitForMinimumDuration(startedAt);
                 return { success: false, error: "Too many attempts. Try again later" };
             }
 
-            const user = await client.query(api.users.getByUsername, { username, ...await generateAuthPayload(false) });
+            const user = await client.query(api.users.getByUsername, { username: data.username, ...await generateAuthPayload(false) });
             if (!user)
                 return { success: false, error: "Invalid credentials" };
 
-            const isMatch = await verifyScryptHash(password, user.passwordHash);
-            await client.mutation(api.auth.recordLoginResult, { username, success: isMatch, ...await generateAuthPayload(false) });
+            const isMatch = await verifyScryptHash(data.password, user.passwordHash);
+            await client.mutation(api.auth.recordLoginResult, { username: data.username, success: isMatch, ...await generateAuthPayload(false) });
             await waitForMinimumDuration(startedAt);
 
             if (isMatch) {
@@ -55,7 +46,7 @@ export const login = createServerFn({ method: "POST" })
         } catch (error) {
             if (client) {
                 try {
-                    await client.mutation(api.auth.recordLoginResult, { username, success: false, ...await generateAuthPayload(false) });
+                    await client.mutation(api.auth.recordLoginResult, { username: data.username, success: false, ...await generateAuthPayload(false) });
                 } catch (recordError) {
                     console.error("Failed to record login result:", recordError);
                 }

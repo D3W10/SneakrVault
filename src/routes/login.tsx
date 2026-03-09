@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { checkAuth, getDashboardForUser, login, MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from "@/data/auth";
+import { checkAuth, getDashboardForUser, login } from "@/data/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
@@ -36,7 +36,7 @@ function LoginComponent() {
                 setError(result.error || "Invalid credentials");
         } catch (err) {
             console.error(err);
-            setError("An error occurred");
+            setError(String(err));
         } finally {
             setLoading(false);
         }
@@ -50,7 +50,7 @@ function LoginComponent() {
                     <FieldSet>
                         <FieldLegend className="flex items-center gap-3">
                             <img src="/logo.svg" alt="" className="size-8" />
-                            <h1 className="text-3xl text-primary font-extrabold tracking-tight drop-shadow-lg drop-shadow-primary/40">SneakrVault</h1>
+                            <h1 className="text-3xl text-primary font-extrabold tracking-tight drop-shadow-lg drop-shadow-primary/30">SneakrVault</h1>
                         </FieldLegend>
                         <FieldGroup>
                             <Field>
@@ -60,7 +60,6 @@ function LoginComponent() {
                                     type="text"
                                     value={username}
                                     placeholder="Required"
-                                    maxLength={MAX_USERNAME_LENGTH}
                                     required
                                     autoComplete="username"
                                     aria-invalid={!!error}
@@ -77,7 +76,6 @@ function LoginComponent() {
                                     type="password"
                                     value={password}
                                     placeholder="Required"
-                                    maxLength={MAX_PASSWORD_LENGTH}
                                     required
                                     autoComplete="current-password"
                                     aria-invalid={!!error}

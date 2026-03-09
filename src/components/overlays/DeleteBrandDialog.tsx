@@ -42,7 +42,7 @@ export function DeleteBrandDialog({ open, setOpen, _id }: DeleteBrandDialogProps
                     </DialogHeader>
                     <DialogFooter>
                         <DialogClose render={<Button variant="outline">No</Button>} />
-                        <Button type="submit" className="w-14" disabled={isSaving}>
+                        <Button type="submit" className="sm:w-14" disabled={isSaving}>
                             {!isSaving ? "Yes" : <Spinner />}
                         </Button>
                     </DialogFooter>
