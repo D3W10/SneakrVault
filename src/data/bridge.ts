@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { BrandInsert, BrandRemove, BrandUpdate } from "convex/brands";
+import { LocationInsert, LocationRemove, LocationUpdate } from "convex/locations";
+import { UserInsert, UserRemove, UserUpdate } from "convex/users";
+import { SneakerInsert, SneakerRemove, SneakerUpdate } from "convex/sneakers";
 import { generateAuthPayload, getClient } from "@/data/auth";
 import { api } from "@db/api";
-import type { Doc, Id } from "@db/dataModel";
-
-type Db<T extends object> = Omit<T, "_id" | "_creationTime">;
 
 async function encryptPassword(password: string) {
     const { randomBytes, scryptSync } = await import("node:crypto");
@@ -30,193 +32,196 @@ async function handleMutation(mutationFn: () => Promise<any>, errorMessage: stri
     }
 }
 
-export const getUsers = createServerFn({ method: "GET" })
+const getSneakers = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.sneakers.get, await generateAuthPayload()),
+        "Failed to get sneakers"
+    ));
+
+const addSneaker = createServerFn({ method: "POST" })
+    .inputValidator(SneakerInsert)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.sneakers.insert, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to add sneaker"
+    ));
+
+const editSneaker = createServerFn({ method: "POST" })
+    .inputValidator(SneakerUpdate)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.sneakers.update, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to edit sneaker"
+    ));
+
+const deleteSneaker = createServerFn({ method: "POST" })
+    .inputValidator(SneakerRemove)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.sneakers.remove, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to delete sneaker"
+    ));
+
+const getBrands = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.brands.get, await generateAuthPayload()),
+        "Failed to get brands"
+    ));
+
+const generateUploadUrl = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().mutation(api.brands.generateUploadUrl, await generateAuthPayload()),
+        "Failed to generate upload url"
+    ));
+
+const addBrand = createServerFn({ method: "POST" })
+    .inputValidator(BrandInsert)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.brands.insert, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to add brand"
+    ));
+
+const editBrand = createServerFn({ method: "POST" })
+    .inputValidator(BrandUpdate)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.brands.update, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to edit brand"
+    ));
+
+const deleteBrand = createServerFn({ method: "POST" })
+    .inputValidator(BrandRemove)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.brands.remove, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to delete brand"
+    ));
+
+const getLocations = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.locations.get, await generateAuthPayload()),
+        "Failed to get locations"
+    ));
+
+const addLocation = createServerFn({ method: "POST" })
+    .inputValidator(LocationInsert)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.locations.insert, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to add location"
+    ));
+
+const editLocation = createServerFn({ method: "POST" })
+    .inputValidator(LocationUpdate)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.locations.update, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to edit location"
+    ));
+
+const deleteLocation = createServerFn({ method: "POST" })
+    .inputValidator(LocationRemove)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.locations.remove, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to delete location"
+    ));
+
+const getUsers = createServerFn({ method: "GET" })
     .handler(() => handleQuery(
         async () => getClient().query(api.users.get, await generateAuthPayload()),
         "Failed to get users"
     ));
 
-export const getOwners = createServerFn({ method: "GET" })
+const getOwners = createServerFn({ method: "GET" })
     .handler(() => handleQuery(
         async () => getClient().query(api.users.getOwners, await generateAuthPayload()),
         "Failed to get owners"
     ));
 
-export const addUser = createServerFn({ method: "POST" })
-    .inputValidator((data: Omit<Db<Doc<"users">>, "passwordHash"> & { password: string }) => data)
+const addUser = createServerFn({ method: "POST" })
+    .inputValidator(UserInsert.omit({ passwordHash: true }).extend({ password: z.string() }))
     .handler(async ({ data }) => {
-        const username = data.username.trim();
-        const password = data.password;
-        const color = data.color.trim();
-        if (!username || !password || !color)
-            return { success: false, error: "Missing required fields" };
-
+        const { password, ...rest } = data;
         return handleMutation(
             async () => getClient().mutation(api.users.insert, {
-                username,
+                ...rest,
                 passwordHash: await encryptPassword(password),
-                color,
-                role: data.role,
-                active: data.active,
                 ...(await generateAuthPayload()),
             }),
             "Failed to add user"
         );
     });
 
-export const editUser = createServerFn({ method: "POST" })
-    .inputValidator((data: Omit<Db<Doc<"users">>, "passwordHash"> & { _id: Id<"users">; password?: string }) => data)
+const editUser = createServerFn({ method: "POST" })
+    .inputValidator(UserUpdate.omit({ passwordHash: true }).extend({ password: z.string().optional() }))
     .handler(async ({ data }) => {
-        const username = data.username.trim();
-        const color = data.color.trim();
-        const password = (data.password ?? "").trim();
+        const { password, ...rest } = data;
         const passwordHash = password ? await encryptPassword(password) : undefined;
-        if (!data._id || !username || !color)
-            return { success: false, error: "Missing required fields" };
-
         return handleMutation(
             async () => getClient().mutation(api.users.update, {
-                _id: data._id,
-                username,
-                passwordHash,
-                color,
-                role: data.role,
-                active: data.active,
+                ...rest,
+                ...(passwordHash ? { passwordHash } : {}),
                 ...(await generateAuthPayload()),
             }),
             "Failed to edit user"
         );
     });
 
-export const deleteUser = createServerFn({ method: "POST" })
-    .inputValidator((data: { _id: Id<"users"> }) => data)
-    .handler(async ({ data }) => {
-        if (!data._id)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.users.remove, {
-                _id: data._id,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to delete user"
-        );
-    });
-
-export const getSneakers = createServerFn({ method: "GET" })
-    .handler(() => handleQuery(
-        async () => getClient().query(api.sneakers.get, await generateAuthPayload()),
-        "Failed to get sneakers"
+const deleteUser = createServerFn({ method: "POST" })
+    .inputValidator(UserRemove)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.users.remove, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to delete user"
     ));
 
-export const getBrands = createServerFn({ method: "GET" })
-    .handler(() => handleQuery(
-        async () => getClient().query(api.brands.get, await generateAuthPayload()),
-        "Failed to get brands"
-    ));
-
-export const addBrand = createServerFn({ method: "POST" })
-    .inputValidator((data: Db<Doc<"brands">>) => data)
-    .handler(async ({ data }) => {
-        const name = data.name.trim();
-        const slug = data.slug.trim();
-        if (!name || !slug)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.brands.insert, {
-                name,
-                slug,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to add brand"
-        );
-    });
-
-export const editBrand = createServerFn({ method: "POST" })
-    .inputValidator((data: Db<Doc<"brands">> & { _id: Id<"brands"> }) => data)
-    .handler(async ({ data }) => {
-        const name = data.name.trim();
-        const slug = data.slug.trim();
-        if (!data._id || !name || !slug)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.brands.update, {
-                _id: data._id,
-                name,
-                slug,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to edit brand"
-        );
-    });
-
-export const deleteBrand = createServerFn({ method: "POST" })
-    .inputValidator((data: { _id: Id<"brands"> }) => data)
-    .handler(async ({ data }) => {
-        if (!data._id)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.brands.remove, {
-                _id: data._id,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to delete brand"
-        );
-    });
-
-export const getLocations = createServerFn({ method: "GET" })
-    .handler(() => handleQuery(
-        async () => getClient().query(api.locations.get, await generateAuthPayload()),
-        "Failed to get locations"
-    ));
-
-export const addLocation = createServerFn({ method: "POST" })
-    .inputValidator((data: Omit<Db<Doc<"locations">>, "passwordHash">) => data)
-    .handler(async ({ data }) => {
-        const name = data.name.trim();
-        if (!name)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.locations.insert, {
-                name,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to add location"
-        );
-    });
-
-export const editLocation = createServerFn({ method: "POST" })
-    .inputValidator((data: Omit<Db<Doc<"locations">>, "passwordHash"> & { _id: Id<"locations"> }) => data)
-    .handler(async ({ data }) => {
-        const name = data.name.trim();
-        if (!data._id || !name)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.locations.update, {
-                _id: data._id,
-                name,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to edit location"
-        );
-    });
-
-export const deleteLocation = createServerFn({ method: "POST" })
-    .inputValidator((data: { _id: Id<"locations"> }) => data)
-    .handler(async ({ data }) => {
-        if (!data._id)
-            return { success: false, error: "Missing required fields" };
-
-        return handleMutation(
-            async () => getClient().mutation(api.locations.remove, {
-                _id: data._id,
-                ...(await generateAuthPayload()),
-            }),
-            "Failed to delete location"
-        );
-    });
+export default {
+    sneakers: {
+        get: getSneakers,
+        add: addSneaker,
+        edit: editSneaker,
+        remove: deleteSneaker,
+    },
+    brands: {
+        get: getBrands,
+        generate: generateUploadUrl,
+        add: addBrand,
+        edit: editBrand,
+        remove: deleteBrand,
+    },
+    locations: {
+        get: getLocations,
+        add: addLocation,
+        edit: editLocation,
+        remove: deleteLocation,
+    },
+    users: {
+        get: getUsers,
+        getOwners: getOwners,
+        add: addUser,
+        edit: editUser,
+        remove: deleteUser,
+    },
+}

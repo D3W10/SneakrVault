@@ -27,7 +27,7 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
                             <>
                                 <IconMapPin className="size-4 shrink-0 text-primary" />
                                 <span className="text-primary-100 group-hover:text-primary-300 opacity-75 group-hover:opacity-100 font-semibold truncate transition">
-                                    {sneaker.location}
+                                    {sneaker.location.name}
                                 </span>
                             </>
                             

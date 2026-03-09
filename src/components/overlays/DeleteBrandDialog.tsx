@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { deleteBrand } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import type { Id } from "@db/dataModel";
 
 interface DeleteBrandDialogProps {
@@ -20,7 +20,7 @@ export function DeleteBrandDialog({ open, setOpen, _id }: DeleteBrandDialogProps
         e.preventDefault();
         setIsSaving(true);
 
-        const result = await deleteBrand({
+        const result = await bridge.brands.remove({
             data: {
                 _id,
             },

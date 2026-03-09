@@ -14,9 +14,8 @@ import { DeleteLocationDialog } from "@/components/overlays/DeleteLocationDialog
 import { DeleteUserDialog } from "@/components/overlays/DeleteUserDialog";
 import { Header } from "@/components/Header";
 import { checkAuth } from "@/data/auth";
-import { getBrands, getLocations, getUsers } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
-import type { Doc } from "@db/dataModel";
 
 export const Route = createFileRoute("/manage")({
     component: ManagePage,
@@ -28,15 +27,15 @@ function ManagePage() {
     const [addBrandDialogOpen, setAddBrandDialogOpen] = useState(false);
     const { isPending: uip, data: users } = useQuery({
         queryKey: ["users"],
-        queryFn: getUsers,
+        queryFn: bridge.users.get,
     });
     const { isPending: lip, data: locations } = useQuery({
         queryKey: ["locations"],
-        queryFn: getLocations,
+        queryFn: bridge.locations.get,
     });
     const { isPending: bip, data: brands } = useQuery({
         queryKey: ["brands"],
-        queryFn: getBrands,
+        queryFn: bridge.brands.get,
     });
     const logout = useLogout();
 
@@ -119,8 +118,8 @@ function ManagePage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="lg:w-56">Name</TableHead>
-                                    <TableHead>Slug</TableHead>
+                                    <TableHead className="lg:w-10" />
+                                    <TableHead>Name</TableHead>
                                     <TableHead className="lg:w-20" />
                                 </TableRow>
                             </TableHeader>
@@ -135,7 +134,7 @@ function ManagePage() {
     );
 }
 
-function UserTableRow({ user }: { user: Doc<"users"> }) {
+function UserTableRow({ user }: { user: Awaited<ReturnType<typeof bridge.users.get>>[number] }) {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const { data: session } = useQuery({
@@ -146,7 +145,7 @@ function UserTableRow({ user }: { user: Doc<"users"> }) {
     const isCurrentUser = session?.username === user.username;
 
     return (
-        <TableRow>
+        <TableRow className="h-10">
             <TableCell>{user.username}</TableCell>
             <TableCell>{user.role}</TableCell>
             <TableCell>{user.color}</TableCell>
@@ -167,12 +166,12 @@ function UserTableRow({ user }: { user: Doc<"users"> }) {
     );
 }
 
-function LocationTableRow({ location }: { location: Doc<"locations"> }) {
+function LocationTableRow({ location }: { location: Awaited<ReturnType<typeof bridge.locations.get>>[number] }) {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     return (
-        <TableRow>
+        <TableRow className="h-10">
             <TableCell>{location.name}</TableCell>
             <TableCell className="p-0 text-right">
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setEditDialogOpen(true)}>
@@ -188,14 +187,16 @@ function LocationTableRow({ location }: { location: Doc<"locations"> }) {
     );
 }
 
-function BrandTableRow({ brand }: { brand: Doc<"brands"> }) {
+function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.brands.get>>[number] }) {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     return (
-        <TableRow>
+        <TableRow className="h-10">
+            <TableCell className="p-0">
+                {brand.iconUrl && <img src={brand.iconUrl} alt={brand.name} className="size-6 object-contain" />}
+            </TableCell>
             <TableCell>{brand.name}</TableCell>
-            <TableCell>{brand.slug}</TableCell>
             <TableCell className="p-0 text-right">
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setEditDialogOpen(true)}>
                     <IconPencil />

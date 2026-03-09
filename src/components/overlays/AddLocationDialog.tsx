@@ -6,7 +6,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { addLocation, editLocation } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import type { Doc } from "@db/dataModel";
 
 interface AddLocationDialogProps {
@@ -27,7 +27,7 @@ export function AddLocationDialog({ open, setOpen, location }: AddLocationDialog
         setError("");
 
         if (!location) {
-            const result = await addLocation({
+            const result = await bridge.locations.add({
                 data: {
                     name,
                 },
@@ -38,7 +38,7 @@ export function AddLocationDialog({ open, setOpen, location }: AddLocationDialog
                 return;
             }
         } else {
-            const result = await editLocation({
+            const result = await bridge.locations.edit({
                 data: {
                     _id: location._id,
                     name,
@@ -75,12 +75,12 @@ export function AddLocationDialog({ open, setOpen, location }: AddLocationDialog
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="locationName">Name</Label>
-                            <Input id="locationName" name="name" maxLength={30} placeholder={location?.name ?? "Required"} value={name} onChange={e => setName(e.target.value)} />
+                            <Input id="locationName" name="name" maxLength={30} placeholder={location?.name ?? "Required"} disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
                         </Field>
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </FieldGroup>
                     <DialogFooter>
-                        <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
                         <Button type="submit" className="w-31" disabled={isSaving || !name}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>

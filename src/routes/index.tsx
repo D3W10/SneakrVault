@@ -11,7 +11,7 @@ import { GridBlock } from "@/components/blocks/GridBlock";
 import { AddSneakerDialog } from "@/components/overlays/AddSneakerDialog";
 import { Header } from "@/components/Header";
 import { checkAuth } from "@/data/auth";
-import { getBrands, getLocations, getOwners } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
 import type { Search } from "@/lib/models";
 import type { Id } from "@db/dataModel";
@@ -28,15 +28,15 @@ function Index() {
     const logout = useLogout();
     const { data: brands } = useQuery({
         queryKey: ["brands"],
-        queryFn: getBrands,
+        queryFn: bridge.brands.get,
     });
     const { data: locations } = useQuery({
         queryKey: ["locations"],
-        queryFn: getLocations,
+        queryFn: bridge.locations.get,
     });
     const { data: owners } = useQuery({
         queryKey: ["owners"],
-        queryFn: getOwners,
+        queryFn: bridge.users.getOwners,
     });
     const auth = Route.useRouteContext().auth;
 

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { deleteUser } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import type { Id } from "@db/dataModel";
 
 interface DeleteUserDialogProps {
@@ -20,7 +20,7 @@ export function DeleteUserDialog({ open, setOpen, _id }: DeleteUserDialogProps) 
         e.preventDefault();
         setIsSaving(true);
 
-        const result = await deleteUser({
+        const result = await bridge.users.remove({
             data: {
                 _id,
             },

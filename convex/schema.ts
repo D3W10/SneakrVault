@@ -2,14 +2,6 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-    users: defineTable({
-        username: v.string(),
-        passwordHash: v.string(),
-        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
-        color: v.string(),
-        active: v.boolean(),
-    })
-        .index("by_username", ["username"]),
     sneakers: defineTable({
         name: v.string(),
         color: v.string(),
@@ -29,11 +21,19 @@ export default defineSchema({
         .index("by_location", ["location"]),
     brands: defineTable({
         name: v.string(),
-        slug: v.string(),
+        icon: v.id("_storage"),
     }),
     locations: defineTable({
         name: v.string(),
     }),
+    users: defineTable({
+        username: v.string(),
+        passwordHash: v.string(),
+        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
+        color: v.string(),
+        active: v.boolean(),
+    })
+        .index("by_username", ["username"]),
     loginAttempts: defineTable({
         key: v.string(),
         failedCount: v.number(),

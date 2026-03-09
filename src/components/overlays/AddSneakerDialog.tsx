@@ -51,20 +51,20 @@ export function AddSneakerDialog({ open, setOpen }: AddSneakerDialogProps) {
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="sneakerName">Name</Label>
-                            <Input id="sneakerName" name="name" maxLength={30} placeholder="Required" value={name} onChange={e => setName(e.target.value)} />
+                            <Input id="sneakerName" name="name" maxLength={30} placeholder="Required" disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
                         </Field>
                         <Field>
                             <Label htmlFor="sneakerColor">Color</Label>
-                            <Input id="sneakerColor" name="color" maxLength={40} placeholder="Required" value={color} onChange={e => setColor(e.target.value)} />
+                            <Input id="sneakerColor" name="color" maxLength={40} placeholder="Required" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
                         </Field>
                         <Field orientation="horizontal" className="w-fit">
-                            <Checkbox id="sneakerDecommissioned" checked={decommissioned} onCheckedChange={e => setDecommissioned(!!e)} />
+                            <Checkbox id="sneakerDecommissioned" disabled={isSaving} checked={decommissioned} onCheckedChange={e => setDecommissioned(!!e)} />
                             <FieldLabel htmlFor="sneakerDecommissioned">Decommissioned</FieldLabel>
                         </Field>
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </FieldGroup>
                     <DialogFooter>
-                        <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
                         <Button type="submit" className="w-31">
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>

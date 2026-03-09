@@ -1,5 +1,16 @@
-import { v } from "convex/values";
+import { z } from "zod";
+import { zid } from "convex-helpers/server/zod4";
 import { adminMutation, adminQuery, guestQuery } from "./customFunctions";
+
+export const UserInsert = z.object({
+    username: z.string(),
+    passwordHash: z.string(),
+    role: z.union([z.literal("guest"), z.literal("normal"), z.literal("admin")]),
+    color: z.string(),
+    active: z.boolean(),
+});
+export const UserUpdate = UserInsert.partial().extend({ _id: zid("users") });
+export const UserRemove = z.object({ _id: zid("users") });
 
 export const get = adminQuery({
     args: {},
@@ -16,9 +27,7 @@ export const getOwners = guestQuery({
 });
 
 export const getByUsername = guestQuery({
-    args: {
-        username: v.string(),
-    },
+    args: { username: z.string() },
     handler: async (ctx, args) => {
         return await ctx.db
             .query("users")
@@ -33,13 +42,7 @@ export const getByUsername = guestQuery({
 });
 
 export const insert = adminMutation({
-    args: {
-        username: v.string(),
-        passwordHash: v.string(),
-        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
-        color: v.string(),
-        active: v.boolean(),
-    },
+    args: UserInsert,
     handler: async (ctx, args) => {
         await ctx.db.insert("users", args);
         return { success: true };
@@ -47,31 +50,16 @@ export const insert = adminMutation({
 });
 
 export const update = adminMutation({
-    args: {
-        _id: v.id("users"),
-        username: v.string(),
-        passwordHash: v.optional(v.string()),
-        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
-        color: v.string(),
-        active: v.boolean(),
-    },
+    args: UserUpdate,
     handler: async (ctx, args) => {
-        await ctx.db.patch(args._id, {
-            username: args.username,
-            role: args.role,
-            color: args.color,
-            active: args.active,
-            ...(args.passwordHash ? { passwordHash: args.passwordHash } : {}),
-        });
-
+        const { _id, ...rest } = args;
+        await ctx.db.patch(args._id, rest);
         return { success: true };
     },
 });
 
 export const remove = adminMutation({
-    args: {
-        _id: v.id("users"),
-    },
+    args: { _id: zid("users") },
     handler: async (ctx, args) => {
         await ctx.db.delete(args._id);
         return { success: true };

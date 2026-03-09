@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { IconCake } from "@tabler/icons-react";
 import { SneakerCard } from "@/components/SneakerCard";
-import { getSneakers } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { hasSearched } from "@/lib/utils";
 import type { Search } from "@/lib/models";
 
@@ -13,7 +13,7 @@ interface BirthdayBlockProps {
 export function BirthdayBlock({ search }: BirthdayBlockProps) {
     const { data: sneakers } = useQuery({
         queryKey: ["sneakers"],
-        queryFn: getSneakers,
+        queryFn: bridge.sneakers.get,
     });
 
     const today = moment().startOf("day");

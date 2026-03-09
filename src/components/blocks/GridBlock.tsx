@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { IconLayoutGrid, IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
-import { getSneakers } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { filterBySearch, hasSearched } from "@/lib/utils";
 import type { SessionState } from "@/data/session";
 import type { Search } from "@/lib/models";
@@ -16,7 +16,7 @@ interface GridBlockProps {
 export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
     const { isPending, data: sneakers } = useQuery({
         queryKey: ["sneakers"],
-        queryFn: getSneakers,
+        queryFn: bridge.sneakers.get,
     });
     const searched = hasSearched(search);
 

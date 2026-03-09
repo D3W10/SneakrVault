@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH } from "@/data/auth";
-import { addUser, editUser } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
 import type { Doc } from "@db/dataModel";
 
@@ -46,7 +46,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
         setError("");
 
         if (!user) {
-            const result = await addUser({
+            const result = await bridge.users.add({
                 data: {
                     username,
                     password,
@@ -61,7 +61,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
                 return;
             }
         } else {
-            const result = await editUser({
+            const result = await bridge.users.edit({
                 data: {
                     _id: user._id,
                     username,
@@ -115,16 +115,16 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="userUsername">Username</Label>
-                            <Input id="userUsername" name="username" maxLength={MAX_USERNAME_LENGTH} placeholder={user?.username ?? "Required"} value={username} onChange={e => setUsername(e.target.value)} />
+                            <Input id="userUsername" name="username" maxLength={MAX_USERNAME_LENGTH} placeholder={user?.username ?? "Required"} disabled={isSaving} value={username} onChange={e => setUsername(e.target.value)} />
                         </Field>
                         <Field>
                             <Label htmlFor="userPassword">Password</Label>
-                            <Input id="userPassword" name="password" type="password" maxLength={MAX_PASSWORD_LENGTH} placeholder={!user ? "Required" : "New password"} value={password} onChange={e => setPassword(e.target.value)} />
+                            <Input id="userPassword" name="password" type="password" maxLength={MAX_PASSWORD_LENGTH} placeholder={!user ? "Required" : "New password"} disabled={isSaving} value={password} onChange={e => setPassword(e.target.value)} />
                         </Field>
                         <div className="flex gap-2">
                             <Field className="flex-2">
                                 <Label htmlFor="userRole">Role</Label>
-                                <Select value={role} disabled={isCurrentUser} onValueChange={e => setRole(e ?? "guest")}>
+                                <Select value={role} disabled={isCurrentUser || isSaving} onValueChange={e => setRole(e ?? "guest")}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
@@ -140,17 +140,17 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
                                     <Label htmlFor="userColor">Color</Label>
                                     {isColorValid && <div className="w-5 h-2.5 mr-0.5 rounded-md" style={{ backgroundColor: color }} />}
                                 </div>
-                                <Input id="userColor" name="color" placeholder="#ff566b" value={color} onChange={e => setColor(e.target.value)} />
+                                <Input id="userColor" name="color" placeholder="#ff566b" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
                             </Field>
                         </div>
                         <Field orientation="horizontal" className="w-fit">
-                            <Checkbox id="userActive" checked={active} disabled={isCurrentUser} onCheckedChange={e => setActive(!!e)} />
+                            <Checkbox id="userActive" checked={active} disabled={isCurrentUser || isSaving} onCheckedChange={e => setActive(!!e)} />
                             <FieldLabel htmlFor="userActive">Active</FieldLabel>
                         </Field>
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </FieldGroup>
                     <DialogFooter>
-                        <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
                         <Button type="submit" className="w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>

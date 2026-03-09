@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { deleteLocation } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import type { Id } from "@db/dataModel";
 
 interface DeleteLocationDialogProps {
@@ -20,7 +20,7 @@ export function DeleteLocationDialog({ open, setOpen, _id }: DeleteLocationDialo
         e.preventDefault();
         setIsSaving(true);
 
-        const result = await deleteLocation({
+        const result = await bridge.locations.remove({
             data: {
                 _id,
             },

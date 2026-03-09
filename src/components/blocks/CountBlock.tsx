@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSneakers } from "@/data/bridge";
+import bridge from "@/data/bridge";
 import { hasSearched } from "@/lib/utils";
 import type { Search } from "@/lib/models";
 
@@ -11,7 +11,7 @@ interface CountBlockProps {
 export function CountBlock({ search }: CountBlockProps) {
     const { data: sneakers } = useQuery({
         queryKey: ["sneakers"],
-        queryFn: getSneakers,
+        queryFn: bridge.sneakers.get,
     });
     const searched = hasSearched(search);
     const length = sneakers?.length ?? 0;

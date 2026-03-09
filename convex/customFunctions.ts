@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { customMutation, customQuery } from "convex-helpers/server/customFunctions";
+import { zCustomMutation, zCustomQuery } from "convex-helpers/server/zod4";
 import { mutation, query } from "@db/server";
 import type { Doc } from "@db/dataModel";
 
@@ -36,7 +36,7 @@ async function validateAuthInput(args: { signature: string; timestamp: number; a
         throw new Error("Forbidden: Insufficient role");
 }
 
-export const guestQuery = customQuery(query, {
+export const guestQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "guest");
@@ -44,7 +44,7 @@ export const guestQuery = customQuery(query, {
     },
 });
 
-export const normalQuery = customQuery(query, {
+export const normalQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "normal");
@@ -52,7 +52,7 @@ export const normalQuery = customQuery(query, {
     },
 });
 
-export const adminQuery = customQuery(query, {
+export const adminQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "admin");
@@ -60,7 +60,7 @@ export const adminQuery = customQuery(query, {
     },
 });
 
-export const guestMutation = customMutation(mutation, {
+export const guestMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "guest");
@@ -68,7 +68,7 @@ export const guestMutation = customMutation(mutation, {
     },
 });
 
-export const normalMutation = customMutation(mutation, {
+export const normalMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "normal");
@@ -76,7 +76,7 @@ export const normalMutation = customMutation(mutation, {
     },
 });
 
-export const adminMutation = customMutation(mutation, {
+export const adminMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
         await validateAuthInput(args, "admin");
