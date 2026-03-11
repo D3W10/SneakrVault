@@ -4,9 +4,9 @@ import { adminMutation, guestQuery } from "./customFunctions";
 
 export const BrandInsert = z.object({
     name: z.string(),
-    icon: zid("_storage"),
+    icon: zid("_storage").optional(),
 });
-export const BrandUpdate = BrandInsert.partial().extend({ _id: zid("brands") });
+export const BrandUpdate = BrandInsert.partial().extend({ _id: zid("brands"), icon: zid("_storage").nullish() });
 export const BrandRemove = z.object({ _id: zid("brands") });
 
 export const get = guestQuery({
@@ -14,14 +14,7 @@ export const get = guestQuery({
     handler: async ctx => {
         const brands = await ctx.db.query("brands").collect();
 
-        return Promise.all(brands.map(async b => ({ ...b, iconUrl: await ctx.storage.getUrl(b.icon) })));
-    },
-});
-
-export const generateUploadUrl = adminMutation({
-    args: {},
-    handler: async ctx => {
-        return await ctx.storage.generateUploadUrl();
+        return Promise.all(brands.map(async b => ({ ...b, iconUrl: b.icon && await ctx.storage.getUrl(b.icon) })));
     },
 });
 
@@ -36,13 +29,18 @@ export const insert = adminMutation({
 export const update = adminMutation({
     args: BrandUpdate,
     handler: async (ctx, args) => {
-        const { _id, ...rest } = args;
+        const { _id, icon, ...rest } = args;
         const brand = await ctx.db.query("brands").filter(q => q.eq(q.field("_id"), _id)).first();
 
-        if (args.icon && brand?.icon)
-            await ctx.storage.delete(brand.icon);
+        let patch = { ...rest } as z.infer<typeof BrandInsert>;
 
-        await ctx.db.patch(args._id, rest);
+        if (icon !== undefined) {
+            patch.icon = icon === null ? undefined : icon;
+            if (brand?.icon)
+                await ctx.storage.delete(brand.icon);
+        }
+
+        await ctx.db.patch(args._id, patch);
         return { success: true };
     },
 });
@@ -50,6 +48,10 @@ export const update = adminMutation({
 export const remove = adminMutation({
     args: BrandRemove,
     handler: async (ctx, args) => {
+        const brand = await ctx.db.query("brands").filter(q => q.eq(q.field("_id"), args._id)).first();
+        if (brand?.icon)
+            await ctx.storage.delete(brand.icon);
+
         await ctx.db.delete(args._id);
         return { success: true };
     },

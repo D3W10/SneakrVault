@@ -11,7 +11,7 @@ export function hasSearched(search: Search) {
 }
 
 export function filterBySearch(sneakers: Sneaker[], search: Search) {
-    return sneakers.filter(sneaker => 
+    return sneakers.filter(sneaker =>
         sneaker.name.toLowerCase().includes(search.term.toLowerCase()) &&
         (!search.location || sneaker.location._id === search.location) &&
         (!search.brand || sneaker.brand.name === search.brand) &&

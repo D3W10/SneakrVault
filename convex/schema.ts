@@ -6,22 +6,22 @@ export default defineSchema({
         name: v.string(),
         color: v.string(),
         size: v.number(),
-        date: v.string(),
-        photo: v.optional(v.id("_storage")),
         brand: v.id("brands"),
+        photo: v.optional(v.id("_storage")),
         location: v.union(v.id("locations"), v.literal("outside")),
         owner: v.optional(v.id("users")),
+        date: v.optional(v.string()),
         originalOwner: v.optional(v.id("users")),
         decommissioned: v.boolean(),
+        stockxUrl: v.optional(v.string()),
         pickDate: v.optional(v.string()),
         pickTo: v.optional(v.id("users")),
-        stockxUrl: v.optional(v.string()),
     })
         .index("by_brand", ["brand"])
         .index("by_location", ["location"]),
     brands: defineTable({
         name: v.string(),
-        icon: v.id("_storage"),
+        icon: v.optional(v.id("_storage")),
     }),
     locations: defineTable({
         name: v.string(),

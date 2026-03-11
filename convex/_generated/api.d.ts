@@ -13,6 +13,7 @@ import type * as brands from "../brands.js";
 import type * as customFunctions from "../customFunctions.js";
 import type * as locations from "../locations.js";
 import type * as sneakers from "../sneakers.js";
+import type * as storage from "../storage.js";
 import type * as users from "../users.js";
 
 import type {
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   customFunctions: typeof customFunctions;
   locations: typeof locations;
   sneakers: typeof sneakers;
+  storage: typeof storage;
   users: typeof users;
 }>;
 

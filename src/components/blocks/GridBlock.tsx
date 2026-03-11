@@ -34,12 +34,14 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
                 {isPending ? (
                     Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
                 ) : (sneakers ?? []).length !== 0 ? (
-                    filterBySearch(sneakers ?? [], search).map(s => (
-                        <SneakerCard
-                            key={s._id}
-                            sneaker={s}
-                        />
-                    ))
+                    filterBySearch(sneakers ?? [], search)
+                        .sort((a, b) => b._creationTime - a._creationTime)
+                        .map(s => (
+                            <SneakerCard
+                                key={s._id}
+                                sneaker={s}
+                            />
+                        ))
                 ) : (
                     <div className="py-20 flex flex-col items-center gap-4 col-span-full font-medium text-center text-muted-foreground">
                         {!searched ? (

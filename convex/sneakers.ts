@@ -6,18 +6,18 @@ export const SneakerInsert = z.object({
     name: z.string(),
     color: z.string(),
     size: z.number(),
-    date: z.string(),
-    slug: z.string(),
     brand: zid("brands"),
+    photo: zid("_storage").optional(),
     location: z.union([zid("locations"), z.literal("outside")]),
     owner: zid("users").optional(),
+    date: z.string().optional(),
     originalOwner: zid("users").optional(),
     decommissioned: z.boolean(),
+    stockxUrl: z.string().optional(),
     pickDate: z.string().optional(),
     pickTo: zid("users").optional(),
-    stockxUrl: z.string().optional(),
 });
-export const SneakerUpdate = SneakerInsert.partial().extend({ _id: zid("sneakers") });
+export const SneakerUpdate = SneakerInsert.partial().extend({ _id: zid("sneakers"), photo: zid("_storage").nullish() });
 export const SneakerRemove = z.object({ _id: zid("sneakers") });
 
 export const get = guestQuery({
@@ -29,7 +29,7 @@ export const get = guestQuery({
             sneakers.map(async sneaker => {
                 const brand = await ctx.db.get(sneaker.brand);
                 
-                let locationId = "";
+                let locationId = "outside";
                 let locationName = "Outside";
                 if (sneaker.location !== "outside") {
                     const location = await ctx.db.get(sneaker.location);
@@ -47,6 +47,7 @@ export const get = guestQuery({
                         _id: locationId,
                         name: locationName,
                     },
+                    photoUrl: sneaker.photo && await ctx.storage.getUrl(sneaker.photo)
                 };
             })
         );
@@ -64,8 +65,18 @@ export const insert = normalMutation({
 export const update = normalMutation({
     args: SneakerUpdate,
     handler: async (ctx, args) => {
-        const { _id, ...rest } = args;
-        await ctx.db.patch(args._id, rest);
+        const { _id, photo, ...rest } = args;
+        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), _id)).first();
+
+        let patch = { ...rest } as z.infer<typeof SneakerInsert>;
+
+        if (photo !== undefined) {
+            patch.photo = photo === null ? undefined : photo;
+            if (sneaker?.photo)
+                await ctx.storage.delete(sneaker.photo);
+        }
+
+        await ctx.db.patch(args._id, patch);
         return { success: true };
     },
 });
@@ -73,6 +84,10 @@ export const update = normalMutation({
 export const remove = normalMutation({
     args: { _id: zid("sneakers") },
     handler: async (ctx, args) => {
+        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), args._id)).first();
+        if (sneaker?.photo)
+            await ctx.storage.delete(sneaker.photo);
+
         await ctx.db.delete(args._id);
         return { success: true };
     },

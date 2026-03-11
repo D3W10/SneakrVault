@@ -19,6 +19,8 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
     const today = moment().startOf("day");
     const nextWeek = moment().add(7, "days").endOf("day");
     const upcomingBirthdays = (sneakers ?? []).filter(s => {
+        if (!s.date) return false;
+
         const birthdayDate = moment(s.date);
         const currentYearBirthday = birthdayDate.clone().year(today.year());
 
@@ -40,7 +42,7 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
         return (
             <div className="px-6 md:px-8 flex flex-col gap-4">
                 <div className="flex items-center gap-2">
-                    <IconCake className="size-5 text-primary" />
+                    <IconCake className="size-6 text-primary" />
                     <h2 className="text-xl font-bold text-white">Upcoming Birthdays</h2>
                 </div>
                 <div className="p-px pb-4 flex gap-4 overflow-x-auto">

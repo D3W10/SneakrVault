@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
@@ -17,29 +18,33 @@ interface AddBrandDialogProps {
 
 export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
     const [name, setName] = useState("");
-    const [icon, setIcon] = useState<File | null>(null);
+    const [icon, setIcon] = useState<File | null>();
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
     const queryClient = useQueryClient();
 
-    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setIsSaving(true);
         setError("");
 
-        const url = await bridge.brands.generate();
-        const upload = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": icon!.type },
-            body: icon,
-        });
-        const { storageId } = await upload.json();
+        let iconId: string | null | undefined;
+        if (icon) {
+            const url = await bridge.storage.generate();
+            const upload = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": icon.type },
+                body: icon,
+            });
+            iconId = (await upload.json()).storageId;
+        } else
+            iconId = icon;
 
         if (!brand) {
             const result = await bridge.brands.add({
                 data: {
                     name,
-                    icon: storageId,
+                    icon: iconId ?? undefined,
                 },
             });
             if (!result.success) {
@@ -52,7 +57,7 @@ export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
                 data: {
                     _id: brand._id,
                     name,
-                    icon: storageId,
+                    icon: iconId,
                 },
             });
             if (!result.success) {
@@ -73,7 +78,7 @@ export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
             return;
 
         setName(brand?.name ?? "");
-        setIcon(null);
+        setIcon(undefined);
         setError("");
     }, [open]);
 
@@ -91,13 +96,20 @@ export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
                         </Field>
                         <Field>
                             <Label htmlFor="brandIcon">Icon</Label>
-                            <Input id="brandIcon" name="icon" type="file" disabled={isSaving} accept="image/*,.svg" onChange={e => setIcon(e.target.files?.[0] ?? null)} />
+                            <div className="flex gap-2">
+                                <Input id="brandIcon" name="icon" type="file" disabled={isSaving} accept="image/*,.svg" onChange={e => setIcon(e.target.files?.[0] ?? null)} />
+                                {brand?.icon && (
+                                    <Button variant="outline" size="icon" disabled={isSaving || icon === null} onClick={() => setIcon(null)}>
+                                        <IconTrash className="size-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </Field>
                         {error && <p className="text-sm text-destructive">{error}</p>}
                     </FieldGroup>
                     <DialogFooter>
                         <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !icon}>
+                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
                             {!isSaving ? "Save changes" : <Spinner />}
                         </Button>
                     </DialogFooter>

@@ -76,7 +76,7 @@ const getBrands = createServerFn({ method: "GET" })
 
 const generateUploadUrl = createServerFn({ method: "GET" })
     .handler(() => handleQuery(
-        async () => getClient().mutation(api.brands.generateUploadUrl, await generateAuthPayload()),
+        async () => getClient().mutation(api.storage.generateUploadUrl, await generateAuthPayload()),
         "Failed to generate upload url"
     ));
 
@@ -206,7 +206,6 @@ export default {
     },
     brands: {
         get: getBrands,
-        generate: generateUploadUrl,
         add: addBrand,
         edit: editBrand,
         remove: deleteBrand,
@@ -223,5 +222,8 @@ export default {
         add: addUser,
         edit: editUser,
         remove: deleteUser,
+    },
+    storage: {
+        generate: generateUploadUrl,
     },
 }

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import moment from "moment";
 import { IconCalendarEvent, IconMapPin } from "@tabler/icons-react";
+import moment from "moment";
 import { Skeleton } from "@/components/ui/skeleton"
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import { cn } from "@/lib/utils";
