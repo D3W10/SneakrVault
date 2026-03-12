@@ -11,11 +11,12 @@ export const SneakerInsert = z.object({
     location: z.union([zid("locations"), z.literal("outside")]),
     owner: zid("users").optional(),
     date: z.string().optional(),
-    originalOwner: zid("users").optional(),
+    type: z.union([z.literal("Sneakers"), z.literal("Shoes"), z.literal("Boots"), z.literal("Flip-flops")]),
+    originalOwner: z.union([zid("users"), z.string()]).optional(),
     decommissioned: z.boolean(),
     stockxUrl: z.string().optional(),
-    pickDate: z.string().optional(),
-    pickTo: zid("users").optional(),
+    pickFor: zid("users").optional(),
+    pickUntil: z.string().optional(),
 });
 export const SneakerUpdate = SneakerInsert.partial().extend({ _id: zid("sneakers"), photo: zid("_storage").nullish() });
 export const SneakerRemove = z.object({ _id: zid("sneakers") });

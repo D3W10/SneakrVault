@@ -35,7 +35,10 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
                     Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
                 ) : (sneakers ?? []).length !== 0 ? (
                     filterBySearch(sneakers ?? [], search)
-                        .sort((a, b) => b._creationTime - a._creationTime)
+                        .sort((a, b) => {
+                            const getTime = (obj: { date?: string; _creationTime: number }) => obj.date ? Date.parse(obj.date) : obj._creationTime * 1000;
+                            return getTime(b) - getTime(a);
+                        })
                         .map(s => (
                             <SneakerCard
                                 key={s._id}

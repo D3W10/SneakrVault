@@ -1,8 +1,9 @@
 import { useSession } from "@tanstack/react-start/server";
-import type { Doc } from "@db/dataModel"
+import type { Doc, Id } from "@db/dataModel"
 
 export type SessionState = {
     isAuthenticated: boolean;
+    _id: Id<"users">;
     username: Doc<"users">["username"];
     role: Doc<"users">["role"];
 };

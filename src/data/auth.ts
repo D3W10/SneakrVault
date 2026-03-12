@@ -37,9 +37,10 @@ export const login = createServerFn({ method: "POST" })
                 const session = await getAppSession();
                 await session.update({
                     isAuthenticated: true,
+                    _id: user._id,
                     username: user.username,
                     role: user.role,
-                });
+                } satisfies SessionState);
 
                 return { success: true };
             }

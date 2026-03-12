@@ -5,15 +5,17 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList, ComboboxTrigger } from "@/components/ui/combobox";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import bridge from "@/data/bridge";
+import type { Sneaker, User } from "@/lib/models";
 import type { Doc } from "@db/dataModel";
 
 interface AddSneakerDialogProps {
@@ -31,6 +33,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
     const [location, setLocation] = useState("");
     const [owner, setOwner] = useState("");
     const [date, setDate] = useState<Date | null>(null);
+    const [type, setType] = useState<Sneaker["type"]>("Sneakers");
     const [originalOwner, setOriginalOwner] = useState("");
     const [decommissioned, setDecommissioned] = useState(false);
     const [stockxUrl, setStockxUrl] = useState("");
@@ -78,6 +81,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                     location,
                     owner: owner || undefined,
                     date: date?.toISOString(),
+                    type,
                     originalOwner: originalOwner || undefined,
                     decommissioned,
                     stockxUrl,
@@ -100,6 +104,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                     location,
                     owner: owner || undefined,
                     date: date?.toISOString(),
+                    type,
                     originalOwner: originalOwner || undefined,
                     decommissioned,
                     stockxUrl,
@@ -130,6 +135,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
         setLocation(sneaker?.location ?? "");
         setOwner(sneaker?.owner ?? "");
         setDate(sneaker?.date ? new Date(sneaker?.date) : null);
+        setType(sneaker?.type ?? "Sneakers");
         setOriginalOwner(sneaker?.originalOwner ?? "");
         setDecommissioned(sneaker?.decommissioned ?? false);
         setStockxUrl(sneaker?.stockxUrl ?? "");
@@ -211,7 +217,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     <div className="flex gap-2">
                                         <div className="w-full relative">
                                             <Input id="sneakerPhoto" name="photo" type="file" className={photo ? "text-transparent!" : ""} disabled={isSaving} accept="image/*" onChange={e => setPhoto(e.target.files?.[0] ?? null)} />
-                                            {photo && <span className="flex items-center absolute top-0 bottom-0 right-0 left-25 text-muted-foreground z-1">{photo.name}</span>}
+                                            {photo && <span className="flex items-center absolute top-0 bottom-0 right-px left-25 text-muted-foreground overflow-hidden whitespace-nowrap z-1">{photo.name}</span>}
                                         </div>
                                         {sneaker?.photo && (
                                             <Button variant="outline" size="icon" disabled={isSaving || photo === null} onClick={() => setPhoto(null)}>
@@ -224,25 +230,49 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                         </TabsContent>
                         <TabsContent value="additional">
                             <FieldGroup>
-                                <Field>
-                                    <Label htmlFor="sneakerOwner">Owner</Label>
-                                    <Select value={owner} disabled={isSaving} onValueChange={e => setOwner(e ?? "")}>
-                                        <SelectTrigger className="w-full">
-                                            {!selOwner ? "Select an owner" : selOwner.username}
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {(owners ?? []).map(l => (
-                                                <SelectItem value={l._id} key={l._id}>{l.username}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </Field>
                                 <div className="flex gap-2">
                                     <Field>
-                                        <Label htmlFor="sneakerDate">Date</Label>
+                                        <Label htmlFor="sneakerType">Type</Label>
+                                        <Select value={type} disabled={isSaving} onValueChange={e => setType(e ?? "Sneakers")}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Sneakers">Sneakers</SelectItem>
+                                                <SelectItem value="Shoes">Shoes</SelectItem>
+                                                <SelectItem value="Boots">Boots</SelectItem>
+                                                <SelectItem value="Flip-flops">Flip-flops</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </Field>
+                                    <Field>
+                                        <Label htmlFor="sneakerOwner">Owner</Label>
+                                        <Select value={owner} disabled={isSaving} onValueChange={e => setOwner(e ?? "")}>
+                                            <SelectTrigger className="w-full">
+                                                {!selOwner ? "Select an owner" : (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="size-2.5 rounded-full" style={{ backgroundColor: selOwner?.color }} />
+                                                        {selOwner.username}
+                                                    </div>
+                                                )}
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {(owners ?? []).map(o => (
+                                                    <SelectItem value={o._id} key={o._id}>
+                                                        <div className="size-2.5 rounded-full" style={{ backgroundColor: o.color }} />
+                                                        {o.username}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </Field>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Field>
+                                        <Label htmlFor="sneakerDate">Acquisition Date</Label>
                                         <Popover>
                                             <PopoverTrigger disabled={isSaving} render={<Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">{date ? format(date, "PPP") : <span>Pick a date</span>}<IconChevronDown data-icon="inline-end" /></Button>} />
-                                            <PopoverContent className="w-auto p-0" align="start">
+                                            <PopoverContent className="w-auto p-0 bg-accent" align="start">
                                                 <Calendar
                                                     mode="single"
                                                     captionLayout="dropdown"
@@ -255,16 +285,20 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     </Field>
                                     <Field>
                                         <Label htmlFor="sneakerOriginalOwner">Original owner</Label>
-                                        <Select value={originalOwner} disabled={isSaving} onValueChange={e => setOriginalOwner(e ?? "")}>
-                                            <SelectTrigger className="w-full">
-                                                {!selOriginalOwner ? "Select an owner" : selOriginalOwner.username}
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {(owners ?? []).map(l => (
-                                                    <SelectItem value={l._id} key={l._id}>{l.username}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <Combobox items={(owners ?? [])} value={originalOwner} disabled={isSaving} onValueChange={e => setOriginalOwner(e ?? "")}>
+                                            <ComboboxInput placeholder="Select an owner" />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No users found</ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(owner: User) => (
+                                                        <ComboboxItem key={owner._id} value={owner._id}>
+                                                            <div className="size-2.5 rounded-full" style={{ backgroundColor: owner.color }} />
+                                                            {owner.username}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
                                     </Field>
                                 </div>
                                 <Field>
@@ -280,7 +314,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                         {error && <p className="text-sm text-destructive">{error}</p>}
                         <DialogFooter>
                             <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                            <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !color || !size || !brand || !location}>
+                            <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !color || !size || !brand || !location || stockxUrl.length !== 0 && !/^https:\/\/stockx\.com\/[a-zA-Z0-9-]+$/g.test(stockxUrl)}>
                                 {!isSaving ? "Save changes" : <Spinner />}
                             </Button>
                         </DialogFooter>

@@ -22,10 +22,10 @@ export const Route = createRootRouteWithContext<{
         if (!auth.isAuthenticated)
             throw redirect({ to: "/login" });
 
-        if (auth.role === "admin" && location.pathname !== "/manage")
+        if (auth.role === "admin" && !location.pathname.startsWith("/manage"))
             throw redirect({ to: "/manage" });
 
-        if (auth.role !== "admin" && location.pathname !== "/")
+        if (auth.role !== "admin" && location.pathname.startsWith("/manage"))
             throw redirect({ to: "/" });
 
         return { auth };

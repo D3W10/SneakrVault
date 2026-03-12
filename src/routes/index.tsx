@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
+import { SneakerInsert } from "convex/sneakers";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,7 +43,7 @@ function Index() {
         queryFn: bridge.users.getOwners,
     });
     const containerRef = useRef<HTMLDivElement>(null);
-    const auth = Route.useRouteContext().auth;
+    const { auth } = Route.useRouteContext();
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent | TouchEvent) {
@@ -127,11 +128,17 @@ function Index() {
                                         setFilter={o => setSearch({ ...search, owner: o })}
                                     />
                                     <FilterGroup
+                                        name="Type"
+                                        current={search.type}
+                                        options={SneakerInsert.shape.type.options.map(o => ({ id: o.value, label: o.value }))}
+                                        setFilter={t => setSearch({ ...search, type: t })}
+                                    />
+                                    <FilterGroup
                                         name="Decommissioned"
                                         current={search.decommissioned}
                                         options={[{ id: true, label: "List" }, { id: false, label: "All" }]}
                                         unsetText="Hidden"
-                                        setFilter={o => setSearch({ ...search, decommissioned: o })}
+                                        setFilter={d => setSearch({ ...search, decommissioned: d })}
                                     />
                                 </PopoverContent>
                             </Popover>
@@ -144,32 +151,7 @@ function Index() {
                 outScrolling={setScrolling}
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
-                {search.length === 0 && !locationFilter && (
-                    <div className="px-6 md:px-8 pt-px pb-4 flex gap-6 overflow-x-auto">
-                        <Link to={"/sneakers/" + pickedMine?.id} disabled={!pickedMine} className={cn("p-1 pr-6 flex items-center gap-2 shrink-0 bg-secondary rounded-full shadow-lg ring ring-border/50", authIf(auth.mine, "shadow-amber-500/25", "shadow-cyan-500/25"))}>
-                            <SneakerPhoto sneaker={pickedMine} small className="size-12 rounded-full overflow-hidden" />
-                            <div className="space-y-0.5">
-                                <p className={cn("text-xs font-semibold", authIf(auth.mine, "text-amber-500", "text-cyan-500"))}>{persons && auth ? persons[auth.mine] : " "}</p>
-                                {pickedMine ? (
-                                    <p className="text-sm font-semibold">{pickedMine.name}</p>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground font-semibold">No sneaker picked</p>
-                                )}
-                            </div>
-                        </Link>
-                        <Link to={"/sneakers/" + pickedOther?.id} disabled={!pickedOther} className={cn("p-1 pr-6 flex items-center gap-2 shrink-0 bg-secondary rounded-full shadow-lg ring ring-border/50", authIf(auth.other, "shadow-amber-500/25", "shadow-cyan-500/25"))}>
-                            <SneakerPhoto sneaker={pickedOther} small className="size-12 rounded-full overflow-hidden" />
-                            <div className="space-y-0.5">
-                                <p className={cn("text-xs font-semibold", authIf(auth.other, "text-amber-500", "text-cyan-500"))}>{persons && auth ? persons[auth.other] : " "}</p>
-                                {pickedOther ? (
-                                    <p className="text-sm font-semibold">{pickedOther.name}</p>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground font-semibold">No sneaker picked</p>
-                                )}
-                            </div>
-                        </Link>
-                    </div>
-
+                {/* Customize here the blocks you want to show and their order */}
                 <BirthdayBlock search={search} />
                 <GridBlock search={search} onAdd={addSneaker} auth={auth} />
                 <CountBlock search={search} />

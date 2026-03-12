@@ -7,15 +7,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function hasSearched(search: Search) {
-    return search.term.length > 0 || search.location || search.brand || search.owner || search.decommissioned !== undefined;
+    return search.term.length > 0 || search.location || search.brand || search.owner || search.type || search.decommissioned !== undefined;
 }
 
 export function filterBySearch(sneakers: Sneaker[], search: Search) {
     return sneakers.filter(sneaker =>
         sneaker.name.toLowerCase().includes(search.term.toLowerCase()) &&
         (!search.location || sneaker.location._id === search.location) &&
-        (!search.brand || sneaker.brand.name === search.brand) &&
+        (!search.brand || sneaker.brand._id === search.brand) &&
         (!search.owner || sneaker.owner === search.owner) &&
-        (!search.decommissioned && !sneaker.decommissioned)
+        (!search.type || sneaker.type === search.type) &&
+        (search.decommissioned === undefined ? !sneaker.decommissioned : search.decommissioned ? sneaker.decommissioned : true)
     );
 }

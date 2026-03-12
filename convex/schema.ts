@@ -11,11 +11,12 @@ export default defineSchema({
         location: v.union(v.id("locations"), v.literal("outside")),
         owner: v.optional(v.id("users")),
         date: v.optional(v.string()),
-        originalOwner: v.optional(v.id("users")),
+        type: v.union(v.literal("Sneakers"), v.literal("Shoes"), v.literal("Boots"), v.literal("Flip-flops")),
+        originalOwner: v.optional(v.union(v.id("users"), v.string())),
         decommissioned: v.boolean(),
         stockxUrl: v.optional(v.string()),
-        pickDate: v.optional(v.string()),
-        pickTo: v.optional(v.id("users")),
+        pickFor: v.optional(v.id("users")),
+        pickUntil: v.optional(v.string()),
     })
         .index("by_brand", ["brand"])
         .index("by_location", ["location"]),
