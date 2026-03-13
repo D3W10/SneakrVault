@@ -41,6 +41,9 @@ interface SneakPickSelectorProps {
 }
 
 export function SneakPickSelector({ sneaker, auth }: SneakPickSelectorProps) {
+    if (auth?.role === "guest")
+        return null;
+
     if (!sneaker)
         return <Skeleton className="w-86 h-40 max-md:hidden rounded-xl" />;
 

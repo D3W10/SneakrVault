@@ -63,23 +63,32 @@ function ManagePage() {
                                 </div>
                             )}
                             <TabsContent value="users">
-                                <Button onClick={() => setAddUserDialogOpen(true)}>
+                                <Button className="max-sm:hidden" onClick={() => setAddUserDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add user
+                                </Button>
+                                <Button className="sm:hidden" size="icon" onClick={() => setAddUserDialogOpen(true)}>
+                                    <IconPlus className="size-4" />
                                 </Button>
                                 <AddUserDialog open={addUserDialogOpen} setOpen={setAddUserDialogOpen} />
                             </TabsContent>
                             <TabsContent value="locations">
-                                <Button onClick={() => setAddLocationDialogOpen(true)}>
+                                <Button className="max-sm:hidden" onClick={() => setAddLocationDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add location
+                                </Button>
+                                <Button className="sm:hidden" size="icon" onClick={() => setAddLocationDialogOpen(true)}>
+                                    <IconPlus className="size-4" />
                                 </Button>
                                 <AddLocationDialog open={addLocationDialogOpen} setOpen={setAddLocationDialogOpen} />
                             </TabsContent>
                             <TabsContent value="brands">
-                                <Button onClick={() => setAddBrandDialogOpen(true)}>
+                                <Button className="max-sm:hidden" onClick={() => setAddBrandDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add brand
+                                </Button>
+                                <Button className="sm:hidden" size="icon" onClick={() => setAddBrandDialogOpen(true)}>
+                                    <IconPlus className="size-4" />
                                 </Button>
                                 <AddBrandDialog open={addBrandDialogOpen} setOpen={setAddBrandDialogOpen} />
                             </TabsContent>
@@ -118,7 +127,7 @@ function ManagePage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="lg:w-9" />
+                                    <TableHead className="w-9" />
                                     <TableHead>Name</TableHead>
                                     <TableHead className="lg:w-20" />
                                 </TableRow>

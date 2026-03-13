@@ -80,23 +80,25 @@ function SneakerDetails() {
                             <IconChevronLeft className="size-5" data-icon="inline-start" />
                             Back to library
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger render={
-                                <Button variant="outline" size="icon">
-                                    <IconDots className="size-5" />
-                                </Button>
-                            } />
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                                    <IconPencil className="size-4" />
-                                    Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
-                                    <IconTrash className="size-4" />
-                                    Delete
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {auth?.role !== "guest" && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger render={
+                                    <Button variant="outline" size="icon">
+                                        <IconDots className="size-5" />
+                                    </Button>
+                                } />
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                                        <IconPencil className="size-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+                                        <IconTrash className="size-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </>
                 }
             />
