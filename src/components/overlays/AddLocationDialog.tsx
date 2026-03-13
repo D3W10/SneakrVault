@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import bridge from "@/data/bridge";
-import type { Doc } from "@db/dataModel";
+import type { Location } from "@/lib/models";
 
 interface AddLocationDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
-    location?: Doc<"locations">;
+    location?: Location;
 }
 
 export function AddLocationDialog({ open, setOpen, location }: AddLocationDialogProps) {

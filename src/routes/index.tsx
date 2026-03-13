@@ -1,21 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
-import { SneakerInsert } from "convex/sneakers";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BirthdayBlock } from "@/components/blocks/BirthdayBlock";
 import { CountBlock } from "@/components/blocks/CountBlock";
 import { GridBlock } from "@/components/blocks/GridBlock";
+import { SneakPickBlock } from "@/components/blocks/SneakPickBlock";
 import { AddSneakerDialog } from "@/components/overlays/AddSneakerDialog";
 import { Header } from "@/components/Header";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
+import { sneakerTypes, type Search } from "@/lib/models";
 import { useLogout } from "@/lib/useLogout";
+import { useOutsideClick } from "@/lib/useOutsideClick";
 import { cn } from "@/lib/utils";
-import type { Search } from "@/lib/models";
 import type { Id } from "@db/dataModel";
 
 export const Route = createFileRoute("/")({
@@ -45,31 +46,16 @@ function Index() {
     const containerRef = useRef<HTMLDivElement>(null);
     const { auth } = Route.useRouteContext();
 
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent | TouchEvent) {
-            if (!filtersOpen) return;
-
-            const target = event.target as HTMLElement;
-            const isInsideContainer = containerRef.current?.contains(target);
-            const isInsidePopover = typeof target.closest === 'function' && target.closest('[data-slot="popover-content"]');
-
-            if (!isInsideContainer && !isInsidePopover) {
-                setFiltersOpen(false);
-            }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("touchstart", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("touchstart", handleClickOutside);
-        };
-    }, [filtersOpen]);
-
     function addSneaker() {
         setAddDialogOpen(true);
     }
+
+    function closeSearch() {
+        setSearchOpen(false);
+        setFiltersOpen(false);
+    }
+
+    useOutsideClick(containerRef, () => setFiltersOpen(false));
 
     return (
         <div className="min-h-screen">
@@ -104,7 +90,7 @@ function Index() {
                                             onChange={e => setSearch({ ...search, term: e.target.value })}
                                         />
                                     </InputGroup>
-                                    <Button className="md:hidden" variant="outline" size="icon" onClick={() => setSearchOpen(false)}>
+                                    <Button className="md:hidden" variant="outline" size="icon" onClick={() => closeSearch()}>
                                         <IconX className="size-5" />
                                     </Button>
                                 </PopoverTrigger>
@@ -130,7 +116,7 @@ function Index() {
                                     <FilterGroup
                                         name="Type"
                                         current={search.type}
-                                        options={SneakerInsert.shape.type.options.map(o => ({ id: o.value, label: o.value }))}
+                                        options={sneakerTypes.map(o => ({ id: o, label: o }))}
                                         setFilter={t => setSearch({ ...search, type: t })}
                                     />
                                     <FilterGroup
@@ -152,6 +138,7 @@ function Index() {
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
                 {/* Customize here the blocks you want to show and their order */}
+                <SneakPickBlock />
                 <BirthdayBlock search={search} />
                 <GridBlock search={search} onAdd={addSneaker} auth={auth} />
                 <CountBlock search={search} />

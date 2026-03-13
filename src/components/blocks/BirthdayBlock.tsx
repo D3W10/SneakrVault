@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import moment from "moment";
+import { addDays, compareAsc, endOfDay, getYear, isBefore, isWithinInterval, parseISO, setYear, startOfDay } from "date-fns";
 import { IconCake } from "@tabler/icons-react";
 import { SneakerCard } from "@/components/SneakerCard";
 import bridge from "@/data/bridge";
@@ -16,26 +16,28 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
         queryFn: bridge.sneakers.get,
     });
 
-    const today = moment().startOf("day");
-    const nextWeek = moment().add(7, "days").endOf("day");
+    const today = startOfDay(new Date());
+    const nextWeek = endOfDay(addDays(today, 7));
     const upcomingBirthdays = (sneakers ?? []).filter(s => {
         if (!s.date) return false;
 
-        const birthdayDate = moment(s.date);
-        const currentYearBirthday = birthdayDate.clone().year(today.year());
+        const birthdayDate = parseISO(s.date);
+        let currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today)));
 
-        if (currentYearBirthday.isBefore(today, "day"))
-            currentYearBirthday.add(1, "year");
+        if (isBefore(currentYearBirthday, today))
+            currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today) + 1));
 
-        return currentYearBirthday.isBetween(today, nextWeek, "day", "[]");
+        return isWithinInterval(currentYearBirthday, { start: today, end: nextWeek });
     }).sort((a, b) => {
-        const bdayA = moment(a.date).year(today.year());
-        if (bdayA.isBefore(today, "day")) bdayA.add(1, "year");
+        const bdayA = parseISO(a.date!);
+        let currentA = startOfDay(setYear(bdayA, getYear(today)));
+        if (isBefore(currentA, today)) currentA = startOfDay(setYear(bdayA, getYear(today) + 1));
 
-        const bdayB = moment(b.date).year(today.year());
-        if (bdayB.isBefore(today, "day")) bdayB.add(1, "year");
+        const bdayB = parseISO(b.date!);
+        let currentB = startOfDay(setYear(bdayB, getYear(today)));
+        if (isBefore(currentB, today)) currentB = startOfDay(setYear(bdayB, getYear(today) + 1));
 
-        return bdayA.diff(bdayB);
+        return compareAsc(currentA, currentB);
     });
 
     if (!hasSearched(search) && upcomingBirthdays.length !== 0) {

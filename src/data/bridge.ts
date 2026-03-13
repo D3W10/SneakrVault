@@ -38,6 +38,12 @@ const getSneakers = createServerFn({ method: "GET" })
         "Failed to get sneakers"
     ));
 
+const getPickedSneakers = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.sneakers.getPickedSneakers, await generateAuthPayload()),
+        "Failed to get picked sneakers"
+    ));
+
 const addSneaker = createServerFn({ method: "POST" })
     .inputValidator(SneakerInsert)
     .handler(({ data }) => handleMutation(
@@ -200,6 +206,7 @@ const deleteUser = createServerFn({ method: "POST" })
 export default {
     sneakers: {
         get: getSneakers,
+        getPicked: getPickedSneakers,
         add: addSneaker,
         edit: editSneaker,
         remove: deleteSneaker,

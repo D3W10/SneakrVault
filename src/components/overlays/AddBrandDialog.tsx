@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import bridge from "@/data/bridge";
-import type { Doc } from "@db/dataModel";
+import type { Brand } from "@/lib/models";
 
 interface AddBrandDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
-    brand?: Doc<"brands">;
+    brand?: Brand;
 }
 
 export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {

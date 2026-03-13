@@ -10,19 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 import { Spinner } from "@/components/ui/spinner";
 import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
-import type { Doc } from "@db/dataModel";
+import type { User } from "@/lib/models";
 
 interface AddUserDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
-    user?: Doc<"users">;
+    user?: User;
     isCurrentUser?: boolean;
 }
 
 export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: AddUserDialogProps) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState<Doc<"users">["role"]>("guest");
+    const [role, setRole] = useState<User["role"]>("guest");
     const [color, setColor] = useState("");
     const [isColorValid, setIsColorValid] = useState(false);
     const [active, setActive] = useState(true);

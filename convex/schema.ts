@@ -12,7 +12,14 @@ export default defineSchema({
         owner: v.optional(v.id("users")),
         date: v.optional(v.string()),
         type: v.union(v.literal("Sneakers"), v.literal("Shoes"), v.literal("Boots"), v.literal("Flip-flops")),
-        originalOwner: v.optional(v.union(v.id("users"), v.string())),
+        originalOwner: v.optional(v.union(v.object({
+            type: v.literal("local"),
+            id: v.id("users"),
+        }),
+        v.object({
+            type: v.literal("outside"),
+            name: v.string(),
+        }))),
         decommissioned: v.boolean(),
         stockxUrl: v.optional(v.string()),
         pickFor: v.optional(v.id("users")),

@@ -4,6 +4,7 @@
 @import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(*));
+@custom-variant pwa (@media (display-mode: standalone));
 
 @theme inline {
     --font-sans: 'Inter Variable', sans-serif;
@@ -47,7 +48,7 @@
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.24 0.006 285.885);
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.24 0.006 285.885);
+    --popover: oklch(0.18 0.006 286.033);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.7055 0.2151 18.29);
     --primary-foreground: oklch(0.141 0.005 285.823);

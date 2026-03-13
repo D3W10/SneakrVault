@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList, ComboboxTrigger } from "@/components/ui/combobox";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import bridge from "@/data/bridge";
 import type { Sneaker, User } from "@/lib/models";
-import type { Doc } from "@db/dataModel";
 
 interface AddSneakerDialogProps {
     open: boolean;
     setOpen: (open: boolean) => unknown;
-    sneaker?: Doc<"sneakers">;
+    sneaker?: Sneaker;
 }
 
 export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogProps) {
@@ -34,7 +33,9 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
     const [owner, setOwner] = useState("");
     const [date, setDate] = useState<Date | null>(null);
     const [type, setType] = useState<Sneaker["type"]>("Sneakers");
-    const [originalOwner, setOriginalOwner] = useState("");
+    const [originalOwnerType, setOriginalOwnerType] = useState<"local" | "outside">("local");
+    const [originalOwnerId, setOriginalOwnerId] = useState("");
+    const [originalOwnerName, setOriginalOwnerName] = useState("");
     const [decommissioned, setDecommissioned] = useState(false);
     const [stockxUrl, setStockxUrl] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -52,6 +53,18 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
         queryFn: bridge.users.getOwners,
     });
     const queryClient = useQueryClient();
+
+    function onSelect(val: string) {
+        setOriginalOwnerType("local");
+        setOriginalOwnerId(val);
+        setOriginalOwnerName(owners?.find(o => o._id === val)?.username ?? "");
+    }
+
+    function onCustomSelect(val: string) {
+        setOriginalOwnerType("outside");
+        setOriginalOwnerId("");
+        setOriginalOwnerName(val);
+    }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -82,7 +95,9 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                     owner: owner || undefined,
                     date: date?.toISOString(),
                     type,
-                    originalOwner: originalOwner || undefined,
+                    originalOwner: originalOwnerType === "local"
+                        ? { type: "local", id: originalOwnerId }
+                        : { type: "outside", name: originalOwnerName },
                     decommissioned,
                     stockxUrl,
                 },
@@ -105,7 +120,9 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                     owner: owner || undefined,
                     date: date?.toISOString(),
                     type,
-                    originalOwner: originalOwner || undefined,
+                    originalOwner: originalOwnerType === "local"
+                        ? { type: "local", id: originalOwnerId }
+                        : { type: "outside", name: originalOwnerName },
                     decommissioned,
                     stockxUrl,
                 },
@@ -130,13 +147,26 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
         setName(sneaker?.name ?? "");
         setColor(sneaker?.color ?? "");
         setSize(sneaker?.size.toString() ?? "");
-        setBrand(sneaker?.brand ?? "");
+        setBrand(sneaker?.brand._id ?? "");
         setPhoto(undefined);
-        setLocation(sneaker?.location ?? "");
-        setOwner(sneaker?.owner ?? "");
+        setLocation(sneaker?.location._id ?? "");
+        setOwner(sneaker?.owner._id ?? "");
         setDate(sneaker?.date ? new Date(sneaker?.date) : null);
         setType(sneaker?.type ?? "Sneakers");
-        setOriginalOwner(sneaker?.originalOwner ?? "");
+        if (sneaker?.originalOwner._id) {
+            setOriginalOwnerType("local");
+            setOriginalOwnerId(sneaker?.originalOwner._id);
+            setOriginalOwnerName(owners?.find(o => o._id === sneaker?.originalOwner._id)?.username ?? "");
+        } else if (sneaker?.originalOwner.username) {
+            setOriginalOwnerType("outside");
+            setOriginalOwnerId("");
+            setOriginalOwnerName(sneaker.originalOwner.username);
+        } else {
+            setOriginalOwnerType("local");
+            setOriginalOwnerId("");
+            setOriginalOwnerName("");
+        }
+        setOriginalOwnerId(sneaker?.originalOwner?._id ?? "");
         setDecommissioned(sneaker?.decommissioned ?? false);
         setStockxUrl(sneaker?.stockxUrl ?? "");
         setError("");
@@ -145,7 +175,6 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
     const selBrand = brands?.find(b => b._id === brand);
     const selLocation = locations?.find(l => l._id === location) ?? "Outside";
     const selOwner = owners?.find(o => o._id === owner);
-    const selOriginalOwner = owners?.find(o => o._id === originalOwner);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -172,7 +201,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     </Field>
                                     <Field className="flex-1">
                                         <Label htmlFor="sneakerSize">Size</Label>
-                                        <Input id="sneakerSize" name="size" inputMode="numeric" placeholder="10" disabled={isSaving} value={size} onChange={e => /^\d*$/.test(e.target.value) && setSize(e.target.value)} />
+                                        <Input id="sneakerSize" name="size" inputMode="numeric" placeholder="10" disabled={isSaving} value={size} onChange={e => /^[\d\.]*$/.test(e.target.value) && setSize(e.target.value)} />
                                     </Field>
                                 </div>
                                 <div className="flex gap-2">
@@ -272,7 +301,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                         <Label htmlFor="sneakerDate">Acquisition Date</Label>
                                         <Popover>
                                             <PopoverTrigger disabled={isSaving} render={<Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">{date ? format(date, "PPP") : <span>Pick a date</span>}<IconChevronDown data-icon="inline-end" /></Button>} />
-                                            <PopoverContent className="w-auto p-0 bg-accent" align="start">
+                                            <PopoverContent className="w-auto p-0" align="start">
                                                 <Calendar
                                                     mode="single"
                                                     captionLayout="dropdown"
@@ -285,10 +314,10 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     </Field>
                                     <Field>
                                         <Label htmlFor="sneakerOriginalOwner">Original owner</Label>
-                                        <Combobox items={(owners ?? [])} value={originalOwner} disabled={isSaving} onValueChange={e => setOriginalOwner(e ?? "")}>
-                                            <ComboboxInput placeholder="Select an owner" />
+                                        <Combobox items={owners ?? []} value={originalOwnerId} disabled={isSaving} onValueChange={e => e && onSelect(e)}>
+                                            <ComboboxInput placeholder="Select an owner" value={originalOwnerName} disabled={isSaving} onChange={e => onCustomSelect(e.target.value)} />
                                             <ComboboxContent>
-                                                <ComboboxEmpty>No users found</ComboboxEmpty>
+                                                <ComboboxEmpty>Create "{originalOwnerName.slice(0, 12)}{originalOwnerName.length > 12 && "..."}"</ComboboxEmpty>
                                                 <ComboboxList>
                                                     {(owner: User) => (
                                                         <ComboboxItem key={owner._id} value={owner._id}>

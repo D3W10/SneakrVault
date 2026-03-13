@@ -1,14 +1,39 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IconHexagon } from "@tabler/icons-react";
+import { addDays, addHours, startOfDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { SneakerPhoto } from "@/components/SneakerPhoto";
 import bridge from "@/data/bridge";
 import { useOutsideClick } from "@/lib/useOutsideClick";
 import { cn } from "@/lib/utils";
 import type { SessionState } from "@/data/session";
 import type { Sneaker } from "@/lib/models";
+
+export function SneakPickBlock() {
+    const { data: sneakers } = useQuery({
+        queryKey: ["sneakers", "picked"],
+        queryFn: bridge.sneakers.getPicked,
+    });
+
+    if (!sneakers)
+        return null;
+
+    return (
+        <div className="px-6 md:px-8 py-px flex gap-4 overflow-x-auto">
+            {(sneakers ?? []).map(s => (
+                <Link to={"/sneakers/" + s._id} className="p-2 shrink-0 relative bg-secondary rounded-2xl group inset-shadow-sm inset-shadow-(color:--user-color)/10 ring ring-border/75 overflow-hidden" key={s._id} style={{ "--user-color": s.pickFor.color ?? "var(--color-muted-foreground)" } as React.CSSProperties}>
+                    <SneakerPhoto sneaker={s} />
+                    <p className="px-3 py-1 absolute left-0 right-0 bottom-0 text-center text-xs font-semibold bg-secondary rounded-t-md ring ring-border/75 drop-shadow-2xl drop-shadow-(color:--user-color)">{s.pickFor.username}</p>
+                </Link>
+            ))}
+        </div>
+    );
+}
 
 interface SneakPickSelectorProps {
     sneaker: Sneaker | undefined;
@@ -17,48 +42,74 @@ interface SneakPickSelectorProps {
 
 export function SneakPickSelector({ sneaker, auth }: SneakPickSelectorProps) {
     if (!sneaker)
-        return <Skeleton className="w-86 h-52 rounded-xl" />;
+        return <Skeleton className="w-86 h-40 max-md:hidden rounded-xl" />;
 
     return (
-        <div className="w-86 h-fit p-4 bg-accent rounded-xl ring ring-border space-y-3">
+        <div className="md:w-86 h-fit p-4 pwa:pb-10 max-md:fixed max-md:bottom-0 max-md:left-px max-md:right-px bg-accent rounded-xl max-md:rounded-b-none ring ring-border space-y-3">
             <div className="flex items-center gap-2">
                 <IconHexagon className="size-4 text-primary" />
                 <h3 className="font-bold">Pick this sneaker</h3>
             </div>
             <div className="space-y-2">
-                <PickTimeSelect auth={auth} self />
-                <PickTimeSelect auth={auth} />
+                <PickTimeSelect sneaker={sneaker} auth={auth} self />
+                <PickTimeSelect sneaker={sneaker} auth={auth} />
             </div>
         </div>
     );
 }
 
 interface PickTimeSelectProps {
+    sneaker: Sneaker | undefined;
     auth?: Partial<SessionState>;
     self?: boolean;
 }
 
-function PickTimeSelect({ auth, self = false }: PickTimeSelectProps) {
+function PickTimeSelect({ sneaker, auth, self = false }: PickTimeSelectProps) {
     const [open, setOpen] = useState(false);
     const [pickFor, setPickFor] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
     const { data: users } = useQuery({
         queryKey: ["owners"],
         queryFn: bridge.users.getOwners,
         enabled: !self,
         select: users => users.filter(u => u.active && u._id !== auth?._id),
     });
+    const queryClient = useQueryClient();
     const ref = useRef<HTMLDivElement>(null);
 
+    async function pickSneaker(until: Date) {
+        if (!sneaker || self && (!auth || !auth._id) || !self && !pickFor) return;
+
+        setIsSaving(true);
+        setOpen(false);
+
+        const result = await bridge.sneakers.edit({
+            data: {
+                _id: sneaker._id,
+                pickFor: self ? auth?._id : pickFor ?? undefined,
+                pickUntil: until.toISOString(),
+            },
+        });
+        if (result.success)
+            await queryClient.invalidateQueries({ queryKey: ["sneakers"] });
+
+        setIsSaving(false);
+    }
+
     useEffect(() => {
-        if (!pickFor && users?.length) setPickFor(users[0]._id);
+        if (!pickFor && users?.length)
+            setPickFor(users[0]._id);
     }, [users]);
+
     useOutsideClick(ref, () => setOpen(false));
 
     const selUser = users?.find(o => o._id === pickFor);
 
     return (
         <div ref={ref} className="min-h-9 relative">
-            <Button className="w-full relative z-2" variant={self ? "default" : "outline"} onClick={() => setOpen(!open)}>{self ? "Pick for me" : "Pick for someone else"}</Button>
+            <Button className="w-full relative z-2" variant={self ? "default" : "outline"} disabled={isSaving} onClick={() => setOpen(!open)}>
+                {!isSaving ? self ? "Pick for me" : "Pick for someone else" : <Spinner />}
+            </Button>
             <div className="h-5 absolute top-4 -left-px -right-px bg-accent rounded-b-md z-1" />
             <div className={cn("mx-px -mt-4 mb-px px-1 relative rounded-md ring ring-border overflow-hidden space-y-0.5 transition-all duration-300", !open ? "h-0 ease-in-out" : (self ? "h-43.5" : "h-53") + " pt-5 pb-1 ease-out")}>
                 {!self && (
@@ -81,10 +132,10 @@ function PickTimeSelect({ auth, self = false }: PickTimeSelectProps) {
                         </SelectContent>
                     </Select>
                 )}
-                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!users?.length}>For 1 hour</Button>
-                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!users?.length}>For 3 hour</Button>
-                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!users?.length}>For 8 hour</Button>
-                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!users?.length}>Until tomorrow</Button>
+                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!self && !users?.length} onClick={() => pickSneaker(addHours(new Date(), 1))}>For 1 hour</Button>
+                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!self && !users?.length} onClick={() => pickSneaker(addHours(new Date(), 3))}>For 3 hour</Button>
+                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!self && !users?.length} onClick={() => pickSneaker(addHours(new Date(), 8))}>For 8 hour</Button>
+                <Button className="w-full px-2 flex justify-start" variant="ghost" disabled={!self && !users?.length} onClick={() => pickSneaker(startOfDay(addDays(new Date(), 1)))}>Until tomorrow</Button>
             </div>
         </div>
     );
