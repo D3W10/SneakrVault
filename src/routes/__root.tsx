@@ -1,8 +1,10 @@
 import { createRootRouteWithContext, HeadContent, redirect, Scripts } from "@tanstack/react-router";
+import { QueryClient } from "@tanstack/react-query";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { TanStackQueryProvider } from "@/integrations/query";
 import { checkAuth } from "@/data/auth";
-import type { QueryClient } from "@tanstack/react-query";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRouteWithContext<{
@@ -68,7 +70,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <HeadContent />
             </head>
             <body>
-                {children}
+                <TanStackQueryProvider>
+                    {children}
+                </TanStackQueryProvider>
                 <TanStackDevtools
                     config={{
                         position: "bottom-right",
@@ -77,6 +81,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                         {
                             name: "Tanstack Router",
                             render: <TanStackRouterDevtoolsPanel />,
+                        },
+                        {
+                            name: "Tanstack Query",
+                            render: <ReactQueryDevtoolsPanel />,
                         },
                     ]}
                 />
