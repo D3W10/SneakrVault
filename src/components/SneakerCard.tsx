@@ -24,7 +24,7 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
                 <div className="min-w-0 flex flex-col justify-center gap-y-2">
                     <div>
                         <h3 className="text-xl text-white group-hover:text-primary-200 font-bold tracking-tight truncate transition-colors">{sneaker.name}</h3>
-                        <h3 className="text-md text-zinc-300 group-hover:text-primary-100 font-medium transition-colors">{sneaker.color}</h3>
+                        <h3 className="text-md text-zinc-300 group-hover:text-primary-100 font-medium truncate transition-colors">{sneaker.color}</h3>
                     </div>
                     <div className="flex items-center gap-1.5 text-sm text-zinc-400 group-hover:text-zinc-300 transition-colors">
                         {!birthday ? (

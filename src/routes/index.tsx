@@ -138,7 +138,7 @@ function Index() {
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
                 {/* Customize here the blocks you want to show and their order */}
-                <SneakPickBlock />
+                <SneakPickBlock search={search} />
                 <BirthdayBlock search={search} />
                 <GridBlock search={search} onAdd={addSneaker} auth={auth} />
                 <CountBlock search={search} />

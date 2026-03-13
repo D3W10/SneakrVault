@@ -10,17 +10,21 @@ import { Spinner } from "@/components/ui/spinner";
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import bridge from "@/data/bridge";
 import { useOutsideClick } from "@/lib/useOutsideClick";
-import { cn } from "@/lib/utils";
+import { cn, hasSearched } from "@/lib/utils";
 import type { SessionState } from "@/data/session";
-import type { Sneaker } from "@/lib/models";
+import type { Search, Sneaker } from "@/lib/models";
 
-export function SneakPickBlock() {
+interface SneakPickBlockProps {
+    search: Search;
+}
+
+export function SneakPickBlock({ search }: SneakPickBlockProps) {
     const { data: sneakers } = useQuery({
         queryKey: ["sneakers", "picked"],
         queryFn: bridge.sneakers.getPicked,
     });
 
-    if (!sneakers)
+    if (!sneakers?.length || hasSearched(search))
         return null;
 
     return (
