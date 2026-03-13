@@ -26,9 +26,9 @@ export function SneakPickBlock() {
     return (
         <div className="px-6 md:px-8 py-px flex gap-4 overflow-x-auto">
             {(sneakers ?? []).map(s => (
-                <Link to={"/sneakers/" + s._id} className="p-2 shrink-0 relative bg-secondary rounded-2xl group inset-shadow-sm inset-shadow-(color:--user-color)/10 ring ring-border/75 overflow-hidden" key={s._id} style={{ "--user-color": s.pickFor.color ?? "var(--color-muted-foreground)" } as React.CSSProperties}>
+                <Link to={"/sneakers/" + s._id} className="p-2 shrink-0 relative bg-secondary rounded-2xl group inset-shadow-sneakpick inset-shadow-(color:--user-color)/15 ring ring-border/75 inset-ring inset-ring-(--user-color)/15 overflow-hidden" key={s._id} style={{ "--user-color": s.pickFor.color ?? "var(--color-muted-foreground)" } as React.CSSProperties}>
                     <SneakerPhoto sneaker={s} />
-                    <p className="px-3 py-1 absolute left-0 right-0 bottom-0 text-center text-xs font-semibold bg-secondary rounded-t-md ring ring-border/75 drop-shadow-2xl drop-shadow-(color:--user-color)">{s.pickFor.username}</p>
+                    <p className="px-3 py-1 absolute left-0 right-0 bottom-0 text-center text-xs font-semibold bg-secondary rounded-t-md ring ring-border/75 shadow-sneakpick shadow-(color:--user-color)/50">{s.pickFor.username}</p>
                 </Link>
             ))}
         </div>
