@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
+import { IconFilter2, IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -50,6 +50,11 @@ function Index() {
         setAddDialogOpen(true);
     }
 
+    function onMobileChange(term: string) {
+        setFiltersOpen(false);
+        setSearch({ ...search, term })
+    }
+
     function closeSearch() {
         setSearchOpen(false);
         setFiltersOpen(false);
@@ -84,12 +89,22 @@ function Index() {
                                             <IconSearch className="size-4 text-muted-foreground" />
                                         </InputGroupAddon>
                                         <InputGroupInput
+                                            className="max-md:hidden"
                                             value={search.term}
                                             placeholder="Search sneakers..."
                                             onFocus={() => setFiltersOpen(true)}
                                             onChange={e => setSearch({ ...search, term: e.target.value })}
                                         />
+                                        <InputGroupInput
+                                            className="md:hidden"
+                                            value={search.term}
+                                            placeholder="Search sneakers..."
+                                            onChange={e => onMobileChange(e.target.value)}
+                                        />
                                     </InputGroup>
+                                    <Button className="md:hidden" variant="outline" size="icon" onClick={() => setFiltersOpen(!filtersOpen)}>
+                                        <IconFilter2 className="size-5" />
+                                    </Button>
                                     <Button className="md:hidden" variant="outline" size="icon" onClick={() => closeSearch()}>
                                         <IconX className="size-5" />
                                     </Button>
