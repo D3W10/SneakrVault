@@ -87,7 +87,7 @@ function SneakerDetails() {
                                         <IconDots className="size-5" />
                                     </Button>
                                 } />
-                                <DropdownMenuContent>
+                                <DropdownMenuContent align="end" sideOffset={8}>
                                     <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                         <IconPencil className="size-4" />
                                         Edit
