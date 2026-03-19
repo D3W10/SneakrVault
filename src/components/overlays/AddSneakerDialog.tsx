@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IconChevronDown, IconTrash } from "@tabler/icons-react";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, 
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { InputGroupAddon } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,6 +41,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
     const [stockxUrl, setStockxUrl] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
+    const originalOwnerCombobox = useRef<HTMLDivElement>(null);
     const { data: brands } = useQuery({
         queryKey: ["brands"],
         queryFn: bridge.brands.get,
@@ -307,6 +309,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                                     captionLayout="dropdown"
                                                     required
                                                     selected={date ?? undefined}
+                                                    defaultMonth={date ?? undefined}
                                                     onSelect={setDate}
                                                 />
                                             </PopoverContent>
@@ -315,8 +318,12 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     <Field>
                                         <Label htmlFor="sneakerOriginalOwner">Original owner</Label>
                                         <Combobox items={owners ?? []} value={originalOwnerId} disabled={isSaving} onValueChange={e => e && onSelect(e)}>
-                                            <ComboboxInput placeholder="Select an owner" value={originalOwnerName} disabled={isSaving} onChange={e => onCustomSelect(e.target.value)} />
-                                            <ComboboxContent>
+                                            <ComboboxInput placeholder="Select an owner" value={originalOwnerName} ref={originalOwnerCombobox} disabled={isSaving} onChange={e => onCustomSelect(e.target.value)}>
+                                                <InputGroupAddon className="pl-2.5 pr-0.5">
+                                                    <div className="size-2.5 rounded-full" style={{ backgroundColor: owners?.find(o => o._id === originalOwnerId)?.color || "var(--color-muted-foreground)" }} />
+                                                </InputGroupAddon>
+                                            </ComboboxInput>
+                                            <ComboboxContent anchor={originalOwnerCombobox}>
                                                 <ComboboxEmpty>Create "{originalOwnerName.slice(0, 12)}{originalOwnerName.length > 12 && "..."}"</ComboboxEmpty>
                                                 <ComboboxList>
                                                     {(owner: User) => (

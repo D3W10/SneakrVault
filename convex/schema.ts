@@ -26,7 +26,8 @@ export default defineSchema({
         pickUntil: v.optional(v.string()),
     })
         .index("by_brand", ["brand"])
-        .index("by_location", ["location"]),
+        .index("by_location", ["location"])
+        .index("by_pickFor", ["pickFor"]),
     brands: defineTable({
         name: v.string(),
         icon: v.optional(v.id("_storage")),

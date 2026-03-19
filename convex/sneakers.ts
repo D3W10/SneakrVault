@@ -72,9 +72,16 @@ export const update = normalMutation({
     args: SneakerUpdate,
     handler: async (ctx, args) => {
         const { _id, photo, ...rest } = args;
-        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), _id)).first();
 
-        let patch = { ...rest } as z.infer<typeof SneakerInsert>;
+        if (rest.pickFor && rest.pickUntil) {
+            const oldPicks = await ctx.db.query("sneakers").withIndex("by_pickFor", q => q.eq("pickFor", rest.pickFor)).collect();
+            await Promise.all(
+                oldPicks.map(p => ctx.db.patch(p._id, { pickFor: undefined, pickUntil: undefined }))
+            );
+        }
+
+        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), _id)).first();
+        const patch = { ...rest } as z.infer<typeof SneakerInsert>;
 
         if (photo !== undefined) {
             patch.photo = photo === null ? undefined : photo;

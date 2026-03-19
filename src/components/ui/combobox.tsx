@@ -53,13 +53,15 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  ref,
   ...props
-}: ComboboxPrimitive.Input.Props & {
+}: Omit<ComboboxPrimitive.Input.Props, "ref"> & {
   showTrigger?: boolean
   showClear?: boolean
+  ref?: React.Ref<HTMLDivElement>
 }) {
   return (
-    <InputGroup className={cn("w-auto", className)}>
+    <InputGroup className={cn("w-auto", className)} ref={ref}>
       <ComboboxPrimitive.Input
         render={<InputGroupInput disabled={disabled} />}
         {...props}
