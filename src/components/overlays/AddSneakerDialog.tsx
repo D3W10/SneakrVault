@@ -55,7 +55,23 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
         queryFn: bridge.users.getOwners,
     });
     const queryClient = useQueryClient();
+
+    const fractions: Record<string, string> = { "1/2": "½", "1/3": "⅓", "2/3": "⅔" };
     const isValidStockxUrl = (url: string) => /^https:\/\/stockx\.com\/[a-zA-Z0-9-]+$/g.test(url);
+
+    function parseSize(size: string) {
+        if (!/^[\d\.\/½⅓⅔]*$/.test(size)) return;
+
+        if (/\d\/\d/g.test(size)) {
+            for (const frac of size.matchAll(/(\d)\/(\d)/g)) {
+                const char = fractions[frac[1] + "/" + frac[2]];
+                if (char)
+                    size = size.replace(frac[0], char);
+            }
+        }
+
+        setSize(size);
+    }
 
     function onSelect(val: string) {
         setOriginalOwnerType("local");
@@ -204,7 +220,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                     </Field>
                                     <Field className="flex-1">
                                         <Label htmlFor="sneakerSize">Size</Label>
-                                        <Input id="sneakerSize" name="size" inputMode="numeric" placeholder="10" disabled={isSaving} value={size} onChange={e => /^[\d\.]*$/.test(e.target.value) && setSize(e.target.value)} />
+                                        <Input id="sneakerSize" name="size" placeholder="10" disabled={isSaving} value={size} onChange={e => parseSize(e.target.value)} />
                                     </Field>
                                 </div>
                                 <div className="flex gap-2">
