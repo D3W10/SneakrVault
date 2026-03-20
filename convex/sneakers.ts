@@ -7,12 +7,13 @@ import type { QueryCtx } from "@db/server";
 export const SneakerInsert = z.object({
     name: z.string(),
     color: z.string(),
-    size: z.number().optional(),
+    size: z.string().optional(),
     brand: zid("brands").optional(),
     photo: zid("_storage").optional(),
     location: z.union([zid("locations"), z.literal("outside")]).optional(),
     owner: zid("users").optional(),
     date: z.string().optional(),
+    style: z.string().optional(),
     type: z.union([z.literal("Sneakers"), z.literal("Shoes"), z.literal("Boots"), z.literal("Flip-flops")]),
     originalOwner: z.union([
         z.object({

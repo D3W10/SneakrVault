@@ -45,6 +45,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const [location, setLocation] = useState(sneaker?.location._id ?? "");
     const [owner, setOwner] = useState(sneaker?.owner._id ?? "");
     const [date, setDate] = useState<Date | null>(sneaker?.date ? new Date(sneaker.date) : null);
+    const [style, setStyle] = useState(sneaker?.style ?? "");
     const [type, setType] = useState<Sneaker["type"]>(sneaker?.type ?? "Sneakers");
     const [originalOwnerType, setOriginalOwnerType] = useState<"local" | "outside">(sneaker?.originalOwner._id ? "local" : sneaker?.originalOwner.username ? "outside" : "local");
     const [originalOwnerId, setOriginalOwnerId] = useState(sneaker?.originalOwner._id ?? "");
@@ -119,12 +120,13 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 data: {
                     name,
                     color,
-                    size: size ? +size : undefined,
+                    size: size || undefined,
                     brand: brand || undefined,
                     photo: photoId ?? undefined,
                     location: location || undefined,
                     owner: owner || undefined,
                     date: date?.toISOString(),
+                    style: style || undefined,
                     type,
                     originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local"
                         ? { type: "local", id: originalOwnerId }
@@ -144,12 +146,13 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     _id: sneaker._id,
                     name,
                     color,
-                    size: size ? +size : undefined,
+                    size: size || undefined,
                     brand: brand || undefined,
                     photo: photoId,
                     location: location || undefined,
                     owner: owner || undefined,
                     date: date?.toISOString(),
+                    style: style || undefined,
                     type,
                     originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local"
                         ? { type: "local", id: originalOwnerId }
@@ -188,7 +191,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
         <form className="contents" onSubmit={handleSubmit}>
             <Tabs defaultValue="basic" className="gap-6">
                 <DialogHeader>
-                    <DialogTitle>Add sneaker</DialogTitle>
+                    <DialogTitle>{!brand ? "Add sneaker" : "Edit sneaker"}</DialogTitle>
                     <TabsList variant="line">
                         <TabsTrigger value="basic">Basic</TabsTrigger>
                         <TabsTrigger value="additional">Additional</TabsTrigger>
@@ -339,10 +342,16 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                 </Combobox>
                             </Field>
                         </div>
-                        <Field data-invalid={stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
-                            <Label htmlFor="sneakerStockX">StockX Url</Label>
-                            <Input id="sneakerStockX" name="stockx" inputMode="url" placeholder="https://stockx.com/nike-air-max-plus-triple-black" disabled={isSaving} value={stockxUrl} onChange={e => setStockxUrl(e.target.value)} />
-                        </Field>
+                        <div className="flex gap-2">
+                            <Field className="flex-2" data-invalid={stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
+                                <Label htmlFor="sneakerStockX">StockX Url</Label>
+                                <Input id="sneakerStockX" name="stockx" inputMode="url" placeholder="https://stockx.com/nike-air-max-plus-triple-black" disabled={isSaving} value={stockxUrl} onChange={e => setStockxUrl(e.target.value)} />
+                            </Field>
+                            <Field className="flex-1">
+                                <Label htmlFor="sneakerStyle">Style code</Label>
+                                <Input id="sneakerStyle" name="style" placeholder="604133-050" disabled={isSaving} value={style} onChange={e => setStyle(e.target.value)} />
+                            </Field>
+                        </div>
                         <Field orientation="horizontal" className="w-fit">
                             <Checkbox id="sneakerDecommissioned" disabled={isSaving} checked={decommissioned} onCheckedChange={e => setDecommissioned(!!e)} />
                             <FieldLabel htmlFor="sneakerDecommissioned">Decommissioned</FieldLabel>
