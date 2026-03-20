@@ -215,17 +215,25 @@ function SneakerDetails() {
                                     )}
                                 </div>
                             )}
-                            {sneaker.stockxUrl && (
+                            {(sneaker.stockxUrl || sneaker.style) && (
                                 <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                    <div>
-                                        <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Links</h3>
-                                        <a href={sneaker.stockxUrl} target="_blank">
-                                            <Button variant="outline" className="gap-2.5">
-                                                <img src="/StockX.svg" alt="StockX" className="size-4" />
-                                                StockX
-                                            </Button>
-                                        </a>
-                                    </div>
+                                    {sneaker.stockxUrl && (
+                                        <div>
+                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Links</h3>
+                                            <a href={sneaker.stockxUrl} target="_blank">
+                                                <Button variant="outline" className="gap-2.5">
+                                                    <img src="/StockX.svg" alt="StockX" className="size-4" />
+                                                    StockX
+                                                </Button>
+                                            </a>
+                                        </div>
+                                    )}
+                                    {sneaker.style && (
+                                        <div>
+                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Style Code</h3>
+                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.style}</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
