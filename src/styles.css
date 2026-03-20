@@ -42,6 +42,12 @@
     --radius-4xl: calc(var(--radius) + 16px);
     --shadow-sneakpick: 0 0 8px var(--tw-shadow-color, rgb(0 0 0 / 0.05));
     --inset-shadow-sneakpick: inset 0 0 8px var(--tw-inset-shadow-color, rgb(0 0 0 / 0.05));
+    --animate-text-glow-sweep: text-glow-sweep 4s linear infinite;
+
+    @keyframes text-glow-sweep {
+        0% { background-position: 200% center; }
+        100% { background-position: -200% center; }
+    }
 }
 
 :root {
