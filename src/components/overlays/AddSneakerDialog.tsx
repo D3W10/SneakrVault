@@ -55,6 +55,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
         queryFn: bridge.users.getOwners,
     });
     const queryClient = useQueryClient();
+    const isValidStockxUrl = (url: string) => /^https:\/\/stockx\.com\/[a-zA-Z0-9-]+$/g.test(url);
 
     function onSelect(val: string) {
         setOriginalOwnerType("local");
@@ -194,12 +195,12 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                             <FieldGroup>
                                 <Field>
                                     <Label htmlFor="sneakerName">Name</Label>
-                                    <Input id="sneakerName" name="name" maxLength={30} placeholder="Required" disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
+                                    <Input id="sneakerName" name="name" maxLength={30} placeholder="Nike Air Max Plus" disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
                                 </Field>
                                 <div className="flex gap-2">
                                     <Field className="flex-4">
                                         <Label htmlFor="sneakerColor">Color</Label>
-                                        <Input id="sneakerColor" name="color" maxLength={50} placeholder="Required" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
+                                        <Input id="sneakerColor" name="color" maxLength={50} placeholder="Triple Black" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
                                     </Field>
                                     <Field className="flex-1">
                                         <Label htmlFor="sneakerSize">Size</Label>
@@ -280,12 +281,10 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                         <Label htmlFor="sneakerOwner">Owner</Label>
                                         <Select value={owner} disabled={isSaving} onValueChange={e => setOwner(e ?? "")}>
                                             <SelectTrigger className="w-full">
-                                                {!selOwner ? "Select an owner" : (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="size-2.5 rounded-full" style={{ backgroundColor: selOwner?.color }} />
-                                                        {selOwner.username}
-                                                    </div>
-                                                )}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="size-2.5 rounded-full" style={{ backgroundColor: selOwner?.color || "var(--color-muted-foreground)" }} />
+                                                    {!selOwner ? "Select an owner" : selOwner.username}
+                                                </div>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {(owners ?? []).map(o => (
@@ -337,7 +336,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                                         </Combobox>
                                     </Field>
                                 </div>
-                                <Field>
+                                <Field data-invalid={stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
                                     <Label htmlFor="sneakerStockX">StockX Url</Label>
                                     <Input id="sneakerStockX" name="stockx" inputMode="url" placeholder="https://stockx.com/nike-air-max-plus-triple-black" disabled={isSaving} value={stockxUrl} onChange={e => setStockxUrl(e.target.value)} />
                                 </Field>
@@ -350,7 +349,7 @@ export function AddSneakerDialog({ open, setOpen, sneaker }: AddSneakerDialogPro
                         {error && <p className="text-sm text-destructive">{error}</p>}
                         <DialogFooter>
                             <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                            <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !color || !size || !brand || !location || stockxUrl.length !== 0 && !/^https:\/\/stockx\.com\/[a-zA-Z0-9-]+$/g.test(stockxUrl)}>
+                            <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !color || !size || !brand || !location || stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
                                 {!isSaving ? "Save changes" : <Spinner />}
                             </Button>
                         </DialogFooter>
