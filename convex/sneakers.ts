@@ -7,10 +7,10 @@ import type { QueryCtx } from "@db/server";
 export const SneakerInsert = z.object({
     name: z.string(),
     color: z.string(),
-    size: z.number(),
-    brand: zid("brands"),
+    size: z.number().optional(),
+    brand: zid("brands").optional(),
     photo: zid("_storage").optional(),
-    location: z.union([zid("locations"), z.literal("outside")]),
+    location: z.union([zid("locations"), z.literal("outside")]).optional(),
     owner: zid("users").optional(),
     date: z.string().optional(),
     type: z.union([z.literal("Sneakers"), z.literal("Shoes"), z.literal("Boots"), z.literal("Flip-flops")]),
@@ -107,12 +107,20 @@ export const remove = normalMutation({
 });
 
 async function transformSneaker(ctx: QueryCtx, sneaker: Doc<"sneakers">) {
-    const brand = await ctx.db.get(sneaker.brand);
+    let brand = { _id: "", name: "Unknown", iconUrl: "" };
+    if (sneaker.brand) {
+        const doc = await ctx.db.get(sneaker.brand);
+        brand = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown", iconUrl: (doc?.icon && await ctx.storage.getUrl(doc.icon)) ?? "" };
+    }
 
-    let location = { _id: "outside", name: "Outside" };
-    if (sneaker.location !== "outside") {
-        const doc = await ctx.db.get(sneaker.location);
-        location = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown" };
+    let location = { _id: "", name: "Unknown" };
+    if (sneaker.location) {
+        if (sneaker.location === "outside")
+            location = { _id: "outside", name: "Outside" };
+        else {
+            const doc = await ctx.db.get(sneaker.location);
+            location = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown" };
+        }
     }
 
     let owner = { _id: "", username: "", color: "" };
@@ -138,11 +146,7 @@ async function transformSneaker(ctx: QueryCtx, sneaker: Doc<"sneakers">) {
 
     return {
         ...sneaker,
-        brand: {
-            _id: brand?._id,
-            name: brand?.name ?? "Unknown",
-            iconUrl: brand?.icon && await ctx.storage.getUrl(brand.icon)
-        },
+        brand,
         photoUrl: sneaker.photo && await ctx.storage.getUrl(sneaker.photo),
         location,
         owner,

@@ -19,13 +19,25 @@ interface AddUserDialogProps {
     isCurrentUser?: boolean;
 }
 
-export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: AddUserDialogProps) {
-    const [username, setUsername] = useState("");
+export function AddUserDialog(props: AddUserDialogProps) {
+    const { open, ...rest } = props;
+
+    return (
+        <Dialog open={open} onOpenChange={rest.setOpen}>
+            <DialogContent showCloseButton={false}>
+                {open && <AddUserDialogContent {...rest} />}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function AddUserDialogContent({ setOpen, user, isCurrentUser = false }: Omit<AddUserDialogProps, "open">) {
+    const [username, setUsername] = useState(user?.username ?? "");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState<User["role"]>("guest");
-    const [color, setColor] = useState("");
+    const [role, setRole] = useState<User["role"]>(user?.role ?? "guest");
+    const [color, setColor] = useState(user?.color ?? "");
     const [isColorValid, setIsColorValid] = useState(false);
-    const [active, setActive] = useState(true);
+    const [active, setActive] = useState(user?.active ?? true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
     const logout = useLogout();
@@ -35,7 +47,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
         document.head.style.color = color;
         const isValid = document.head.style.color;
         document.head.removeAttribute("style");
-    
+
         return !!isValid;
     }
 
@@ -81,7 +93,7 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
 
         if (isCurrentUser) {
             logout();
-            return
+            return;
         }
 
         setOpen(false);
@@ -92,70 +104,54 @@ export function AddUserDialog({ open, setOpen, user, isCurrentUser = false }: Ad
         setIsColorValid(validateColor(color));
     }, [color]);
 
-    useEffect(() => {
-        if (!open)
-            return;
-
-        setUsername(user?.username ?? "");
-        setPassword("");
-        setRole(user?.role ?? "guest");
-        setColor(user?.color ?? "");
-        setActive(user?.active ?? true);
-        setError("");
-    }, [open]);
-
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent showCloseButton={false}>
-                <form className="contents" onSubmit={handleSubmit}>
-                    <DialogHeader>
-                        <DialogTitle>{!user ? "Add user" : "Edit user"}</DialogTitle>
-                    </DialogHeader>
-                    <FieldGroup>
-                        <Field>
-                            <Label htmlFor="userUsername">Username</Label>
-                            <Input id="userUsername" name="username" placeholder={user?.username ?? "Required"} disabled={isSaving} value={username} onChange={e => setUsername(e.target.value)} />
-                        </Field>
-                        <Field>
-                            <Label htmlFor="userPassword">Password</Label>
-                            <Input id="userPassword" name="password" type="password" placeholder={!user ? "Required" : "New password"} disabled={isSaving} value={password} onChange={e => setPassword(e.target.value)} />
-                        </Field>
-                        <div className="flex gap-2">
-                            <Field className="flex-2">
-                                <Label htmlFor="userRole">Role</Label>
-                                <Select value={role} disabled={isCurrentUser || isSaving} onValueChange={e => setRole(e ?? "guest")}>
-                                    <SelectTrigger className="w-full">
-                                        {role[0].toUpperCase() + role.slice(1)}
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="guest">Guest</SelectItem>
-                                        <SelectItem value="normal">Normal</SelectItem>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </Field>
-                            <Field className="flex-1">
-                                <div className="flex justify-between items-center">
-                                    <Label htmlFor="userColor">Color</Label>
-                                    {isColorValid && <div className="w-5 h-2.5 mr-0.5 rounded-md" style={{ backgroundColor: color }} />}
-                                </div>
-                                <Input id="userColor" name="color" placeholder="#ff566b" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
-                            </Field>
+        <form className="contents" onSubmit={handleSubmit}>
+            <DialogHeader>
+                <DialogTitle>{!user ? "Add user" : "Edit user"}</DialogTitle>
+            </DialogHeader>
+            <FieldGroup>
+                <Field>
+                    <Label htmlFor="userUsername">Username</Label>
+                    <Input id="userUsername" name="username" placeholder={user?.username ?? "Required"} disabled={isSaving} value={username} onChange={e => setUsername(e.target.value)} />
+                </Field>
+                <Field>
+                    <Label htmlFor="userPassword">Password</Label>
+                    <Input id="userPassword" name="password" type="password" placeholder={!user ? "Required" : "New password"} disabled={isSaving} value={password} onChange={e => setPassword(e.target.value)} />
+                </Field>
+                <div className="flex gap-2">
+                    <Field className="flex-2">
+                        <Label htmlFor="userRole">Role</Label>
+                        <Select value={role} disabled={isCurrentUser || isSaving} onValueChange={e => setRole(e ?? "guest")}>
+                            <SelectTrigger className="w-full">
+                                {role[0].toUpperCase() + role.slice(1)}
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="guest">Guest</SelectItem>
+                                <SelectItem value="normal">Normal</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </Field>
+                    <Field className="flex-1">
+                        <div className="flex justify-between items-center">
+                            <Label htmlFor="userColor">Color</Label>
+                            {isColorValid && <div className="w-5 h-2.5 mr-0.5 rounded-md" style={{ backgroundColor: color }} />}
                         </div>
-                        <Field orientation="horizontal" className="w-fit">
-                            <Checkbox id="userActive" checked={active} disabled={isCurrentUser || isSaving} onCheckedChange={e => setActive(!!e)} />
-                            <FieldLabel htmlFor="userActive">Active</FieldLabel>
-                        </Field>
-                        {error && <p className="text-sm text-destructive">{error}</p>}
-                    </FieldGroup>
-                    <DialogFooter>
-                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="sm:w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
-                            {!isSaving ? "Save changes" : <Spinner />}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+                        <Input id="userColor" name="color" placeholder="#ff566b" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
+                    </Field>
+                </div>
+                <Field orientation="horizontal" className="w-fit">
+                    <Checkbox id="userActive" checked={active} disabled={isCurrentUser || isSaving} onCheckedChange={e => setActive(!!e)} />
+                    <FieldLabel htmlFor="userActive">Active</FieldLabel>
+                </Field>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+            </FieldGroup>
+            <DialogFooter>
+                <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
+                <Button type="submit" className="sm:w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
+                    {!isSaving ? "Save changes" : <Spinner />}
+                </Button>
+            </DialogFooter>
+        </form>
     );
 }

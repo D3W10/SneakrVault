@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,20 @@ interface AddBrandDialogProps {
     brand?: Brand;
 }
 
-export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
-    const [name, setName] = useState("");
+export function AddBrandDialog(props: AddBrandDialogProps) {
+    const { open, ...rest } = props;
+
+    return (
+        <Dialog open={open} onOpenChange={rest.setOpen}>
+            <DialogContent showCloseButton={false}>
+                {open && <AddBrandDialogContent {...rest} />}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function AddBrandDialogContent({ setOpen, brand }: Omit<AddBrandDialogProps, "open">) {
+    const [name, setName] = useState(brand?.name ?? "");
     const [icon, setIcon] = useState<File | null>();
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
@@ -73,48 +85,35 @@ export function AddBrandDialog({ open, setOpen, brand }: AddBrandDialogProps) {
         setIsSaving(false);
     }
 
-    useEffect(() => {
-        if (!open)
-            return;
-
-        setName(brand?.name ?? "");
-        setIcon(undefined);
-        setError("");
-    }, [open]);
-
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent showCloseButton={false}>
-                <form className="contents" onSubmit={handleSubmit}>
-                    <DialogHeader>
-                        <DialogTitle>{!brand ? "Add brand" : "Edit brand"}</DialogTitle>
-                    </DialogHeader>
-                    <FieldGroup>
-                        <Field>
-                            <Label htmlFor="brandName">Name</Label>
-                            <Input id="brandName" name="name" maxLength={35} placeholder={brand?.name ?? "Required"} disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
-                        </Field>
-                        <Field>
-                            <Label htmlFor="brandIcon">Icon</Label>
-                            <div className="flex gap-2">
-                                <Input id="brandIcon" name="icon" type="file" disabled={isSaving} accept="image/*,.svg" onChange={e => setIcon(e.target.files?.[0] ?? null)} />
-                                {brand?.icon && (
-                                    <Button variant="outline" size="icon" disabled={isSaving || icon === null} onClick={() => setIcon(null)}>
-                                        <IconTrash className="size-4" />
-                                    </Button>
-                                )}
-                            </div>
-                        </Field>
-                        {error && <p className="text-sm text-destructive">{error}</p>}
-                    </FieldGroup>
-                    <DialogFooter>
-                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
-                            {!isSaving ? "Save changes" : <Spinner />}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <form className="contents" onSubmit={handleSubmit}>
+            <DialogHeader>
+                <DialogTitle>{!brand ? "Add brand" : "Edit brand"}</DialogTitle>
+            </DialogHeader>
+            <FieldGroup>
+                <Field>
+                    <Label htmlFor="brandName">Name</Label>
+                    <Input id="brandName" name="name" maxLength={35} placeholder={brand?.name ?? "Required"} disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
+                </Field>
+                <Field>
+                    <Label htmlFor="brandIcon">Icon</Label>
+                    <div className="flex gap-2">
+                        <Input id="brandIcon" name="icon" type="file" disabled={isSaving} accept="image/*,.svg" onChange={e => setIcon(e.target.files?.[0] ?? null)} />
+                        {brand?.icon && (
+                            <Button variant="outline" size="icon" disabled={isSaving || icon === null} onClick={() => setIcon(null)}>
+                                <IconTrash className="size-4" />
+                            </Button>
+                        )}
+                    </div>
+                </Field>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+            </FieldGroup>
+            <DialogFooter>
+                <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
+                <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
+                    {!isSaving ? "Save changes" : <Spinner />}
+                </Button>
+            </DialogFooter>
+        </form>
     );
 }

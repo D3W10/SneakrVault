@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,8 +15,20 @@ interface AddLocationDialogProps {
     location?: Location;
 }
 
-export function AddLocationDialog({ open, setOpen, location }: AddLocationDialogProps) {
-    const [name, setName] = useState("");
+export function AddLocationDialog(props: AddLocationDialogProps) {
+    const { open, ...rest } = props;
+
+    return (
+        <Dialog open={open} onOpenChange={rest.setOpen}>
+            <DialogContent showCloseButton={false}>
+                {open && <AddLocationDialogContent {...rest} />}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function AddLocationDialogContent({ setOpen, location }: Omit<AddLocationDialogProps, "open">) {
+    const [name, setName] = useState(location?.name ?? "");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
     const queryClient = useQueryClient();
@@ -57,36 +69,24 @@ export function AddLocationDialog({ open, setOpen, location }: AddLocationDialog
         setIsSaving(false);
     }
 
-    useEffect(() => {
-        if (!open)
-            return;
-
-        setName(location?.name ?? "");
-        setError("");
-    }, [open]);
-
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent showCloseButton={false}>
-                <form className="contents" onSubmit={handleSubmit}>
-                    <DialogHeader>
-                        <DialogTitle>{!location ? "Add location" : "Edit location"}</DialogTitle>
-                    </DialogHeader>
-                    <FieldGroup>
-                        <Field>
-                            <Label htmlFor="locationName">Name</Label>
-                            <Input id="locationName" name="name" maxLength={30} placeholder={location?.name ?? "Required"} disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
-                        </Field>
-                        {error && <p className="text-sm text-destructive">{error}</p>}
-                    </FieldGroup>
-                    <DialogFooter>
-                        <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                        <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
-                            {!isSaving ? "Save changes" : <Spinner />}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <form className="contents" onSubmit={handleSubmit}>
+            <DialogHeader>
+                <DialogTitle>{!location ? "Add location" : "Edit location"}</DialogTitle>
+            </DialogHeader>
+            <FieldGroup>
+                <Field>
+                    <Label htmlFor="locationName">Name</Label>
+                    <Input id="locationName" name="name" maxLength={30} placeholder={location?.name ?? "Required"} disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
+                </Field>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+            </FieldGroup>
+            <DialogFooter>
+                <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
+                <Button type="submit" className="sm:w-31" disabled={isSaving || !name}>
+                    {!isSaving ? "Save changes" : <Spinner />}
+                </Button>
+            </DialogFooter>
+        </form>
     );
 }

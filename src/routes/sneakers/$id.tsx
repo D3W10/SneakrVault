@@ -125,26 +125,34 @@ function SneakerDetails() {
                 <div className="flex gap-6">
                     {sneaker ? (
                         <div className="w-full h-fit py-6 flex flex-col gap-6 flex-1 bg-accent rounded-xl ring ring-border z-0">
-                            <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                <div>
-                                    <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Size</h3>
-                                    <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.size}</p>
+                            {(sneaker.size || sneaker.brand._id || sneaker.location._id) && (
+                                <div className="w-full px-6 flex gap-6 overflow-x-auto">
+                                    {sneaker.size && (
+                                        <div>
+                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Size</h3>
+                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.size}</p>
+                                        </div>
+                                    )}
+                                    {sneaker.brand._id && (
+                                        <div>
+                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Brand</h3>
+                                            <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
+                                                {sneaker.brand.iconUrl && <img src={sneaker.brand.iconUrl} alt={sneaker.brand.name} className="size-4 object-contain" />}
+                                                <p className="text-sm font-semibold">{sneaker.brand.name}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {sneaker.location._id && (
+                                        <div>
+                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Location</h3>
+                                            <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
+                                                <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
+                                                <p className="text-sm font-semibold">{sneaker.location.name}</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <div>
-                                    <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Brand</h3>
-                                    <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
-                                        {sneaker.brand.iconUrl && <img src={sneaker.brand.iconUrl} alt={sneaker.brand.name} className="size-4 object-contain" />}
-                                        <p className="text-sm font-semibold">{sneaker.brand.name}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Location</h3>
-                                    <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
-                                        <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
-                                        <p className="text-sm font-semibold">{sneaker.location.name}</p>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                             <div className="w-full px-6 flex gap-6 overflow-x-auto">
                                 <div>
                                     <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">State</h3>

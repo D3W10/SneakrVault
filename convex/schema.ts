@@ -5,10 +5,10 @@ export default defineSchema({
     sneakers: defineTable({
         name: v.string(),
         color: v.string(),
-        size: v.number(),
-        brand: v.id("brands"),
+        size: v.optional(v.number()),
+        brand: v.optional(v.id("brands")),
         photo: v.optional(v.id("_storage")),
-        location: v.union(v.id("locations"), v.literal("outside")),
+        location: v.optional(v.union(v.id("locations"), v.literal("outside"))),
         owner: v.optional(v.id("users")),
         date: v.optional(v.string()),
         type: v.union(v.literal("Sneakers"), v.literal("Shoes"), v.literal("Boots"), v.literal("Flip-flops")),
