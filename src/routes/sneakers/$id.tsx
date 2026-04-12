@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { IconChevronLeft, IconDots, IconMapPin, IconPencil, IconTrash } from "@tabler/icons-react";
 import { addDays, differenceInCalendarDays, differenceInYears, endOfDay, format, getYear, isBefore, isWithinInterval, parseISO, setYear, startOfDay } from "date-fns";
@@ -24,6 +24,7 @@ function SneakerDetails() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [acqDate, setAcqDate] = useState(new Date());
     const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number; } | null>(null);
+    const canGoBack = useCanGoBack()
     const navigate = useNavigate();
     const { id } = Route.useParams();
     const { isPending, data: sneaker } = useQuery({
@@ -31,7 +32,15 @@ function SneakerDetails() {
         queryFn: bridge.sneakers.get,
         select: items => items.find(i => i._id === id),
     });
+    const router = useRouter()
     const { auth } = Route.useRouteContext();
+
+    function handleBack() {
+        if (canGoBack)
+            router.history.back()
+        else
+            navigate({ to: "/" })
+    }
 
     useEffect(() => {
         if (!isPending) {
@@ -64,7 +73,7 @@ function SneakerDetails() {
         <div className="min-h-screen">
             <Header
                 left={
-                    <Button className="md:hidden" variant="outline" size="icon" onClick={() => navigate({ to: "/" })}>
+                    <Button className="md:hidden" variant="outline" size="icon" onClick={handleBack}>
                         <IconChevronLeft className="size-5" />
                     </Button>
                 }
@@ -76,7 +85,7 @@ function SneakerDetails() {
                                 <DeleteSneakerDialog open={deleteOpen} setOpen={setDeleteOpen} _id={sneaker._id} />
                             </>
                         )}
-                        <Button className="max-md:hidden" variant="outline" onClick={() => navigate({ to: "/" })}>
+                        <Button className="max-md:hidden" variant="outline" onClick={handleBack}>
                             <IconChevronLeft className="size-5" data-icon="inline-start" />
                             Back to library
                         </Button>
@@ -108,7 +117,7 @@ function SneakerDetails() {
                         <>
                             <SneakerPhoto sneaker={sneaker} className="size-24 sm:size-28 md:size-32 rounded-lg ring ring-border shadow-2xl shadow-primary/25 animate-in fade-in zoom-in duration-500" />
                             <div className="flex flex-col justify-center gap-1 flex-1 animate-in fade-in duration-1000">
-                                <h1 className="text-xl sm:text-3xl md:text-2xl lg:text-4xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{sneaker.name}</h1> 
+                                <h1 className="text-xl sm:text-3xl md:text-2xl lg:text-4xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{sneaker.name}</h1>
                                 <h2 className="sm:text-xl md:text-lg lg:text-2xl text-secondary-foreground font-bold">{sneaker.color}</h2>
                             </div>
                         </>
