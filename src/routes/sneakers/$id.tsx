@@ -26,7 +26,7 @@ function SneakerDetails() {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [acqDate, setAcqDate] = useState(new Date());
     const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number; } | null>(null);
-    const canGoBack = useCanGoBack()
+    const canGoBack = useCanGoBack();
     const navigate = useNavigate();
     const { id } = Route.useParams();
     const { isPending, data: sneaker } = useQuery({
@@ -34,14 +34,14 @@ function SneakerDetails() {
         queryFn: bridge.sneakers.get,
         select: items => items.find(i => i._id === id),
     });
-    const router = useRouter()
+    const router = useRouter();
     const { auth } = Route.useRouteContext();
 
     function handleBack() {
         if (canGoBack)
-            router.history.back()
+            router.history.back();
         else
-            navigate({ to: "/" })
+            navigate({ to: "/" });
     }
 
     useEffect(() => {
@@ -54,7 +54,7 @@ function SneakerDetails() {
                 const today = startOfDay(new Date());
                 const nextWeek = endOfDay(addDays(today, 7));
 
-                if (sneaker?.date) {
+                if (sneaker.date) {
                     const birthdayDate = parseISO(sneaker.date);
                     let currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today)));
 
@@ -69,7 +69,7 @@ function SneakerDetails() {
                 }
             }
         }
-    }, [isPending]);
+    }, [isPending, sneaker]);
 
     return (
         <div className="min-h-screen">

@@ -4,6 +4,7 @@ import { BrandInsert, BrandRemove, BrandUpdate } from "convex/brands";
 import { LocationInsert, LocationRemove, LocationUpdate } from "convex/locations";
 import { UserInsert, UserRemove, UserUpdate } from "convex/users";
 import { SneakerInsert, SneakerRemove, SneakerUpdate } from "convex/sneakers";
+import { CollectionInsert, CollectionRemove, CollectionUpdate } from "convex/collections";
 import { generateAuthPayload, getClient } from "@/data/auth";
 import { api } from "@db/api";
 
@@ -203,6 +204,42 @@ const deleteUser = createServerFn({ method: "POST" })
         "Failed to delete user"
     ));
 
+const getCollections = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.collections.get, await generateAuthPayload()),
+        "Failed to get collections"
+    ));
+
+const addCollection = createServerFn({ method: "POST" })
+    .inputValidator(CollectionInsert)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.collections.insert, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to add collection"
+    ));
+
+const editCollection = createServerFn({ method: "POST" })
+    .inputValidator(CollectionUpdate)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.collections.update, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to edit collection"
+    ));
+
+const deleteCollection = createServerFn({ method: "POST" })
+    .inputValidator(CollectionRemove)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.collections.remove, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to delete collection"
+    ));
+
 export default {
     sneakers: {
         get: getSneakers,
@@ -232,5 +269,11 @@ export default {
     },
     storage: {
         generate: generateUploadUrl,
+    },
+    collections: {
+        get: getCollections,
+        add: addCollection,
+        edit: editCollection,
+        remove: deleteCollection,
     },
 }

@@ -50,7 +50,7 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
                                 <p>Your library is empty. Start by adding pairs to your collection!</p>
                                 {auth?.role !== "guest" && <Button onClick={onAdd}>Add sneaker</Button>}
                             </>
-                        ): (
+                        ) : (
                             <p>No sneakers found matching {search.term ? `"${search.term}"` : "these filters"}</p>
                         )}
                     </div>

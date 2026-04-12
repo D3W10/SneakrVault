@@ -4,7 +4,7 @@ import type { Sneaker } from "@/lib/models";
 
 interface SneakerPhotoProps {
     sneaker?: Sneaker;
-    className?: string
+    className?: string;
 }
 
 export function SneakerPhoto({ sneaker, className }: SneakerPhotoProps) {

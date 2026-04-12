@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CollectionPhoto } from "@/components/CollectionPhoto";
 import type { Collection } from "@/lib/models";
 
 interface CollectionCardProps {
@@ -11,7 +12,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
         <Link to="/collections/$id" params={{ id: collection._id }} className="w-full min-w-60 block relative p-2 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0">
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="w-fit h-full flex items-center gap-4 relative z-1">
-                <div className="size-18 bg-radial-[at_0%_10%] from-10% from-(--cover-start) to-90% to-(--cover-end) rounded-lg" style={{ "--cover-start": collection.cover[0], "--cover-end": collection.cover[1] } as React.CSSProperties} />
+                <CollectionPhoto collection={collection} />
                 <div className="min-w-0 flex flex-col justify-center gap-y-1">
                     <h2 className="text-lg text-white group-hover:text-primary-200 font-bold tracking-tight truncate transition-colors">{collection.name}</h2>
                     <span className="text-sm text-zinc-300 group-hover:text-primary-100 font-medium truncate transition-colors">{collection.sneakers?.length || 0} pairs</span>
