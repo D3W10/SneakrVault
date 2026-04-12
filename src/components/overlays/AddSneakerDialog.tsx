@@ -191,7 +191,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
         <form className="contents" onSubmit={handleSubmit}>
             <Tabs defaultValue="basic" className="gap-6">
                 <DialogHeader>
-                    <DialogTitle>{!brand ? "Add sneaker" : "Edit sneaker"}</DialogTitle>
+                    <DialogTitle>{!sneaker ? "Add sneaker" : "Edit sneaker"}</DialogTitle>
                     <TabsList variant="line">
                         <TabsTrigger value="basic">Basic</TabsTrigger>
                         <TabsTrigger value="additional">Additional</TabsTrigger>

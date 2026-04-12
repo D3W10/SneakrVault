@@ -20,3 +20,9 @@ export function filterBySearch(sneakers: Sneaker[], search: Search) {
         (search.decommissioned === undefined ? !sneaker.decommissioned : search.decommissioned ? sneaker.decommissioned : true)
     );
 }
+
+type DocWithDate = { date?: string; _creationTime: number };
+export function creationSort(a: DocWithDate, b: DocWithDate) {
+    const getTime = (obj: DocWithDate) => obj.date ? Date.parse(obj.date) : obj._creationTime * 1000;
+    return getTime(b) - getTime(a);
+}

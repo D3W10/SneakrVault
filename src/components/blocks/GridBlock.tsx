@@ -3,7 +3,7 @@ import { IconLayoutGrid, IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
 import bridge from "@/data/bridge";
-import { filterBySearch, hasSearched } from "@/lib/utils";
+import { creationSort, filterBySearch, hasSearched } from "@/lib/utils";
 import type { SessionState } from "@/data/session";
 import type { Search } from "@/lib/models";
 
@@ -19,6 +19,7 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
         queryFn: bridge.sneakers.get,
     });
     const searched = hasSearched(search);
+    const filtered = filterBySearch(sneakers ?? [], search);
 
     return (
         <div className="px-6 md:px-8 flex flex-col gap-4">
@@ -33,12 +34,9 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {isPending ? (
                     Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
-                ) : (sneakers ?? []).length !== 0 ? (
-                    filterBySearch(sneakers ?? [], search)
-                        .sort((a, b) => {
-                            const getTime = (obj: { date?: string; _creationTime: number }) => obj.date ? Date.parse(obj.date) : obj._creationTime * 1000;
-                            return getTime(b) - getTime(a);
-                        })
+                ) : filtered.length !== 0 ? (
+                    filtered
+                        .sort(creationSort)
                         .map(s => (
                             <SneakerCard
                                 key={s._id}
@@ -49,7 +47,7 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
                     <div className="py-20 flex flex-col items-center gap-4 col-span-full font-medium text-center text-muted-foreground">
                         {!searched ? (
                             <>
-                                <p>Your collection is empty. Start by adding pairs to your collection!</p>
+                                <p>Your library is empty. Start by adding pairs to your collection!</p>
                                 {auth?.role !== "guest" && <Button onClick={onAdd}>Add sneaker</Button>}
                             </>
                         ): (

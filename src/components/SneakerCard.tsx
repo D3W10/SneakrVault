@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { IconCake, IconCalendarEvent, IconMapPin } from "@tabler/icons-react";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import { cn } from "@/lib/utils";
 import type { Sneaker } from "@/lib/models";

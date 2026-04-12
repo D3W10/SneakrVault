@@ -4,10 +4,9 @@
     "description": "Organize your sneaker collection",
     "author": "Daniel Nunes",
     "scripts": {
-        "dev": "vite dev",
+        "dev": "concurrently \"vite dev\" \"bunx convex dev\"",
         "build": "vite build",
         "preview": "vite preview",
-        "convex": "bunx convex",
         "seed": "bun run seed.ts"
     },
     "type": "module",
@@ -47,6 +46,7 @@
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.2.0",
+        "concurrently": "^9.2.1",
         "jsdom": "^27.4.0",
         "nitro": "^3.0.260311-beta",
         "typescript": "^5.9.3",

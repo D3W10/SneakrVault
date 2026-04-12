@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,15 +18,11 @@ export function DeleteSneakerDialog({ open, setOpen, _id }: DeleteSneakerDialogP
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
         setIsSaving(true);
 
-        const result = await bridge.sneakers.remove({
-            data: {
-                _id,
-            },
-        });
+        const result = await bridge.sneakers.remove({ data: { _id } });
         if (result.success) {
             queryClient.invalidateQueries({ queryKey: ["sneakers"] });
             navigate({ to: "/" });
@@ -45,7 +41,7 @@ export function DeleteSneakerDialog({ open, setOpen, _id }: DeleteSneakerDialogP
                         <DialogDescription className="text-foreground font-medium">Are you sure you want to delete this pair? You cannot recover its data after deletion!</DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <DialogClose render={<Button variant="outline">No</Button>} />
+                        <DialogClose disabled={isSaving} render={<Button variant="outline">No</Button>} />
                         <Button type="submit" className="sm:w-14" disabled={isSaving}>
                             {!isSaving ? "Yes" : <Spinner />}
                         </Button>

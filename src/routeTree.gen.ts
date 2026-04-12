@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ManageRouteImport } from './routes/manage'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CollectionsIndexRouteImport } from './routes/collections/index'
 import { Route as SneakersIdRouteImport } from './routes/sneakers/$id'
+import { Route as CollectionsIdRouteImport } from './routes/collections/$id'
 
 const ManageRoute = ManageRouteImport.update({
   id: '/manage',
@@ -29,9 +31,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollectionsIndexRoute = CollectionsIndexRouteImport.update({
+  id: '/collections/',
+  path: '/collections/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SneakersIdRoute = SneakersIdRouteImport.update({
   id: '/sneakers/$id',
   path: '/sneakers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsIdRoute = CollectionsIdRouteImport.update({
+  id: '/collections/$id',
+  path: '/collections/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +51,61 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/collections/$id': typeof CollectionsIdRoute
   '/sneakers/$id': typeof SneakersIdRoute
+  '/collections/': typeof CollectionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/collections/$id': typeof CollectionsIdRoute
   '/sneakers/$id': typeof SneakersIdRoute
+  '/collections': typeof CollectionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/collections/$id': typeof CollectionsIdRoute
   '/sneakers/$id': typeof SneakersIdRoute
+  '/collections/': typeof CollectionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/manage' | '/sneakers/$id'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/manage'
+    | '/collections/$id'
+    | '/sneakers/$id'
+    | '/collections/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/manage' | '/sneakers/$id'
-  id: '__root__' | '/' | '/login' | '/manage' | '/sneakers/$id'
+  to:
+    | '/'
+    | '/login'
+    | '/manage'
+    | '/collections/$id'
+    | '/sneakers/$id'
+    | '/collections'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/manage'
+    | '/collections/$id'
+    | '/sneakers/$id'
+    | '/collections/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   ManageRoute: typeof ManageRoute
+  CollectionsIdRoute: typeof CollectionsIdRoute
   SneakersIdRoute: typeof SneakersIdRoute
+  CollectionsIndexRoute: typeof CollectionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collections/': {
+      id: '/collections/'
+      path: '/collections'
+      fullPath: '/collections/'
+      preLoaderRoute: typeof CollectionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sneakers/$id': {
       id: '/sneakers/$id'
       path: '/sneakers/$id'
       fullPath: '/sneakers/$id'
       preLoaderRoute: typeof SneakersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections/$id': {
+      id: '/collections/$id'
+      path: '/collections/$id'
+      fullPath: '/collections/$id'
+      preLoaderRoute: typeof CollectionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +159,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   ManageRoute: ManageRoute,
+  CollectionsIdRoute: CollectionsIdRoute,
   SneakersIdRoute: SneakersIdRoute,
+  CollectionsIndexRoute: CollectionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

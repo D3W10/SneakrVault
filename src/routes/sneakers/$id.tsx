@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconChevronLeft, IconDots, IconMapPin, IconPencil, IconTrash } from "@tabler/icons-react";
+import { IconChevronLeft, IconDots, IconMapPin, IconPencil, IconTrash, IconFolderPlus } from "@tabler/icons-react";
 import { addDays, differenceInCalendarDays, differenceInYears, endOfDay, format, getYear, isBefore, isWithinInterval, parseISO, setYear, startOfDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -10,6 +10,7 @@ import { Header } from "@/components/Header";
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import { SneakPickSelector } from "@/components/blocks/SneakPickBlock";
 import { AddSneakerDialog } from "@/components/overlays/AddSneakerDialog";
+import { AddToCollectionDialog } from "@/components/overlays/AddToCollectionDialog";
 import { DeleteSneakerDialog } from "@/components/overlays/DeleteSneakerDialog";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/sneakers/$id")({
 
 function SneakerDetails() {
     const [editOpen, setEditOpen] = useState(false);
+    const [addToCollectionOpen, setAddToCollectionOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [acqDate, setAcqDate] = useState(new Date());
     const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number; } | null>(null);
@@ -82,6 +84,7 @@ function SneakerDetails() {
                         {sneaker && (
                             <>
                                 <AddSneakerDialog open={editOpen} setOpen={setEditOpen} sneaker={sneaker} />
+                                <AddToCollectionDialog open={addToCollectionOpen} setOpen={setAddToCollectionOpen} sneakerId={sneaker._id} />
                                 <DeleteSneakerDialog open={deleteOpen} setOpen={setDeleteOpen} _id={sneaker._id} />
                             </>
                         )}
@@ -96,10 +99,14 @@ function SneakerDetails() {
                                         <IconDots className="size-5" />
                                     </Button>
                                 } />
-                                <DropdownMenuContent align="end" sideOffset={8}>
+                                <DropdownMenuContent className="w-42" align="end" sideOffset={8}>
                                     <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                         <IconPencil className="size-4" />
                                         Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setAddToCollectionOpen(true)}>
+                                        <IconFolderPlus className="size-4" />
+                                        Add to collection
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
                                         <IconTrash className="size-4" />

@@ -52,4 +52,9 @@ export default defineSchema({
         updatedAtMs: v.number(),
     })
         .index("by_key", ["key"]),
+    collections: defineTable({
+        name: v.string(),
+        cover: v.array(v.string()),
+        sneakers: v.array(v.id("sneakers")),
+    }),
 });

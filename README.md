@@ -96,10 +96,10 @@ bun install
 ```
 3. Run the Convex CLI in dev mode:
 ```bash
-bun run convex dev
+bunx convex dev
 ```
 4. Rename the `.env.local.example` file to `.env.local`;
-5. Follow the instructions in the terminal to associate the local project with a Convex project.
+5. Follow the instructions in the terminal to associate the local project with a Convex project. You can then stop the Convex CLI by pressing `Ctrl + C`;
 6. Fill the rest of the required values in the `.env.local` file.
 7. Run the app:
 ```bash
