@@ -108,7 +108,7 @@ function SneakerDetails() {
                                         <IconFolderPlus className="size-4" />
                                         Add to collection
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+                                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                                         <IconTrash className="size-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -122,7 +122,7 @@ function SneakerDetails() {
                 <div className="w-full flex gap-5 sm:gap-6 md:gap-8">
                     {sneaker ? (
                         <>
-                            <SneakerPhoto sneaker={sneaker} className="size-24 sm:size-28 md:size-32 rounded-lg ring ring-border shadow-2xl shadow-primary/25 animate-in fade-in zoom-in duration-500" />
+                            <SneakerPhoto sneaker={sneaker} className="size-24 sm:size-28 md:size-32 rounded-xl ring ring-border shadow-2xl shadow-primary/25 animate-in fade-in zoom-in duration-500" />
                             <div className="flex flex-col justify-center gap-1 flex-1 animate-in fade-in duration-1000">
                                 <h1 className="text-xl sm:text-3xl md:text-2xl lg:text-4xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{sneaker.name}</h1>
                                 <h2 className="sm:text-xl md:text-lg lg:text-2xl text-secondary-foreground font-bold">{sneaker.color}</h2>
@@ -130,7 +130,7 @@ function SneakerDetails() {
                         </>
                     ) : (
                         <>
-                            <Skeleton className="size-24 sm:size-28 md:size-32 rounded-lg" />
+                            <Skeleton className="size-24 sm:size-28 md:size-32 rounded-xl" />
                             <div className="flex flex-col justify-center gap-1 flex-1">
                                 <Skeleton className="w-1/3 h-10" />
                                 <Skeleton className="w-2/5 h-8" />

@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Skeleton } from "@/components/ui/skeleton";
 import { CollectionPhoto } from "@/components/CollectionPhoto";
 import { Header } from "@/components/Header";
-import { EditCollectionDialog } from "@/components/overlays/EditCollectionDialog";
+import { AddCollectionDialog } from "@/components/overlays/AddCollectionDialog";
 import { DeleteCollectionDialog } from "@/components/overlays/DeleteCollectionDialog";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
 import { checkAuth } from "@/data/auth";
@@ -63,7 +63,7 @@ function CollectionDetails() {
                     <>
                         {collection && (
                             <>
-                                <EditCollectionDialog open={editOpen} setOpen={setEditOpen} collection={collection} />
+                                <AddCollectionDialog open={editOpen} setOpen={setEditOpen} collection={collection} />
                                 <DeleteCollectionDialog open={deleteOpen} setOpen={setDeleteOpen} _id={collection._id} />
                             </>
                         )}
@@ -83,7 +83,7 @@ function CollectionDetails() {
                                         <IconPencil className="size-4" />
                                         Edit
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setDeleteOpen(true)}>
+                                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
                                         <IconTrash className="size-4" />
                                         Delete
                                     </DropdownMenuItem>
@@ -97,7 +97,7 @@ function CollectionDetails() {
                 <div className="w-full flex gap-5 sm:gap-6 md:gap-8">
                     {collection ? (
                         <>
-                            <CollectionPhoto collection={collection} className="size-24 sm:size-28 md:size-32 rounded-lg ring ring-border shadow-2xl shadow-primary/25 animate-in fade-in zoom-in duration-500" />
+                            <CollectionPhoto collection={collection} className="size-24 sm:size-28 md:size-32 rounded-xl ring ring-border shadow-2xl shadow-primary/25 animate-in fade-in zoom-in duration-500" />
                             <div className="flex flex-col justify-center gap-1 flex-1 animate-in fade-in duration-1000">
                                 <h1 className="text-xl sm:text-3xl md:text-2xl lg:text-4xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{collection.name}</h1>
                                 <h2 className="sm:text-xl md:text-lg lg:text-2xl text-secondary-foreground font-bold">{collection.sneakers.length} {collection.sneakers.length === 1 ? "pair" : "pairs"}</h2>
@@ -105,7 +105,7 @@ function CollectionDetails() {
                         </>
                     ) : (
                         <>
-                            <Skeleton className="size-24 sm:size-28 md:size-32 rounded-lg" />
+                            <Skeleton className="size-24 sm:size-28 md:size-32 rounded-xl" />
                             <div className="flex flex-col justify-center gap-1 flex-1">
                                 <Skeleton className="w-1/3 h-10" />
                                 <Skeleton className="w-2/5 h-8" />

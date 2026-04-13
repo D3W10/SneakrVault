@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import colors from "tailwindcss/colors";
+import { IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { SneakerPhoto } from "@/components/SneakerPhoto";
 import bridge from "@/data/bridge";
 import { cn } from "@/lib/utils";
 import type { Collection } from "@/lib/models";
@@ -32,8 +34,14 @@ export function AddCollectionDialog(props: AddCollectionDialogProps) {
 function AddCollectionDialogContent({ setOpen, collection }: Omit<AddCollectionDialogProps, "open">) {
     const [name, setName] = useState(collection?.name ?? "");
     const [cover, setCover] = useState(collection?.cover ?? []);
+    const [sneakers, setSneakers] = useState(collection?.sneakers ?? []);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
+    const { data: sneakerData } = useQuery({
+        queryKey: ["sneakers"],
+        queryFn: bridge.sneakers.get,
+        select: items => items.filter(s => sneakers.includes(s._id))
+    });
     const queryClient = useQueryClient();
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -55,6 +63,8 @@ function AddCollectionDialogContent({ setOpen, collection }: Omit<AddCollectionD
                 data: {
                     _id: collection._id,
                     name,
+                    cover,
+                    sneakers,
                 },
             });
             if (!result.success) {
@@ -94,6 +104,27 @@ function AddCollectionDialogContent({ setOpen, collection }: Omit<AddCollectionD
                         <Button className={cn("h-5 p-0 flex-1 bg-linear-to-r from-rose-400 to-pink-700 border-2 border-rose-400 rounded-sm inset-ring-2 inset-ring-transparent cursor-pointer", cover[0] === colors.rose[400] && "inset-ring-background")} onClick={() => setCover([colors.rose[400], colors.pink[700]])} />
                     </div>
                 </Field>
+                {sneakerData && sneakerData.length !== 0 && (
+                    <Field>
+                        <Label>Pairs in collection</Label>
+                        <div className="w-full max-h-52 flex flex-col bg-secondary rounded-xl ring ring-border/75 divide-y divide-border/75 overflow-y-auto">
+                            {sneakerData.map(s => (
+                                <div key={s._id} className="p-2 flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <SneakerPhoto sneaker={s} className="size-10 *:rounded-sm!" hideText />
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-sm font-semibold">{s.name}</span>
+                                            <span className="text-xs text-muted-foreground">{s.color}</span>
+                                        </div>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" className="group" onClick={() => setSneakers(prev => prev.filter(id => id !== s._id))}>
+                                        <IconTrash className="size-4 text-muted-foreground group-hover:text-destructive transition-colors" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </Field>
+                )}
                 {error && <p className="text-sm text-destructive">{error}</p>}
             </FieldGroup>
             <DialogFooter>
