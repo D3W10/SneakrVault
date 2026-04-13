@@ -35,7 +35,8 @@ It provides a user-friendly interface for anyone to add new pairs plus an admini
 - Search pairs with multiple filters;
 - Ability to create multiple accounts (including admin and guest accounts);
 - Assign locations and owners to pairs, great when you have a shared collection;
-- A system that allow users to pick sneakers for one another.
+- A system that allow users to pick sneakers for one another;
+- Organize pairs into collections for better management.
 
 ## Deploy your own
 
