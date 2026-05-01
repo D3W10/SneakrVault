@@ -5,6 +5,7 @@ import { LocationInsert, LocationRemove, LocationUpdate } from "convex/locations
 import { UserInsert, UserRemove, UserUpdate } from "convex/users";
 import { SneakerInsert, SneakerRemove, SneakerUpdate } from "convex/sneakers";
 import { CollectionInsert, CollectionRemove, CollectionUpdate } from "convex/collections";
+import { ConfigUpdate } from "convex/configs";
 import { generateAuthPayload, getClient } from "@/data/auth";
 import { api } from "@db/api";
 
@@ -240,6 +241,22 @@ const deleteCollection = createServerFn({ method: "POST" })
         "Failed to delete collection"
     ));
 
+const getConfigs = createServerFn({ method: "GET" })
+    .handler(() => handleQuery(
+        async () => getClient().query(api.configs.get),
+        "Failed to get configs"
+    ));
+
+const editConfig = createServerFn({ method: "POST" })
+    .inputValidator(ConfigUpdate)
+    .handler(({ data }) => handleMutation(
+        async () => getClient().mutation(api.configs.update, {
+            ...data,
+            ...(await generateAuthPayload()),
+        }),
+        "Failed to edit config"
+    ));
+
 export default {
     sneakers: {
         get: getSneakers,
@@ -275,5 +292,9 @@ export default {
         add: addCollection,
         edit: editCollection,
         remove: deleteCollection,
+    },
+    configs: {
+        get: getConfigs,
+        edit: editConfig,
     },
 }

@@ -57,4 +57,11 @@ export default defineSchema({
         cover: v.array(v.string()),
         sneakers: v.array(v.id("sneakers")),
     }),
+    configs: defineTable({
+        publicPage: v.boolean(),
+        showOwnerOnCard: v.boolean(),
+        showLocationOnCard: v.boolean(),
+        enableSneakPick: v.boolean(),
+        homePageSections: v.array(v.string()),
+    }),
 });

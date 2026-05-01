@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { checkAuth, getDashboardForUser, login } from "@/data/auth";
+import { login } from "@/data/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
@@ -31,7 +31,7 @@ function LoginComponent() {
 
             if (result.success) {
                 await router.invalidate();
-                await router.navigate({ to: getDashboardForUser(await checkAuth()) });
+                await router.navigate({ to: "/" });
             } else
                 setError(result.error || "Invalid credentials");
         } catch (err) {

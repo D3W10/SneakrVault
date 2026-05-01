@@ -1,5 +1,5 @@
 import { useSession } from "@tanstack/react-start/server";
-import type { Doc, Id } from "@db/dataModel"
+import type { Doc, Id } from "@db/dataModel";
 
 export type SessionState = {
     isAuthenticated: boolean;
@@ -9,7 +9,7 @@ export type SessionState = {
 };
 
 const SESSION_COOKIE_NAME = "sneakrvault_auth";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24;
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 const MIN_SECRET_LENGTH = 32;
 
 function getSessionSecret() {

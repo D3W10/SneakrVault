@@ -39,7 +39,9 @@ async function validateAuthInput(args: { signature: string; timestamp: number; a
 export const guestQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        await validateAuthInput(args, "guest");
+        (!(await ctx.db.query("configs").first())?.publicPage)
+            await validateAuthInput(args, "guest");
+
         return { ctx, args: {} };
     },
 });
@@ -63,7 +65,9 @@ export const adminQuery = zCustomQuery(query, {
 export const guestMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        await validateAuthInput(args, "guest");
+        (!(await ctx.db.query("configs").first())?.publicPage)
+            await validateAuthInput(args, "guest");
+
         return { ctx, args: {} };
     },
 });

@@ -14,6 +14,7 @@ import { AddToCollectionDialog } from "@/components/overlays/AddToCollectionDial
 import { DeleteSneakerDialog } from "@/components/overlays/DeleteSneakerDialog";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
+import { useConfig } from "@/lib/useConfig";
 
 export const Route = createFileRoute("/sneakers/$id")({
     component: SneakerDetails,
@@ -27,6 +28,7 @@ function SneakerDetails() {
     const [acqDate, setAcqDate] = useState(new Date());
     const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number; } | null>(null);
     const canGoBack = useCanGoBack();
+    const configs = useConfig();
     const navigate = useNavigate();
     const { id } = Route.useParams();
     const { isPending, data: sneaker } = useQuery({
@@ -92,7 +94,7 @@ function SneakerDetails() {
                             <IconChevronLeft className="size-5" data-icon="inline-start" />
                             Back to library
                         </Button>
-                        {auth?.role !== "guest" && (
+                        {auth.role !== "guest" && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger render={
                                     <Button variant="outline" size="icon">
@@ -254,7 +256,7 @@ function SneakerDetails() {
                             )}
                         </div>
                     ) : <Skeleton className="h-80 flex-1 rounded-xl" />}
-                    <SneakPickSelector sneaker={sneaker} auth={auth} />
+                    {configs.enableSneakPick && <SneakPickSelector sneaker={sneaker} auth={auth} />}
                 </div>
             </div>
         </div>

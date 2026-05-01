@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconLayoutList, IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
+import { IconLayoutList, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { CollectionCard, CollectionCardSkeleton } from "@/components/CollectionCard";
 import { Header } from "@/components/Header";
+import { UserMenu } from "@/components/UserMenu";
 import { AddCollectionDialog } from "@/components/overlays/AddCollectionDialog";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { useLogout } from "@/lib/useLogout";
 import { cn, creationSort } from "@/lib/utils";
 
-export const Route = createFileRoute("/collections/")({
+export const Route = createFileRoute("/_app/collections/")({
     component: CollectionsList,
     beforeLoad: () => checkAuth(),
 });
@@ -37,7 +38,7 @@ function CollectionsList() {
     return (
         <div className="min-h-screen">
             <Header
-                left={auth?.role !== "guest" && (
+                left={auth.role !== "guest" && (
                     <Button className="md:hidden" variant="outline" size="icon" onClick={addCollection}>
                         <IconPlus className="size-5" />
                     </Button>
@@ -48,7 +49,7 @@ function CollectionsList() {
                         <Button className="md:hidden" variant="outline" size="icon" onClick={() => setSearchOpen(true)}>
                             <IconSearch className="size-5" />
                         </Button>
-                        {auth?.role !== "guest" && (
+                        {auth.role !== "guest" && (
                             <Button className="max-md:hidden" variant="outline" size="icon" onClick={addCollection}>
                                 <IconPlus className="size-5" />
                             </Button>
@@ -68,9 +69,7 @@ function CollectionsList() {
                                 <IconX className="size-5" />
                             </Button>
                         </div>
-                        <Button variant="outline" size="icon" onClick={logout}>
-                            <IconLogout className="size-4.5" />
-                        </Button>
+                        <UserMenu auth={auth} logout={logout} />
                     </>
                 }
                 outScrolling={setScrolling}
@@ -102,9 +101,9 @@ function CollectionsList() {
                                 {!search ? (
                                     <>
                                         <p>You don't have any collections. Start by creating a new one!</p>
-                                        {auth?.role !== "guest" && <Button onClick={addCollection}>Add collection</Button>}
+                                        {auth.role !== "guest" && <Button onClick={addCollection}>Add collection</Button>}
                                     </>
-                                ): (
+                                ) : (
                                     <p>No collections found matching "{search}"</p>
                                 )}
                             </div>

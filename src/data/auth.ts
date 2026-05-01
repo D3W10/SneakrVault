@@ -1,14 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { ConvexHttpClient } from "convex/browser";
 import { z } from "zod";
+import bridge from "@/data/bridge";
+import { getContext } from "@/integrations/query";
 import { api } from "@db/api";
 import type { SessionState } from "@/data/session";
 
 const MIN_AUTH_RESPONSE_MS = 300;
-
-export function getDashboardForUser(session: Partial<SessionState>) {
-    return session.role === "admin" ? "/manage" : "/";
-}
 
 export const login = createServerFn({ method: "POST" })
     .inputValidator(z.object({ username: z.string(), password: z.string() }))
@@ -93,8 +91,9 @@ async function waitForMinimumDuration(startedAt: number) {
 }
 
 export async function generateAuthPayload(requireAuth = true) {
+    const config = await getConfig();
     const session = await getAppSession();
-    if (requireAuth && !session.data.isAuthenticated)
+    if (requireAuth && !config?.publicPage && !session.data.isAuthenticated)
         throw new Error("Unauthorized");
 
     const authRole = session.data.isAuthenticated ? (session.data.role ?? "guest") : "guest";
@@ -144,6 +143,13 @@ async function getCryptoHelpers() {
 
 async function getAppSession() {
     return (await import("./session")).useAppSession();
+}
+
+async function getConfig() {
+    return getContext().queryClient.fetchQuery({
+        queryKey: ["configs"],
+        queryFn: bridge.configs.get,
+    });
 }
 
 async function verifyScryptHash(password: string, encodedHash: string) {

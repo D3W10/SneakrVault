@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { IconCake, IconCalendarEvent, IconMapPin } from "@tabler/icons-react";
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, getDate, getMonth, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SneakerPhoto } from "@/components/SneakerPhoto";
+import { useConfig } from "@/lib/useConfig";
 import { cn } from "@/lib/utils";
 import type { Sneaker } from "@/lib/models";
 
@@ -12,12 +13,15 @@ interface SneakerCardProps {
 }
 
 export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
+    const config = useConfig();
+
+    const today = new Date();
     const birthdayDate = sneaker.date ? parseISO(sneaker.date) : null;
-    const isBirthdayToday = birthdayDate ? isSameDay(birthdayDate, new Date()) : false;
+    const isBirthdayToday = birthdayDate ? getDate(birthdayDate) === getDate(today) && getMonth(birthdayDate) === getMonth(today) : false;
     const birthdayLabel = birthdayDate ? (isBirthdayToday ? "Today" : format(birthdayDate, "d MMM")) : "";
 
     return (
-        <Link to="/sneakers/$id" params={{ id: sneaker._id }} className={cn("min-w-60 block relative p-2 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0", !birthday ? "w-full" : "pr-8 shrink-0")}>
+        <Link to="/sneakers/$id" params={{ id: sneaker._id }} className={cn("min-w-60 block relative p-2 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0", !birthday ? "w-full" : "max-w-84 pr-8 shrink-0")}>
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="w-fit h-full flex items-center gap-4 relative z-1">
                 <SneakerPhoto sneaker={sneaker} />
@@ -28,12 +32,14 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
                     </div>
                     <div className="flex items-center gap-1.5 text-zinc-400 transition-colors">
                         {!birthday ? (
-                            <>
-                                <IconMapPin className="size-4 shrink-0 text-primary" />
-                                <span className="text-sm font-semibold opacity-75 group-hover:opacity-100 truncate transition">
-                                    {sneaker.location.name}
-                                </span>
-                            </>
+                            config.showLocationOnCard && (
+                                <>
+                                    <IconMapPin className="size-4 shrink-0 text-primary" />
+                                    <span className="text-sm font-semibold opacity-75 group-hover:opacity-100 truncate transition">
+                                        {sneaker.location.name}
+                                    </span>
+                                </>
+                            )
                         ) : (
                             <>
                                 {!isBirthdayToday ?
@@ -49,7 +55,7 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
                     </div>
                 </div>
             </div>
-            {!birthday && <div className="h-32 size-48 absolute -bottom-16 -right-24 bg-radial from-(--owner-color)/15 to-75% -z-1" style={{ "--owner-color": sneaker.owner.color } as React.CSSProperties} />}
+            {!birthday && config.showOwnerOnCard && <div className="h-32 size-48 absolute -bottom-16 -right-24 bg-radial from-(--owner-color)/15 to-75% -z-1" style={{ "--owner-color": sneaker.owner.color } as React.CSSProperties} />}
         </Link>
     );
 }

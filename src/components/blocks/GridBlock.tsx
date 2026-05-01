@@ -10,7 +10,7 @@ import type { Search } from "@/lib/models";
 interface GridBlockProps {
     search: Search;
     onAdd: () => unknown;
-    auth?: Partial<SessionState>;
+    auth: Partial<SessionState>;
 }
 
 export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
@@ -48,7 +48,7 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
                         {!searched ? (
                             <>
                                 <p>Your library is empty. Start by adding pairs to your collection!</p>
-                                {auth?.role !== "guest" && <Button onClick={onAdd}>Add sneaker</Button>}
+                                {auth.role !== "guest" && <Button onClick={onAdd}>Add sneaker</Button>}
                             </>
                         ) : (
                             <p>No sneakers found matching {search.term ? `"${search.term}"` : "these filters"}</p>

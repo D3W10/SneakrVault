@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconFilter2, IconLogout, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
+import { IconFilter2, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,15 +11,17 @@ import { GridBlock } from "@/components/blocks/GridBlock";
 import { SneakPickBlock } from "@/components/blocks/SneakPickBlock";
 import { AddSneakerDialog } from "@/components/overlays/AddSneakerDialog";
 import { Header } from "@/components/Header";
+import { UserMenu } from "@/components/UserMenu";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { sneakerTypes, type Search } from "@/lib/models";
 import { useLogout } from "@/lib/useLogout";
+import { useConfig } from "@/lib/useConfig";
 import { useOutsideClick } from "@/lib/useOutsideClick";
 import { cn } from "@/lib/utils";
 import type { Id } from "@db/dataModel";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app/")({
     component: Index,
     beforeLoad: () => checkAuth(),
 });
@@ -43,6 +45,7 @@ function Index() {
         queryKey: ["owners"],
         queryFn: bridge.users.getOwners,
     });
+    const configs = useConfig();
     const containerRef = useRef<HTMLDivElement>(null);
     const { auth } = Route.useRouteContext();
 
@@ -65,7 +68,7 @@ function Index() {
     return (
         <div className="min-h-screen">
             <Header
-                left={auth?.role !== "guest" && (
+                left={auth.role !== "guest" && (
                     <Button className="md:hidden" variant="outline" size="icon" onClick={addSneaker}>
                         <IconPlus className="size-5" />
                     </Button>
@@ -76,7 +79,7 @@ function Index() {
                         <Button className="md:hidden" variant="outline" size="icon" onClick={() => setSearchOpen(true)}>
                             <IconSearch className="size-5" />
                         </Button>
-                        {auth?.role !== "guest" && (
+                        {auth.role !== "guest" && (
                             <Button className="max-md:hidden" variant="outline" size="icon" onClick={addSneaker}>
                                 <IconPlus className="size-5" />
                             </Button>
@@ -144,19 +147,22 @@ function Index() {
                                 </PopoverContent>
                             </Popover>
                         </div>
-                        <Button variant="outline" size="icon" onClick={logout}>
-                            <IconLogout className="size-4.5" />
-                        </Button>
+                        <UserMenu auth={auth} logout={logout} />
                     </>
                 }
                 outScrolling={setScrolling}
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
-                {/* Customize here the blocks you want to show and their order */}
-                <SneakPickBlock search={search} />
-                <BirthdayBlock search={search} />
-                <GridBlock search={search} onAdd={addSneaker} auth={auth} />
-                <CountBlock search={search} />
+                {configs.homePageSections.map((section, idx) => {
+                    if (section === "SneakPick")
+                        return configs.enableSneakPick && <SneakPickBlock key={idx} search={search} />;
+                    else if (section === "Birthday")
+                        return <BirthdayBlock key={idx} search={search} />;
+                    else if (section === "Grid")
+                        return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
+                    else if (section === "Count")
+                        return <CountBlock key={idx} search={search} />;
+                })}
             </div>
         </div>
     );

@@ -14,7 +14,7 @@ import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { creationSort } from "@/lib/utils";
 
-export const Route = createFileRoute("/collections/$id")({
+export const Route = createFileRoute("/_app/collections/$id")({
     component: CollectionDetails,
     beforeLoad: () => checkAuth(),
 });
@@ -71,7 +71,7 @@ function CollectionDetails() {
                             <IconChevronLeft className="size-5" data-icon="inline-start" />
                             Back to collections
                         </Button>
-                        {auth?.role !== "guest" && (
+                        {auth.role !== "guest" && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger render={
                                     <Button variant="outline" size="icon">
@@ -128,7 +128,7 @@ function CollectionDetails() {
                     ) : (
                         <div className="py-20 flex flex-col items-center gap-4 col-span-full font-medium text-center text-muted-foreground">
                             <p>Your collection is empty. Start by adding some pairs!</p>
-                            {auth?.role !== "guest" && <Button onClick={() => navigate({ to: "/" })}>Browse sneakers</Button>}
+                            {auth.role !== "guest" && <Button onClick={() => navigate({ to: "/" })}>Browse sneakers</Button>}
                         </div>
                     )}
                 </div>
