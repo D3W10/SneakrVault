@@ -77,7 +77,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
 
         if (/\d\/\d/g.test(size)) {
             for (const frac of size.matchAll(/(\d)\/(\d)/g)) {
-                const char = fractions[frac[1] + "/" + frac[2]];
+                const char = fractions[`${frac[1]}/${frac[2]}`];
                 if (char)
                     size = size.replace(frac[0], char);
             }
@@ -322,7 +322,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                             </Field>
                             <Field>
                                 <Label htmlFor="sneakerOriginalOwner">Original owner</Label>
-                                <Combobox items={owners ?? []} value={originalOwnerId} disabled={isSaving} onValueChange={e => e && onSelect(e)}>
+                                <Combobox items={owners ?? []} value={originalOwnerId} disabled={isSaving} onValueChange={e => e && (e === "unknown" ? onCustomSelect("Unknown") : onSelect(e))}>
                                     <ComboboxInput placeholder="Select an owner" value={originalOwnerName} ref={originalOwnerCombobox} disabled={isSaving} onChange={e => onCustomSelect(e.target.value)}>
                                         <InputGroupAddon className="pl-2.5 pr-0.5">
                                             <div className="size-2.5 rounded-full" style={{ backgroundColor: owners?.find(o => o._id === originalOwnerId)?.color || "var(--color-muted-foreground)" }} />
@@ -330,7 +330,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                     </ComboboxInput>
                                     <ComboboxContent anchor={originalOwnerCombobox}>
                                         <ComboboxEmpty>Create "{originalOwnerName.slice(0, 12)}{originalOwnerName.length > 12 && "..."}"</ComboboxEmpty>
-                                        <ComboboxList>
+                                        <ComboboxList className="pb-0">
                                             {(owner: User) => (
                                                 <ComboboxItem key={owner._id} value={owner._id}>
                                                     <div className="size-2.5 rounded-full" style={{ backgroundColor: owner.color }} />
@@ -338,6 +338,14 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                                 </ComboboxItem>
                                             )}
                                         </ComboboxList>
+                                        {!originalOwnerName && (
+                                            <ComboboxList className="pt-0">
+                                                <ComboboxItem value="unknown">
+                                                    <div className="size-2.5 bg-muted-foreground rounded-full" />
+                                                    Unknown
+                                                </ComboboxItem>
+                                            </ComboboxList>
+                                        )}
                                     </ComboboxContent>
                                 </Combobox>
                             </Field>

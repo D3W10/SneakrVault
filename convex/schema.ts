@@ -4,10 +4,11 @@ import { v } from "convex/values";
 export default defineSchema({
     sneakers: defineTable({
         name: v.string(),
-        color: v.string(),
+        color: v.optional(v.string()),
         size: v.optional(v.string()),
         brand: v.optional(v.id("brands")),
         photo: v.optional(v.id("_storage")),
+        description: v.optional(v.string()),
         location: v.optional(v.union(v.id("locations"), v.literal("outside"))),
         owner: v.optional(v.id("users")),
         date: v.optional(v.string()),
@@ -23,6 +24,8 @@ export default defineSchema({
         }))),
         decommissioned: v.boolean(),
         stockxUrl: v.optional(v.string()),
+        goatUrl: v.optional(v.string()),
+        authenticyTag: v.optional(v.string()),
         pickFor: v.optional(v.id("users")),
         pickUntil: v.optional(v.string()),
     })
@@ -63,5 +66,8 @@ export default defineSchema({
         showLocationOnCard: v.boolean(),
         enableSneakPick: v.boolean(),
         homePageSections: v.array(v.string()),
+        publicDescriptionVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
+        publicLocationVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
+        publicOwnerVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
     }),
 });

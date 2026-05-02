@@ -8,6 +8,9 @@ export const ConfigUpdate = z.object({
     showLocationOnCard: z.boolean(),
     enableSneakPick: z.boolean(),
     homePageSections: z.array(z.string()),
+    publicDescriptionVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
+    publicLocationVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
+    publicOwnerVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
 });
 
 export const get = query({

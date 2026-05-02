@@ -25,7 +25,7 @@ async function handleQuery<T>(queryFn: () => Promise<T>, errorMessage: string): 
     }
 }
 
-async function handleMutation(mutationFn: () => Promise<any>, errorMessage: string) {
+async function handleMutation(mutationFn: () => Promise<unknown>, errorMessage: string) {
     try {
         await mutationFn();
         return { success: true };

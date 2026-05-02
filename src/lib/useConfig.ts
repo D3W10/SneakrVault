@@ -18,11 +18,10 @@ export function useConfig(native: boolean = false): NativeConfigResult | Resolve
     const { isPending, data } = useQuery({
         queryKey: ["configs"],
         queryFn: bridge.configs.get,
-    });;
+    });
 
-    if (native)
-        return { isPending, data: { ...defaultConfig, ...data } };
-  
+    if (native) return { isPending, data: { ...defaultConfig, ...data } };
+
     return data ? { ...defaultConfig, ...data } : defaultConfig;
 }
 

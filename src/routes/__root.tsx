@@ -1,5 +1,4 @@
 import { createRootRouteWithContext, HeadContent, redirect, Scripts } from "@tanstack/react-router";
-import { QueryClient } from "@tanstack/react-query";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
@@ -7,6 +6,7 @@ import { TanStackQueryProvider } from "@/integrations/query";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import appCss from "../styles.css?url";
+import type { QueryClient } from "@tanstack/react-query";
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient;

@@ -162,6 +162,8 @@ function Index() {
                         return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
                     else if (section === "Count")
                         return <CountBlock key={idx} search={search} />;
+                    else
+                        return null;
                 })}
             </div>
         </div>

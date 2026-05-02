@@ -6,10 +6,11 @@ import type { QueryCtx } from "@db/server";
 
 export const SneakerInsert = z.object({
     name: z.string(),
-    color: z.string(),
+    color: z.string().optional(),
     size: z.string().optional(),
     brand: zid("brands").optional(),
     photo: zid("_storage").optional(),
+    description: z.string().optional(),
     location: z.union([zid("locations"), z.literal("outside")]).optional(),
     owner: zid("users").optional(),
     date: z.string().optional(),
@@ -27,6 +28,8 @@ export const SneakerInsert = z.object({
     ]).optional(),
     decommissioned: z.boolean(),
     stockxUrl: z.string().optional(),
+    goatUrl: z.string().optional(),
+    authenticyTag: z.string().optional(),
     pickFor: zid("users").optional(),
     pickUntil: z.string().optional(),
 });

@@ -29,13 +29,17 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
 
         return isWithinInterval(currentYearBirthday, { start: today, end: nextWeek });
     }).sort((a, b) => {
-        const bdayA = parseISO(a.date!);
-        let currentA = startOfDay(setYear(bdayA, getYear(today)));
-        if (isBefore(currentA, today)) currentA = startOfDay(setYear(bdayA, getYear(today) + 1));
+        if (!a.date || !b.date) return 0;
 
-        const bdayB = parseISO(b.date!);
+        const bdayA = parseISO(a.date);
+        let currentA = startOfDay(setYear(bdayA, getYear(today)));
+        if (isBefore(currentA, today))
+            currentA = startOfDay(setYear(bdayA, getYear(today) + 1));
+
+        const bdayB = parseISO(b.date);
         let currentB = startOfDay(setYear(bdayB, getYear(today)));
-        if (isBefore(currentB, today)) currentB = startOfDay(setYear(bdayB, getYear(today) + 1));
+        if (isBefore(currentB, today))
+            currentB = startOfDay(setYear(bdayB, getYear(today) + 1));
 
         return compareAsc(currentA, currentB);
     });

@@ -33,7 +33,7 @@ function CollectionDetails() {
     const { isPending: sneakersPending, data: sneakers } = useQuery({
         queryKey: ["sneakers"],
         queryFn: bridge.sneakers.get,
-        select: items => items.filter(s => collection && collection.sneakers.includes(s._id))
+        select: items => items.filter(s => collection?.sneakers.includes(s._id))
     });
     const router = useRouter();
     const { auth } = Route.useRouteContext();

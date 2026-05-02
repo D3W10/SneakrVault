@@ -11,18 +11,19 @@ export function hasSearched(search: Search) {
 }
 
 export function filterBySearch(sneakers: Sneaker[], search: Search) {
-    return sneakers.filter(sneaker =>
-        sneaker.name.toLowerCase().includes(search.term.toLowerCase()) &&
-        (!search.location || sneaker.location._id === search.location) &&
-        (!search.brand || sneaker.brand._id === search.brand) &&
-        (!search.owner || sneaker.owner._id === search.owner) &&
-        (!search.type || sneaker.type === search.type) &&
-        (search.decommissioned === undefined ? !sneaker.decommissioned : search.decommissioned ? sneaker.decommissioned : true)
+    return sneakers.filter(
+        sneaker =>
+            sneaker.name.toLowerCase().includes(search.term.toLowerCase()) &&
+            (!search.location || sneaker.location._id === search.location) &&
+            (!search.brand || sneaker.brand._id === search.brand) &&
+            (!search.owner || sneaker.owner._id === search.owner) &&
+            (!search.type || sneaker.type === search.type) &&
+            (search.decommissioned === undefined ? !sneaker.decommissioned : search.decommissioned ? sneaker.decommissioned : true),
     );
 }
 
 type DocWithDate = { date?: string; _creationTime: number };
 export function creationSort(a: DocWithDate, b: DocWithDate) {
-    const getTime = (obj: DocWithDate) => obj.date ? Date.parse(obj.date) : obj._creationTime * 1000;
+    const getTime = (obj: DocWithDate) => (obj.date ? Date.parse(obj.date) : obj._creationTime * 1000);
     return getTime(b) - getTime(a);
 }

@@ -17,18 +17,16 @@ export const login = createServerFn({ method: "POST" })
         try {
             client = getClient();
 
-            const guard = await client.mutation(api.auth.guardLoginAttempt, { username: data.username, ...await generateAuthPayload(false) });
+            const guard = await client.mutation(api.auth.guardLoginAttempt, { username: data.username, ...(await generateAuthPayload(false)) });
             if (!guard.allowed) {
                 await waitForMinimumDuration(startedAt);
                 return { success: false, error: "Too many attempts. Try again later" };
             }
 
-            const user = await client.query(api.users.getByUsername, { username: data.username, ...await generateAuthPayload(false) });
-            if (!user)
-                return { success: false, error: "Invalid credentials" };
+            if (!user) return { success: false, error: "Invalid credentials" };
 
             const isMatch = await verifyScryptHash(data.password, user.passwordHash);
-            await client.mutation(api.auth.recordLoginResult, { username: data.username, success: isMatch, ...await generateAuthPayload(false) });
+            await client.mutation(api.auth.recordLoginResult, { username: data.username, success: isMatch, ...(await generateAuthPayload(false)) });
             await waitForMinimumDuration(startedAt);
 
             if (isMatch) {

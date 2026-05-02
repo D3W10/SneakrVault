@@ -22,7 +22,7 @@ export const get = adminQuery({
 export const getOwners = guestQuery({
     args: {},
     handler: async ctx => {
-        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "normal")).collect();
+        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "normal") || q.eq(q.field("role"), "admin")).collect();
     },
 });
 

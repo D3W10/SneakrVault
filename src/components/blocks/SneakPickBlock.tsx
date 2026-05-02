@@ -30,7 +30,7 @@ export function SneakPickBlock({ search }: SneakPickBlockProps) {
     return (
         <div className="px-6 md:px-8 py-px flex gap-4 overflow-x-auto">
             {(sneakers ?? []).map(s => (
-                <Link to={"/sneakers/" + s._id} className="p-2 shrink-0 relative bg-secondary rounded-2xl group inset-shadow-sneakpick inset-shadow-(color:--user-color)/5 ring ring-border/75 inset-ring inset-ring-(--user-color)/15 overflow-hidden" key={s._id} style={{ "--user-color": s.pickFor.color ?? "var(--color-muted-foreground)" } as React.CSSProperties}>
+                <Link to="/sneakers/$id" params={{ id: s._id }} className="p-2 shrink-0 relative bg-secondary rounded-2xl group inset-shadow-sneakpick inset-shadow-(color:--user-color)/5 ring ring-border/75 inset-ring inset-ring-(--user-color)/15 overflow-hidden" key={s._id} style={{ "--user-color": s.pickFor.color ?? "var(--color-muted-foreground)" } as React.CSSProperties}>
                     <SneakerPhoto sneaker={s} />
                     <p className="px-3 py-1 absolute left-0 right-0 bottom-0 text-center text-xs font-semibold bg-secondary rounded-t-md ring ring-border/75 shadow-sneakpick shadow-(color:--user-color)/50">{s.pickFor.username}</p>
                 </Link>
@@ -49,10 +49,10 @@ export function SneakPickSelector({ sneaker, auth }: SneakPickSelectorProps) {
         return null;
 
     if (!sneaker)
-        return <Skeleton className="w-86 h-40 max-md:hidden rounded-xl" />;
+        return <Skeleton className="w-full h-40 max-md:hidden rounded-xl" />;
 
     return (
-        <div className="md:w-86 h-fit p-4 pwa:pb-10 max-md:fixed max-md:bottom-0 max-md:left-px max-md:right-px bg-accent rounded-xl max-md:rounded-b-none ring ring-border space-y-3">
+        <div className="p-4 pwa:pb-10 max-md:fixed max-md:bottom-0 max-md:left-px max-md:right-px bg-accent rounded-xl max-md:rounded-b-none ring ring-border space-y-4">
             <div className="flex items-center gap-2">
                 <IconHexagon className="size-4 text-primary" />
                 <h3 className="font-bold">Pick this sneaker</h3>
@@ -85,7 +85,7 @@ function PickTimeSelect({ sneaker, auth, self = false }: PickTimeSelectProps) {
     const ref = useRef<HTMLDivElement>(null);
 
     async function pickSneaker(until: Date) {
-        if (!sneaker || self && (!auth || !auth._id) || !self && !pickFor) return;
+        if (!sneaker || self && !auth?._id || !self && !pickFor) return;
 
         setIsSaving(true);
         setOpen(false);
@@ -106,11 +106,14 @@ function PickTimeSelect({ sneaker, auth, self = false }: PickTimeSelectProps) {
     useEffect(() => {
         if (!pickFor && users?.length)
             setPickFor(users[0]._id);
-    }, [users]);
+    }, [pickFor, users]);
 
     useOutsideClick(ref, () => setOpen(false));
 
     const selUser = users?.find(o => o._id === pickFor);
+
+    if (!self && users?.length === 1)
+        return null;
 
     return (
         <div ref={ref} className="min-h-9 relative">
@@ -118,7 +121,7 @@ function PickTimeSelect({ sneaker, auth, self = false }: PickTimeSelectProps) {
                 {!isSaving ? self ? "Pick for me" : "Pick for someone else" : <Spinner />}
             </Button>
             <div className="h-5 absolute top-4 -left-px -right-px bg-accent rounded-b-md z-1" />
-            <div className={cn("mx-px -mt-4 mb-px px-1 relative rounded-md ring ring-border overflow-hidden space-y-0.5 transition-all duration-300", !open ? "h-0 ease-in-out" : (self ? "h-43.5" : "h-53") + " pt-5 pb-1 ease-out")}>
+            <div className={cn("mx-px -mt-4 mb-px px-1 relative rounded-md ring ring-border overflow-hidden space-y-0.5 transition-all duration-300", !open ? "h-0 ease-in-out" : `${self ? "h-43.5" : "h-53"} pt-5 pb-1 ease-out`)}>
                 {!self && (
                     <Select value={pickFor} onValueChange={e => setPickFor(e)}>
                         <SelectTrigger className="w-full">

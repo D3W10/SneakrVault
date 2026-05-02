@@ -1,4 +1,4 @@
-import bridge from "@/data/bridge";
+import type bridge from "@/data/bridge";
 import type { Doc } from "@db/dataModel";
 
 export type Sneaker = Awaited<ReturnType<typeof bridge.sneakers.get>>[number];

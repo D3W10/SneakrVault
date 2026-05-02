@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconChevronLeft, IconDots, IconMapPin, IconPencil, IconTrash, IconFolderPlus } from "@tabler/icons-react";
+import { IconChevronLeft, IconDots, IconMapPin, IconPencil, IconTrash, IconFolderPlus, IconInfoHexagon, IconMenu3 } from "@tabler/icons-react";
 import { addDays, differenceInCalendarDays, differenceInYears, endOfDay, format, getYear, isBefore, isWithinInterval, parseISO, setYear, startOfDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -120,7 +120,7 @@ function SneakerDetails() {
                     </>
                 }
             />
-            <div className="max-w-7xl mx-auto pt-4 max-md:pb-44 max-md:pwa:pb-48 px-6 md:px-8 flex flex-col gap-6 sm:gap-8">
+            <div className="max-w-7xl mx-auto pt-4 max-md:pb-40 max-md:pwa:pb-44 px-6 md:px-8 flex flex-col gap-6">
                 <div className="w-full flex gap-5 sm:gap-6 md:gap-8">
                     {sneaker ? (
                         <>
@@ -140,125 +140,140 @@ function SneakerDetails() {
                         </>
                     )}
                 </div>
-                <div className="flex gap-6">
-                    {sneaker ? (
-                        <div className="w-full h-fit py-6 flex flex-col gap-6 flex-1 bg-accent rounded-xl ring ring-border z-0">
-                            {(sneaker.size || sneaker.brand._id || sneaker.location._id) && (
-                                <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                    {sneaker.size && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Size</h3>
-                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.size}</p>
-                                        </div>
-                                    )}
-                                    {sneaker.brand._id && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Brand</h3>
-                                            <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
-                                                {sneaker.brand.iconUrl && <img src={sneaker.brand.iconUrl} alt={sneaker.brand.name} className="size-4 object-contain" />}
-                                                <p className="text-sm font-semibold">{sneaker.brand.name}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {sneaker.location._id && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Location</h3>
-                                            <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
-                                                <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
-                                                <p className="text-sm font-semibold">{sneaker.location.name}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                <div>
-                                    <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">State</h3>
-                                    <div className="flex items-center gap-4">
-                                        {!sneaker.decommissioned ? (
-                                            <p className="w-fit px-3 py-1.5 flex items-center text-emerald-500 text-sm font-semibold bg-emerald-500/15 rounded-md">Active</p>
-                                        ) : (
-                                            <p className="w-fit px-3 py-1.5 flex items-center text-primary text-sm font-semibold bg-primary/15 rounded-md">Decommissioned</p>
-                                        )}
-                                        {sneaker.pickFor && sneaker.pickUntil && new Date(sneaker.pickUntil).getTime() > new Date().getTime() && (
-                                            <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-muted rounded-md">
-                                                <div className="size-2.5 bg-(--user-color) rounded-full before:size-2.5 before:block before:bg-(--user-color) before:rounded-full before:animate-ping" style={{ "--user-color": sneaker.pickFor.color || "var(--color-muted-foreground)" } as React.CSSProperties} />
-                                                <p className="text-muted-foreground text-sm font-medium">In use by <span className="text-foreground font-bold">{sneaker.pickFor.username}</span></p>
-                                            </div>
-                                        )}
+                <div className="flex max-md:flex-col gap-4 md:gap-6">
+                    <div className="h-fit flex flex-col gap-4 flex-1">
+                        {sneaker ? (
+                            <div className="flex gap-3 flex-1">
+                                {sneaker.size &&
+                                    <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-accent rounded-md ring ring-border">{sneaker.size}</p>
+                                }
+                                {sneaker.brand._id &&
+                                    <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-accent rounded-md ring ring-border">
+                                        {sneaker.brand.iconUrl && <img src={sneaker.brand.iconUrl} alt={sneaker.brand.name} className="size-4 object-contain" />}
+                                        <p className="text-sm font-semibold">{sneaker.brand.name}</p>
                                     </div>
-                                </div>
+                                }
+                                {sneaker.location._id &&
+                                    <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 bg-accent rounded-md ring ring-border">
+                                        <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
+                                        <p className="text-sm font-semibold">{sneaker.location.name}</p>
+                                    </div>
+                                }
+                                {sneaker.decommissioned &&
+                                    <p className="w-fit px-3 py-1.5 flex items-center text-primary text-sm font-semibold bg-primary/15 rounded-md">Decommissioned</p>
+                                }
                             </div>
-                            {sneaker.date && (
-                                <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                    <div>
-                                        <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Acquisition Date</h3>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">
-                                                {format(acqDate, "dd")}
-                                                <span className="px-1.5 text-muted-foreground">/</span>
-                                                {format(acqDate, "MM")}
-                                                <span className="px-1.5 text-muted-foreground">/</span>
-                                                {format(acqDate, "yyyy")}
-                                            </div>
-                                            {bdayStats && (
-                                                <div className="w-fit px-3 py-1.5 flex items-center gap-1.5 text-amber-500 text-sm font-semibold bg-amber-500/15 rounded-md">
-                                                    {bdayStats.years} {bdayStats.years === 1 ? "year" : "years"}
-                                                    <span className="text-amber-500/60">{bdayStats.daysUntil === 0 ? "today!" : `in ${bdayStats.daysUntil} ${bdayStats.daysUntil === 1 ? "day" : "days"}`}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                        ) : <Skeleton className="h-8 flex-1 rounded-xl" />}
+                        {sneaker ? (
+                            <div className="w-full p-4 bg-accent rounded-xl ring ring-border space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <IconMenu3 className="size-4 text-primary" />
+                                    <h3 className="font-bold">Description</h3>
                                 </div>
+                                {sneaker.description ?
+                                    <p className="font-medium text-muted-foreground">{sneaker.description}</p>
+                                :
+                                    <p className="italic text-muted-foreground">No description</p>
+                                }
+                            </div>
+                        ) : <Skeleton className="h-60 flex-1 rounded-xl" />}
+                    </div>
+                    <div className="md:w-86 h-fit flex flex-col gap-6">
+                        <div className="h-6 max-md:hidden" />
+                        {configs.enableSneakPick && <SneakPickSelector sneaker={sneaker} auth={auth} />}
+                        <div className="w-full p-4 bg-accent rounded-xl ring ring-border space-y-4">
+                            <div className="flex items-center gap-2">
+                                <IconInfoHexagon className="size-4 text-primary" />
+                                <h3 className="font-bold">Information</h3>
+                            </div>
+                            {sneaker?.date && (
+                                <InfoBox title="Acquisition Date">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">
+                                            {format(acqDate, "dd")}
+                                            <span className="px-1.5 text-muted-foreground">/</span>
+                                            {format(acqDate, "MM")}
+                                            <span className="px-1.5 text-muted-foreground">/</span>
+                                            {format(acqDate, "yyyy")}
+                                        </div>
+                                        {bdayStats && (
+                                            <div className="w-fit px-3 py-1.5 flex items-center gap-1.5 text-amber-500 text-sm font-semibold bg-amber-500/15 rounded-md">
+                                                {bdayStats.years} {bdayStats.years === 1 ? "year" : "years"}
+                                                <span className="text-amber-500/60">{bdayStats.daysUntil === 0 ? "today!" : `in ${bdayStats.daysUntil} ${bdayStats.daysUntil === 1 ? "day" : "days"}`}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </InfoBox>
                             )}
-                            {(sneaker.owner._id || sneaker.originalOwner.type) && (
-                                <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                    {sneaker.owner._id && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Owner</h3>
+                            {(sneaker?.owner._id || sneaker?.originalOwner.type) && (
+                                <div className="flex gap-x-5 gap-y-4">
+                                    {sneaker?.owner._id && (
+                                        <InfoBox title="Owner">
                                             <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 text-sm font-semibold bg-muted rounded-md">
                                                 <div className="size-2.5 rounded-full" style={{ backgroundColor: sneaker.owner.color || "var(--color-muted-foreground)" }} />
                                                 {sneaker.owner.username}
                                             </div>
-                                        </div>
+                                        </InfoBox>
                                     )}
-                                    {sneaker.originalOwner.type && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Original Owner</h3>
+                                    {sneaker?.originalOwner.type && (
+                                        <InfoBox title="Original Owner">
                                             <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 text-sm font-semibold bg-muted rounded-md">
                                                 <div className="size-2.5 rounded-full" style={{ backgroundColor: sneaker.originalOwner.color || "var(--color-muted-foreground)" }} />
                                                 {sneaker.originalOwner.username}
                                             </div>
-                                        </div>
+                                        </InfoBox>
                                     )}
                                 </div>
                             )}
-                            {(sneaker.stockxUrl || sneaker.style) && (
-                                <div className="w-full px-6 flex gap-6 overflow-x-auto">
-                                    {sneaker.stockxUrl && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Links</h3>
-                                            <a href={sneaker.stockxUrl} target="_blank">
+                            {(sneaker?.style || sneaker?.authenticyTag) && (
+                                <div className="flex gap-x-5 gap-y-4">
+                                    {sneaker?.style && (
+                                        <InfoBox title="Style Code">
+                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.style}</p>
+                                        </InfoBox>
+                                    )}
+                                    {sneaker?.authenticyTag && (
+                                        <InfoBox title="Authenticy Tag">
+                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.authenticyTag}</p>
+                                        </InfoBox>
+                                    )}
+                                </div>
+                            )}
+                            {(sneaker?.stockxUrl || sneaker?.goatUrl) && (
+                                <InfoBox title="Links">
+                                    <div className="flex gap-2">
+                                        {sneaker?.stockxUrl && (
+                                            <a href={sneaker.stockxUrl} target="_blank" rel="noreferrer">
                                                 <Button variant="outline" className="gap-2.5">
-                                                    <img src="/StockX.svg" alt="StockX" className="size-4" />
+                                                    <img src="/StockX.svg" alt="StockX" className="size-3.5" />
                                                     StockX
                                                 </Button>
                                             </a>
-                                        </div>
-                                    )}
-                                    {sneaker.style && (
-                                        <div>
-                                            <h3 className="mb-2 text-xs text-muted-foreground font-semibold tracking-wider uppercase">Style Code</h3>
-                                            <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.style}</p>
-                                        </div>
-                                    )}
-                                </div>
+                                        )}
+                                        {sneaker?.goatUrl && (
+                                            <a href={sneaker.goatUrl} target="_blank" rel="noreferrer">
+                                                <Button variant="outline" className="gap-2.5">
+                                                    <div className="size-3.5 bg-foreground" />
+                                                    GOAT
+                                                </Button>
+                                            </a>
+                                        )}
+                                    </div>
+                                </InfoBox>
                             )}
                         </div>
-                    ) : <Skeleton className="h-80 flex-1 rounded-xl" />}
-                    {configs.enableSneakPick && <SneakPickSelector sneaker={sneaker} auth={auth} />}
+                    </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function InfoBox({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div>
+            <h3 className="mb-2 text-2xs text-muted-foreground font-semibold tracking-wider uppercase">{title}</h3>
+            {children}
         </div>
     );
 }

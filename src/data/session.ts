@@ -15,8 +15,7 @@ const MIN_SECRET_LENGTH = 32;
 function getSessionSecret() {
     const secret = process.env.SESSION_SECRET ?? process.env.VITE_SESSION_SECRET;
 
-    if (!secret || secret.length < MIN_SECRET_LENGTH)
-        throw new Error(`Missing SESSION_SECRET. Set a secret with at least ${MIN_SECRET_LENGTH} characters.`);
+    if (!secret || secret.length < MIN_SECRET_LENGTH) throw new Error(`Missing SESSION_SECRET. Set a secret with at least ${MIN_SECRET_LENGTH} characters.`);
 
     return secret;
 }

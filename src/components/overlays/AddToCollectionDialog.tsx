@@ -71,6 +71,7 @@ function AddToCollectionDialogContent({ sneakerId }: Omit<AddToCollectionDialogP
                     (collections ?? []).map(c => (
                         <button
                             key={c._id}
+                            type="button"
                             className="p-2 flex justify-between items-center"
                             disabled={isSaving}
                             onClick={() => toggleCollection(c._id, c.sneakers || [])}
