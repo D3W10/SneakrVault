@@ -23,6 +23,7 @@ export const login = createServerFn({ method: "POST" })
                 return { success: false, error: "Too many attempts. Try again later" };
             }
 
+            const user = await client.query(api.users.getByUsername, { username: data.username, ...(await generateAuthPayload(false)) });
             if (!user) return { success: false, error: "Invalid credentials" };
 
             const isMatch = await verifyScryptHash(data.password, user.passwordHash);
@@ -43,7 +44,7 @@ export const login = createServerFn({ method: "POST" })
         } catch (error) {
             if (client) {
                 try {
-                    await client.mutation(api.auth.recordLoginResult, { username: data.username, success: false, ...await generateAuthPayload(false) });
+                    await client.mutation(api.auth.recordLoginResult, { username: data.username, success: false, ...(await generateAuthPayload(false)) });
                 } catch (recordError) {
                     console.error("Failed to record login result:", recordError);
                 }
@@ -71,8 +72,7 @@ export const getConvexQueryAuthPayload = createServerFn({ method: "GET" }).handl
 
 export function getClient() {
     const url = process.env.CONVEX_URL ?? process.env.VITE_CONVEX_URL;
-    if (!url)
-        throw new Error("Missing Convex URL. Set CONVEX_URL or VITE_CONVEX_URL to your Convex deployment URL.");
+    if (!url) throw new Error("Missing Convex URL. Set CONVEX_URL or VITE_CONVEX_URL to your Convex deployment URL.");
 
     return new ConvexHttpClient(url, { logger: false });
 }
@@ -84,20 +84,18 @@ function wait(ms: number) {
 async function waitForMinimumDuration(startedAt: number) {
     const elapsed = Date.now() - startedAt;
 
-    if (elapsed < MIN_AUTH_RESPONSE_MS)
-        await wait(MIN_AUTH_RESPONSE_MS - elapsed);
+    if (elapsed < MIN_AUTH_RESPONSE_MS) await wait(MIN_AUTH_RESPONSE_MS - elapsed);
 }
 
 export async function generateAuthPayload(requireAuth = true) {
     const config = await getConfig();
     const session = await getAppSession();
-    if (requireAuth && !config?.publicPage && !session.data.isAuthenticated)
-        throw new Error("Unauthorized");
+    if ((requireAuth && !config?.publicPage && !session.data.isAuthenticated) || !process.env.CONVEX_SERVER_SECRET) throw new Error("Unauthorized");
 
     const authRole = session.data.isAuthenticated ? (session.data.role ?? "guest") : "guest";
 
     const timestamp = Date.now();
-    const secret = process.env.CONVEX_SERVER_SECRET!;
+    const secret = process.env.CONVEX_SERVER_SECRET;
 
     const data = new TextEncoder().encode(`${secret}:${timestamp}:${authRole}`);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -111,15 +109,13 @@ export async function generateAuthPayload(requireAuth = true) {
 function parseScryptHash(encodedHash: string) {
     const parts = encodedHash.split("$");
 
-    if (parts.length !== 3 || parts[0] !== "scrypt")
-        return null;
+    if (parts.length !== 3 || parts[0] !== "scrypt") return null;
 
     try {
         const salt = Buffer.from(parts[1], "base64");
         const hash = Buffer.from(parts[2], "base64");
 
-        if (salt.length === 0 || hash.length === 0)
-            return null;
+        if (salt.length === 0 || hash.length === 0) return null;
 
         return { salt, hash };
     } catch {
@@ -128,10 +124,7 @@ function parseScryptHash(encodedHash: string) {
 }
 
 async function getCryptoHelpers() {
-    const [{ timingSafeEqual, scrypt: scryptCallback }, { promisify }] = await Promise.all([
-        import("node:crypto"),
-        import("node:util"),
-    ]);
+    const [{ timingSafeEqual, scrypt: scryptCallback }, { promisify }] = await Promise.all([import("node:crypto"), import("node:util")]);
 
     return {
         timingSafeEqual,
@@ -140,6 +133,7 @@ async function getCryptoHelpers() {
 }
 
 async function getAppSession() {
+    // biome-ignore lint/correctness/useHookAtTopLevel: This allows the hook to be used outside a component
     return (await import("./session")).useAppSession();
 }
 
@@ -153,12 +147,10 @@ async function getConfig() {
 async function verifyScryptHash(password: string, encodedHash: string) {
     const { scrypt, timingSafeEqual } = await getCryptoHelpers();
     const parsed = parseScryptHash(encodedHash);
-    if (!parsed)
-        return false;
+    if (!parsed) return false;
 
-    const derived = await scrypt(password, parsed.salt, parsed.hash.length) as Buffer;
-    if (derived.length !== parsed.hash.length)
-        return false;
+    const derived = (await scrypt(password, parsed.salt, parsed.hash.length)) as Buffer;
+    if (derived.length !== parsed.hash.length) return false;
 
     return timingSafeEqual(derived, parsed.hash);
 }

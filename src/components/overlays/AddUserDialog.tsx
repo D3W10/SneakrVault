@@ -127,7 +127,7 @@ function AddUserDialogContent({ setOpen, user, isCurrentUser = false }: Omit<Add
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="guest">Guest</SelectItem>
-                                <SelectItem value="normal">Normal</SelectItem>
+                                <SelectItem value="member">Member</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
                             </SelectContent>
                         </Select>

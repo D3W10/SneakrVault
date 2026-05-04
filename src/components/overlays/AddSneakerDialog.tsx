@@ -70,7 +70,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const queryClient = useQueryClient();
 
     const fractions: Record<string, string> = { "1/2": "½", "1/3": "⅓", "2/3": "⅔" };
-    const isValidStockxUrl = (url: string) => /^https:\/\/stockx\.com\/[a-zA-Z0-9-]+$/g.test(url);
+    const isValidStockxUrl = (url: string) => /^https:\/\/(www\.)?stockx\.com\/[a-zA-Z0-9-]+$/g.test(url);
 
     function parseSize(size: string) {
         if (!/^[\d\.\/½⅓⅔]*$/.test(size)) return;
@@ -369,7 +369,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <DialogFooter>
                     <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !color || stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
+                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
                         {!isSaving ? "Save changes" : <Spinner />}
                     </Button>
                 </DialogFooter>

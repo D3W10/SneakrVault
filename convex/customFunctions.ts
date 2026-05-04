@@ -8,11 +8,11 @@ type AuthRole = Doc<"users">["role"];
 const AUTH_ARGS = {
     signature: v.string(),
     timestamp: v.number(),
-    authRole: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
+    authRole: v.union(v.literal("guest"), v.literal("member"), v.literal("admin")),
 };
 const ROLE_PRIORITY: Record<AuthRole, number> = {
     guest: 0,
-    normal: 1,
+    member: 1,
     admin: 2,
 };
 
@@ -46,10 +46,10 @@ export const guestQuery = zCustomQuery(query, {
     },
 });
 
-export const normalQuery = zCustomQuery(query, {
+export const memberQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        await validateAuthInput(args, "normal");
+        await validateAuthInput(args, "member");
         return { ctx, args: {} };
     },
 });
@@ -72,10 +72,10 @@ export const guestMutation = zCustomMutation(mutation, {
     },
 });
 
-export const normalMutation = zCustomMutation(mutation, {
+export const memberMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        await validateAuthInput(args, "normal");
+        await validateAuthInput(args, "member");
         return { ctx, args: {} };
     },
 });

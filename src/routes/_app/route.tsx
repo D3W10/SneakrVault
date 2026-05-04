@@ -13,16 +13,16 @@ function LayoutComponent() {
                 <div className="w-fit p-1.25 flex bg-secondary rounded-full ring ring-border/75">
                     <Link
                         to="/"
-                        activeProps={{ className: "text-primary" }}
-                        className="py-1 pl-2.5 pr-3 flex items-center gap-2 hover:bg-muted/50 rounded-full transition-colors"
+                        activeProps={{ className: "text-primary hover:text-primary" }}
+                        className="py-1 pl-2.5 pr-3 flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors"
                     >
                         <IconLayoutGrid className="size-5" />
                         <span className="font-semibold">Library</span>
                     </Link>
                     <Link
                         to="/collections"
-                        activeProps={{ className: "text-primary" }}
-                        className="py-1 pl-2.5 pr-3 flex items-center gap-2 hover:bg-muted/50 rounded-full transition-colors"
+                        activeProps={{ className: "text-primary hover:text-primary" }}
+                        className="py-1 pl-2.5 pr-3 flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors"
                     >
                         <IconLayoutList className="size-5" />
                         <span className="font-semibold">Collections</span>

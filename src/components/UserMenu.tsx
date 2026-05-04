@@ -27,7 +27,7 @@ export function UserMenu({ auth, logout }: UserMenuProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={8}>
                     {auth.role === "admin" && (
-                        <DropdownMenuItem onClick={() => navigate({ to: "/manage" })}>
+                        <DropdownMenuItem onClick={() => navigate({ to: "/manage/{-$tab}" })}>
                             <IconSettings className="size-4" />
                             Settings
                         </DropdownMenuItem>

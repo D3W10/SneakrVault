@@ -100,3 +100,14 @@
         -webkit-user-drag: none;
     }
 }
+
+@layer utilities {
+    .scrollbar-hidden::-webkit-scrollbar {
+        display: none;
+    }
+  
+    .scrollbar-hidden {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}

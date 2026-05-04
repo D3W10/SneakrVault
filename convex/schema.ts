@@ -42,7 +42,7 @@ export default defineSchema({
     users: defineTable({
         username: v.string(),
         passwordHash: v.string(),
-        role: v.union(v.literal("guest"), v.literal("normal"), v.literal("admin")),
+        role: v.union(v.literal("guest"), v.literal("member"), v.literal("admin")),
         color: v.string(),
         active: v.boolean(),
     })
@@ -61,13 +61,13 @@ export default defineSchema({
         sneakers: v.array(v.id("sneakers")),
     }),
     configs: defineTable({
-        publicPage: v.boolean(),
         showOwnerOnCard: v.boolean(),
         showLocationOnCard: v.boolean(),
         enableSneakPick: v.boolean(),
         homePageSections: v.array(v.string()),
-        publicDescriptionVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
-        publicLocationVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
-        publicOwnerVisibility: v.union(v.literal("all"), v.literal("guests"), v.literal("protected")),
+        publicPage: v.boolean(),
+        locationVisibility: v.union(v.literal("public"), v.literal("guests"), v.literal("protected")),
+        descriptionVisibility: v.union(v.literal("public"), v.literal("guests"), v.literal("protected")),
+        originalOwnerVisibility: v.union(v.literal("public"), v.literal("guests"), v.literal("protected")),
     }),
 });

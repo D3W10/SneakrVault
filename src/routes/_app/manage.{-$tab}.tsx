@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IconCheck, IconPencil, IconPlus, IconTrash, IconGripVertical } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,10 @@ import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { useConfig } from "@/lib/useConfig";
 import { useLogout } from "@/lib/useLogout";
+import { Switch } from "@/components/ui/switch";
+import type { DataModel } from "@db/dataModel";
 
-export const Route = createFileRoute("/_app/manage")({
+export const Route = createFileRoute("/_app/manage/{-$tab}")({
     component: ManagePage,
     beforeLoad: () => checkAuth(),
 });
@@ -43,14 +45,24 @@ function ManagePage() {
         queryKey: ["brands"],
         queryFn: bridge.brands.get,
     });
-    const { isPending: cip, data: configs } = useConfig(true);
-    const queryClient = useQueryClient();
-    const updateConfig = useMutation({
-        mutationFn: bridge.configs.edit,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["configs"] }),
-    });
+    const { isPending: cip, config, updateConfig } = useConfig();
+    const { tab } = Route.useParams();
+    const navigate = useNavigate();
     const { auth } = Route.useRouteContext();
     const logout = useLogout();
+    const tabs = ["users", "locations", "brands", "configurations"] as const;
+    const activeTab = tabs.includes(tab as (typeof tabs)[number]) ? tab : tabs[0];
+    function changePageSecurity(publicPage: boolean) {
+        const patch = { ...config, publicPage };
+        const derivateKeys = ["locationVisibility", "descriptionVisibility", "originalOwnerVisibility"] as const;
+
+        derivateKeys.forEach(key => {
+            if (patch[key] === "public" && !publicPage)
+                patch[key] = "protected";
+        });
+
+        updateConfig.mutate(patch);
+    }
 
     return (
         <div className="min-h-screen">
@@ -60,13 +72,13 @@ function ManagePage() {
                 }
             />
             <div className="max-w-7xl mx-auto px-6 md:px-8 pt-4 pb-20">
-                <Tabs defaultValue="users" className="gap-4">
+                <Tabs className="gap-4" value={activeTab} onValueChange={value => navigate({ to: "/manage/{-$tab}", params: { tab: value } })}>
                     <div className="w-full flex justify-between">
-                        <TabsList variant="line">
-                            <TabsTrigger value="users">Users</TabsTrigger>
-                            <TabsTrigger value="locations">Locations</TabsTrigger>
-                            <TabsTrigger value="brands">Brands</TabsTrigger>
-                            <TabsTrigger value="configurations">Configurations</TabsTrigger>
+                        <TabsList variant="line" className="pr-4 justify-start overflow-x-auto overflow-y-hidden scrollbar-hidden">
+                            <TabsTrigger value={tabs[0]}>Users</TabsTrigger>
+                            <TabsTrigger value={tabs[1]}>Locations</TabsTrigger>
+                            <TabsTrigger value={tabs[2]}>Brands</TabsTrigger>
+                            <TabsTrigger value={tabs[3]}>Configurations</TabsTrigger>
                         </TabsList>
                         <div className="flex gap-2">
                             {(uip || lip || bip || cip) && (
@@ -74,7 +86,7 @@ function ManagePage() {
                                     <Spinner />
                                 </div>
                             )}
-                            <TabsContent value="users">
+                            <TabsContent value={tabs[0]}>
                                 <Button className="max-sm:hidden" onClick={() => setAddUserDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add user
@@ -84,7 +96,7 @@ function ManagePage() {
                                 </Button>
                                 <AddUserDialog open={addUserDialogOpen} setOpen={setAddUserDialogOpen} />
                             </TabsContent>
-                            <TabsContent value="locations">
+                            <TabsContent value={tabs[1]}>
                                 <Button className="max-sm:hidden" onClick={() => setAddLocationDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add location
@@ -94,7 +106,7 @@ function ManagePage() {
                                 </Button>
                                 <AddLocationDialog open={addLocationDialogOpen} setOpen={setAddLocationDialogOpen} />
                             </TabsContent>
-                            <TabsContent value="brands">
+                            <TabsContent value={tabs[2]}>
                                 <Button className="max-sm:hidden" onClick={() => setAddBrandDialogOpen(true)}>
                                     <IconPlus className="size-4" data-icon="inline-start" />
                                     Add brand
@@ -106,7 +118,7 @@ function ManagePage() {
                             </TabsContent>
                         </div>
                     </div>
-                    <TabsContent value="users">
+                    <TabsContent value={tabs[0]}>
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -122,7 +134,7 @@ function ManagePage() {
                             </TableBody>
                         </Table>
                     </TabsContent>
-                    <TabsContent value="locations">
+                    <TabsContent value={tabs[1]}>
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -135,7 +147,7 @@ function ManagePage() {
                             </TableBody>
                         </Table>
                     </TabsContent>
-                    <TabsContent value="brands">
+                    <TabsContent value={tabs[2]}>
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -149,6 +161,58 @@ function ManagePage() {
                             </TableBody>
                         </Table>
                     </TabsContent>
+                    <TabsContent value={tabs[3]}>
+                        {!cip && (
+                            <>
+                                <ConfigSection title="Personalization">
+                                </ConfigSection>
+                                <hr />
+                                <ConfigSection title="Security">
+                                    <ConfigItem
+                                        title="Public page"
+                                        description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!"
+                                    >
+                                        <Switch
+                                            checked={config.publicPage}
+                                            onCheckedChange={changePageSecurity}
+                                        />
+                                    </ConfigItem>
+                                    <ConfigItem
+                                        title="Location visibility"
+                                        description="Allow anyone to view the location of your pairs without the need to log in. Proceed with caution!"
+                                    >
+                                        <VisibilitySelect
+                                            value={config.locationVisibility}
+                                            onChange={v => updateConfig.mutate({ ...config, locationVisibility: v })}
+                                        />
+                                    </ConfigItem>
+                                    <ConfigItem
+                                        title="Description visibility"
+                                        description="Allow anyone to view the descriptions of your pairs without the need to log in."
+                                    >
+                                        <VisibilitySelect
+                                            value={config.descriptionVisibility}
+                                            onChange={v => updateConfig.mutate({ ...config, descriptionVisibility: v })}
+                                        />
+                                    </ConfigItem>
+                                    <ConfigItem
+                                        title="Original Owner visibility"
+                                        description="Allow anyone to view the original owner of your pairs without the need to log in."
+                                    >
+                                        <VisibilitySelect
+                                            value={config.originalOwnerVisibility}
+                                            onChange={v => updateConfig.mutate({ ...config, originalOwnerVisibility: v })}
+                                        />
+                                    </ConfigItem>
+                                </ConfigSection>
+                            </>
+                        )}
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </div>
+    );
+}
 function UserTableRow({ user }: { user: Awaited<ReturnType<typeof bridge.users.get>>[number] }) {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -223,5 +287,51 @@ function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.bran
                 <DeleteBrandDialog open={deleteDialogOpen} setOpen={setDeleteDialogOpen} _id={brand._id} />
             </TableCell>
         </TableRow>
+    );
+}
+
+function ConfigSection({ title, children }: { title: string; children?: React.ReactNode }) {
+    return (
+        <div className="my-6">
+            <h2 className="text-xl sm:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
+            {children}
+        </div>
+    );
+}
+
+function ConfigItem({ title, description, children }: { title: string; description?: string; children?: React.ReactNode }) {
+    return (
+        <div className="mt-5 flex gap-6">
+            <div className="flex-1 space-y-1">
+                <h3 className="text-base text-secondary-foreground font-bold">{title}</h3>
+                <p className="text-muted-foreground">{description}</p>
+            </div>
+            <div className="pt-1.5 pr-2">
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function VisibilitySelect({ value, onChange }: { value: DataModel["configs"]["document"]["locationVisibility"]; onChange: (value: DataModel["configs"]["document"]["locationVisibility"]) => unknown }) {
+    const { config } = useConfig();
+    
+    const visibilityMap: Record<DataModel["configs"]["document"]["locationVisibility"], string> = {
+        protected: "Only for members",
+        guests: "Guests and members",
+        public: "Public",
+    };
+
+    return (
+        <Select value={value} onValueChange={v => onChange(v as keyof typeof visibilityMap)}>
+            <SelectTrigger className="w-52">
+                {visibilityMap[value]}
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="protected">{visibilityMap.protected}</SelectItem>
+                <SelectItem value="guests">{visibilityMap.guests}</SelectItem>
+                {config.publicPage && <SelectItem value="public">{visibilityMap.public}</SelectItem>}
+            </SelectContent>
+        </Select>
     );
 }

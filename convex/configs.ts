@@ -3,14 +3,14 @@ import { query } from "@db/server";
 import { adminMutation } from "./customFunctions";
 
 export const ConfigUpdate = z.object({
-    publicPage: z.boolean(),
     showOwnerOnCard: z.boolean(),
     showLocationOnCard: z.boolean(),
     enableSneakPick: z.boolean(),
     homePageSections: z.array(z.string()),
-    publicDescriptionVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
-    publicLocationVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
-    publicOwnerVisibility: z.union([z.literal("all"), z.literal("guests"), z.literal("protected")]),
+    publicPage: z.boolean(),
+    locationVisibility: z.union([z.literal("public"), z.literal("guests"), z.literal("protected")]),
+    descriptionVisibility: z.union([z.literal("public"), z.literal("guests"), z.literal("protected")]),
+    originalOwnerVisibility: z.union([z.literal("public"), z.literal("guests"), z.literal("protected")]),
 });
 
 export const get = query({

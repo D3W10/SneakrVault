@@ -13,8 +13,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as SneakersIdRouteImport } from './routes/sneakers/$id'
-import { Route as AppManageRouteImport } from './routes/_app/manage'
 import { Route as AppCollectionsIndexRouteImport } from './routes/_app/collections/index'
+import { Route as AppManageChar123TabChar125RouteImport } from './routes/_app/manage.{-$tab}'
 import { Route as AppCollectionsIdRouteImport } from './routes/_app/collections/$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -36,16 +36,17 @@ const SneakersIdRoute = SneakersIdRouteImport.update({
   path: '/sneakers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppManageRoute = AppManageRouteImport.update({
-  id: '/manage',
-  path: '/manage',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppCollectionsIndexRoute = AppCollectionsIndexRouteImport.update({
   id: '/collections/',
   path: '/collections/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppManageChar123TabChar125Route =
+  AppManageChar123TabChar125RouteImport.update({
+    id: '/manage/{-$tab}',
+    path: '/manage/{-$tab}',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppCollectionsIdRoute = AppCollectionsIdRouteImport.update({
   id: '/collections/$id',
   path: '/collections/$id',
@@ -55,27 +56,27 @@ const AppCollectionsIdRoute = AppCollectionsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
-  '/manage': typeof AppManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
   '/collections/$id': typeof AppCollectionsIdRoute
+  '/manage/{-$tab}': typeof AppManageChar123TabChar125Route
   '/collections/': typeof AppCollectionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/manage': typeof AppManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
   '/': typeof AppIndexRoute
   '/collections/$id': typeof AppCollectionsIdRoute
+  '/manage/{-$tab}': typeof AppManageChar123TabChar125Route
   '/collections': typeof AppCollectionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/_app/manage': typeof AppManageRoute
   '/sneakers/$id': typeof SneakersIdRoute
   '/_app/': typeof AppIndexRoute
   '/_app/collections/$id': typeof AppCollectionsIdRoute
+  '/_app/manage/{-$tab}': typeof AppManageChar123TabChar125Route
   '/_app/collections/': typeof AppCollectionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -83,26 +84,26 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/manage'
     | '/sneakers/$id'
     | '/collections/$id'
+    | '/manage/{-$tab}'
     | '/collections/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/manage'
     | '/sneakers/$id'
     | '/'
     | '/collections/$id'
+    | '/manage/{-$tab}'
     | '/collections'
   id:
     | '__root__'
     | '/_app'
     | '/login'
-    | '/_app/manage'
     | '/sneakers/$id'
     | '/_app/'
     | '/_app/collections/$id'
+    | '/_app/manage/{-$tab}'
     | '/_app/collections/'
   fileRoutesById: FileRoutesById
 }
@@ -142,18 +143,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SneakersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/manage': {
-      id: '/_app/manage'
-      path: '/manage'
-      fullPath: '/manage'
-      preLoaderRoute: typeof AppManageRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/collections/': {
       id: '/_app/collections/'
       path: '/collections'
       fullPath: '/collections/'
       preLoaderRoute: typeof AppCollectionsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/manage/{-$tab}': {
+      id: '/_app/manage/{-$tab}'
+      path: '/manage/{-$tab}'
+      fullPath: '/manage/{-$tab}'
+      preLoaderRoute: typeof AppManageChar123TabChar125RouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/collections/$id': {
@@ -167,16 +168,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteRouteChildren {
-  AppManageRoute: typeof AppManageRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCollectionsIdRoute: typeof AppCollectionsIdRoute
+  AppManageChar123TabChar125Route: typeof AppManageChar123TabChar125Route
   AppCollectionsIndexRoute: typeof AppCollectionsIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppManageRoute: AppManageRoute,
   AppIndexRoute: AppIndexRoute,
   AppCollectionsIdRoute: AppCollectionsIdRoute,
+  AppManageChar123TabChar125Route: AppManageChar123TabChar125Route,
   AppCollectionsIndexRoute: AppCollectionsIndexRoute,
 }
 

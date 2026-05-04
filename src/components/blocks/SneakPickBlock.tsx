@@ -45,11 +45,11 @@ interface SneakPickSelectorProps {
 }
 
 export function SneakPickSelector({ sneaker, auth }: SneakPickSelectorProps) {
-    if (auth?.role === "guest")
+    if (!auth?.isAuthenticated || !auth.role || !["member", "admin"].includes(auth.role))
         return null;
 
     if (!sneaker)
-        return <Skeleton className="w-full h-40 max-md:hidden rounded-xl" />;
+        return <Skeleton className="w-full h-36 max-md:hidden rounded-xl" />;
 
     return (
         <div className="p-4 pwa:pb-10 max-md:fixed max-md:bottom-0 max-md:left-px max-md:right-px bg-accent rounded-xl max-md:rounded-b-none ring ring-border space-y-4">

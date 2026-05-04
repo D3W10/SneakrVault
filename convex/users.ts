@@ -5,7 +5,7 @@ import { adminMutation, adminQuery, guestQuery } from "./customFunctions";
 export const UserInsert = z.object({
     username: z.string(),
     passwordHash: z.string(),
-    role: z.union([z.literal("guest"), z.literal("normal"), z.literal("admin")]),
+    role: z.union([z.literal("guest"), z.literal("member"), z.literal("admin")]),
     color: z.string(),
     active: z.boolean(),
 });
@@ -22,7 +22,7 @@ export const get = adminQuery({
 export const getOwners = guestQuery({
     args: {},
     handler: async ctx => {
-        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "normal") || q.eq(q.field("role"), "admin")).collect();
+        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "member") || q.eq(q.field("role"), "admin")).collect();
     },
 });
 

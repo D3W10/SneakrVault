@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zid } from "convex-helpers/server/zod4";
-import { guestQuery, normalMutation } from "./customFunctions";
+import { guestQuery, memberMutation } from "./customFunctions";
 import type { Doc } from "@db/dataModel";
 import type { QueryCtx } from "@db/server";
 
@@ -64,7 +64,7 @@ export const getPickedSneakers = guestQuery({
     },
 });
 
-export const insert = normalMutation({
+export const insert = memberMutation({
     args: SneakerInsert,
     handler: async (ctx, args) => {
         await ctx.db.insert("sneakers", args);
@@ -72,7 +72,7 @@ export const insert = normalMutation({
     },
 });
 
-export const update = normalMutation({
+export const update = memberMutation({
     args: SneakerUpdate,
     handler: async (ctx, args) => {
         const { _id, photo, ...rest } = args;
@@ -98,7 +98,7 @@ export const update = normalMutation({
     },
 });
 
-export const remove = normalMutation({
+export const remove = memberMutation({
     args: { _id: zid("sneakers") },
     handler: async (ctx, args) => {
         const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), args._id)).first();
