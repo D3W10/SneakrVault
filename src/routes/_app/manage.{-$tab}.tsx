@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { IconCheck, IconPencil, IconPlus, IconTrash, IconGripVertical } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { IconCheck, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { AddBrandDialog } from "@/components/overlays/AddBrandDialog";
 import { AddLocationDialog } from "@/components/overlays/AddLocationDialog";
 import { AddUserDialog } from "@/components/overlays/AddUserDialog";
@@ -21,7 +20,7 @@ import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
 import { useConfig } from "@/lib/useConfig";
 import { useLogout } from "@/lib/useLogout";
-import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import type { DataModel } from "@db/dataModel";
 
 export const Route = createFileRoute("/_app/manage/{-$tab}")({
@@ -180,6 +179,7 @@ function ManagePage() {
                                     <ConfigItem
                                         title="Location visibility"
                                         description="Allow anyone to view the location of your pairs without the need to log in. Proceed with caution!"
+                                        wrap
                                     >
                                         <VisibilitySelect
                                             value={config.locationVisibility}
@@ -189,6 +189,7 @@ function ManagePage() {
                                     <ConfigItem
                                         title="Description visibility"
                                         description="Allow anyone to view the descriptions of your pairs without the need to log in."
+                                        wrap
                                     >
                                         <VisibilitySelect
                                             value={config.descriptionVisibility}
@@ -198,6 +199,7 @@ function ManagePage() {
                                     <ConfigItem
                                         title="Original Owner visibility"
                                         description="Allow anyone to view the original owner of your pairs without the need to log in."
+                                        wrap
                                     >
                                         <VisibilitySelect
                                             value={config.originalOwnerVisibility}
@@ -293,18 +295,18 @@ function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.bran
 function ConfigSection({ title, children }: { title: string; children?: React.ReactNode }) {
     return (
         <div className="my-6">
-            <h2 className="text-xl sm:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
+            <h2 className="text-2xl md:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
             {children}
         </div>
     );
 }
 
-function ConfigItem({ title, description, children }: { title: string; description?: string; children?: React.ReactNode }) {
+function ConfigItem({ title, description, children, wrap = false }: { title: string; description?: string; children?: React.ReactNode; wrap?: boolean }) {
     return (
-        <div className="mt-5 flex gap-6">
+        <div className={cn("mt-5 flex", !wrap ? "gap-6" : "max-sm:flex-col gap-1.5 sm:gap-6")}>
             <div className="flex-1 space-y-1">
-                <h3 className="text-base text-secondary-foreground font-bold">{title}</h3>
-                <p className="text-muted-foreground">{description}</p>
+                <h3 className="text-sm sm:text-base text-secondary-foreground font-bold">{title}</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">{description}</p>
             </div>
             <div className="pt-1.5 pr-2">
                 {children}
@@ -324,7 +326,7 @@ function VisibilitySelect({ value, onChange }: { value: DataModel["configs"]["do
 
     return (
         <Select value={value} onValueChange={v => onChange(v as keyof typeof visibilityMap)}>
-            <SelectTrigger className="w-52">
+            <SelectTrigger className="w-full sm:w-52">
                 {visibilityMap[value]}
             </SelectTrigger>
             <SelectContent>
