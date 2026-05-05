@@ -61,8 +61,9 @@ export default defineSchema({
         sneakers: v.array(v.id("sneakers")),
     }),
     configs: defineTable({
-        showOwnerOnCard: v.boolean(),
-        showLocationOnCard: v.boolean(),
+        cardSecondaryInfo: v.union(v.literal("nothing"), v.literal("location"), v.literal("brand"), v.literal("size"), v.literal("owner")),
+        cardShowOwnerColor: v.boolean(),
+        defaultShowDecommissioned: v.boolean(),
         enableSneakPick: v.boolean(),
         homePageSections: v.array(v.string()),
         publicPage: v.boolean(),

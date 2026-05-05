@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconCheck, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconCheck, IconForbid2, IconMapPin, IconPencil, IconPlus, IconRosetteDiscountCheck, IconRuler2, IconTrash, IconUser } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -56,8 +56,7 @@ function ManagePage() {
         const derivateKeys = ["locationVisibility", "descriptionVisibility", "originalOwnerVisibility"] as const;
 
         derivateKeys.forEach(key => {
-            if (patch[key] === "public" && !publicPage)
-                patch[key] = "protected";
+            if (patch[key] === "public" && !publicPage) patch[key] = "protected";
         });
 
         updateConfig.mutate(patch);
@@ -65,11 +64,7 @@ function ManagePage() {
 
     return (
         <div className="min-h-screen">
-            <Header
-                right={
-                    <UserMenu auth={auth} logout={logout} />
-                }
-            />
+            <Header right={<UserMenu auth={auth} logout={logout} />} />
             <div className="max-w-7xl mx-auto px-6 md:px-8 pt-4 pb-20">
                 <Tabs className="gap-4" value={activeTab} onValueChange={value => navigate({ to: "/manage/{-$tab}", params: { tab: value } })}>
                     <div className="w-full flex justify-between">
@@ -129,7 +124,9 @@ function ManagePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {(users ?? []).map(u => <UserTableRow key={u._id} user={u} />)}
+                                {(users ?? []).map(u => (
+                                    <UserTableRow key={u._id} user={u} />
+                                ))}
                             </TableBody>
                         </Table>
                     </TabsContent>
@@ -142,7 +139,9 @@ function ManagePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {(locations ?? []).map(l => <LocationTableRow key={l._id} location={l} />)}
+                                {(locations ?? []).map(l => (
+                                    <LocationTableRow key={l._id} location={l} />
+                                ))}
                             </TableBody>
                         </Table>
                     </TabsContent>
@@ -156,55 +155,38 @@ function ManagePage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {(brands ?? []).map(b => <BrandTableRow key={b._id} brand={b} />)}
+                                {(brands ?? []).map(b => (
+                                    <BrandTableRow key={b._id} brand={b} />
+                                ))}
                             </TableBody>
                         </Table>
                     </TabsContent>
-                    <TabsContent value={tabs[3]}>
+                    <TabsContent value={tabs[3]} className="pt-4 divide-y divide-border *:pt-8 *:pb-8 *:first:pt-0 *:last:pb-0">
                         {!cip && (
                             <>
                                 <ConfigSection title="Personalization">
+                                    <ConfigItem title="Card secondary info" description="Choose which info should additionally be displayed on the sneaker cards." wrap>
+                                        <InfoSelect value={config.cardSecondaryInfo} onChange={v => updateConfig.mutate({ ...config, cardSecondaryInfo: v })} />
+                                    </ConfigItem>
+                                    <ConfigItem title="Show owner color on card" description="Whether the accent color of the user who owns the pair should be displayed at the bottom right of the sneaker card.">
+                                        <Switch checked={config.cardShowOwnerColor} onCheckedChange={v => updateConfig.mutate({ ...config, cardShowOwnerColor: v })} />
+                                    </ConfigItem>
+                                    <ConfigItem title="Show decommisioned pairs" description="Whether decommissioned pairs should be displayed in the library by default, with no need to enable them on the filters.">
+                                        <Switch checked={config.defaultShowDecommissioned} onCheckedChange={v => updateConfig.mutate({ ...config, defaultShowDecommissioned: v })} />
+                                    </ConfigItem>
                                 </ConfigSection>
-                                <hr />
                                 <ConfigSection title="Security">
-                                    <ConfigItem
-                                        title="Public page"
-                                        description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!"
-                                    >
-                                        <Switch
-                                            checked={config.publicPage}
-                                            onCheckedChange={changePageSecurity}
-                                        />
+                                    <ConfigItem title="Public page" description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!">
+                                        <Switch checked={config.publicPage} onCheckedChange={changePageSecurity} />
                                     </ConfigItem>
-                                    <ConfigItem
-                                        title="Location visibility"
-                                        description="Allow anyone to view the location of your pairs without the need to log in. Proceed with caution!"
-                                        wrap
-                                    >
-                                        <VisibilitySelect
-                                            value={config.locationVisibility}
-                                            onChange={v => updateConfig.mutate({ ...config, locationVisibility: v })}
-                                        />
+                                    <ConfigItem title="Location visibility" description="Choose who can view the location of your pairs." wrap caution>
+                                        <VisibilitySelect value={config.locationVisibility} onChange={v => updateConfig.mutate({ ...config, locationVisibility: v })} />
                                     </ConfigItem>
-                                    <ConfigItem
-                                        title="Description visibility"
-                                        description="Allow anyone to view the descriptions of your pairs without the need to log in."
-                                        wrap
-                                    >
-                                        <VisibilitySelect
-                                            value={config.descriptionVisibility}
-                                            onChange={v => updateConfig.mutate({ ...config, descriptionVisibility: v })}
-                                        />
+                                    <ConfigItem title="Description visibility" description="Choose who can view the descriptions of your pairs." wrap>
+                                        <VisibilitySelect value={config.descriptionVisibility} onChange={v => updateConfig.mutate({ ...config, descriptionVisibility: v })} />
                                     </ConfigItem>
-                                    <ConfigItem
-                                        title="Original Owner visibility"
-                                        description="Allow anyone to view the original owner of your pairs without the need to log in."
-                                        wrap
-                                    >
-                                        <VisibilitySelect
-                                            value={config.originalOwnerVisibility}
-                                            onChange={v => updateConfig.mutate({ ...config, originalOwnerVisibility: v })}
-                                        />
+                                    <ConfigItem title="Original Owner visibility" description="Choose who can view the original owner of your pairs." wrap>
+                                        <VisibilitySelect value={config.originalOwnerVisibility} onChange={v => updateConfig.mutate({ ...config, originalOwnerVisibility: v })} />
                                     </ConfigItem>
                                 </ConfigSection>
                             </>
@@ -274,9 +256,7 @@ function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.bran
 
     return (
         <TableRow className="h-10">
-            <TableCell className="p-0">
-                {brand.iconUrl && <img src={brand.iconUrl} alt={brand.name} className="size-5 object-contain" />}
-            </TableCell>
+            <TableCell className="p-0">{brand.iconUrl && <img src={brand.iconUrl} alt={brand.name} className="size-5 object-contain" />}</TableCell>
             <TableCell>{brand.name}</TableCell>
             <TableCell className="p-0 text-right">
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground" onClick={() => setEditDialogOpen(true)}>
@@ -294,31 +274,32 @@ function BrandTableRow({ brand }: { brand: Awaited<ReturnType<typeof bridge.bran
 
 function ConfigSection({ title, children }: { title: string; children?: React.ReactNode }) {
     return (
-        <div className="my-6">
-            <h2 className="text-2xl md:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
-            {children}
+        <div className="space-y-4">
+            <h2 className="pl-5 text-2xl md:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
+            <div className="px-5 py-4 bg-accent rounded-2xl ring ring-border divide-y divide-border *:pt-4 *:pb-4 *:first:pt-0 *:last:pb-0">{children}</div>
         </div>
     );
 }
 
-function ConfigItem({ title, description, children, wrap = false }: { title: string; description?: string; children?: React.ReactNode; wrap?: boolean }) {
+function ConfigItem({ title, description, children, wrap = false, caution = false }: { title: string; description?: string; children?: React.ReactNode; wrap?: boolean; caution?: boolean }) {
     return (
-        <div className={cn("mt-5 flex", !wrap ? "gap-6" : "max-sm:flex-col gap-1.5 sm:gap-6")}>
+        <div className={cn("flex", !wrap ? "gap-6" : "max-sm:flex-col gap-1.5 sm:gap-6")}>
             <div className="flex-1 space-y-1">
                 <h3 className="text-sm sm:text-base text-secondary-foreground font-bold">{title}</h3>
-                <p className="text-xs md:text-sm text-muted-foreground">{description}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                    {description}
+                    {caution && <span className="text-secondary-foreground font-semibold"> Proceed with caution!</span>}
+                </p>
             </div>
-            <div className="pt-1.5 pr-2">
-                {children}
-            </div>
+            <div className="h-10 sm:h-11 md:h-12 flex items-center">{children}</div>
         </div>
     );
 }
 
 function VisibilitySelect({ value, onChange }: { value: DataModel["configs"]["document"]["locationVisibility"]; onChange: (value: DataModel["configs"]["document"]["locationVisibility"]) => unknown }) {
     const { config } = useConfig();
-    
-    const visibilityMap: Record<DataModel["configs"]["document"]["locationVisibility"], string> = {
+
+    const visibilityMap = {
         protected: "Only for members",
         guests: "Guests and members",
         public: "Public",
@@ -326,13 +307,50 @@ function VisibilitySelect({ value, onChange }: { value: DataModel["configs"]["do
 
     return (
         <Select value={value} onValueChange={v => onChange(v as keyof typeof visibilityMap)}>
+            <SelectTrigger className="w-full sm:w-52">{visibilityMap[value]}</SelectTrigger>
+            <SelectContent>
+                {Object.keys(visibilityMap).map(k => {
+                    if (k !== "public" || config.publicPage)
+                        return (
+                            <SelectItem value={k} key={k}>
+                                {visibilityMap[k as keyof typeof visibilityMap]}
+                            </SelectItem>
+                        );
+                })}
+            </SelectContent>
+        </Select>
+    );
+}
+
+function InfoSelect({ value, onChange }: { value: DataModel["configs"]["document"]["cardSecondaryInfo"]; onChange: (value: DataModel["configs"]["document"]["cardSecondaryInfo"]) => unknown }) {
+    const secondaryInfoMap = {
+        nothing: { icon: IconForbid2, label: "Nothing" },
+        location: { icon: IconMapPin, label: "Location" },
+        brand: { icon: IconRosetteDiscountCheck, label: "Brand" },
+        size: { icon: IconRuler2, label: "Size" },
+        owner: { icon: IconUser, label: "Owner" },
+    };
+    const selectedItem = secondaryInfoMap[value];
+
+    return (
+        <Select value={value} onValueChange={v => onChange(v as keyof typeof secondaryInfoMap)}>
             <SelectTrigger className="w-full sm:w-52">
-                {visibilityMap[value]}
+                <div className="size-full flex items-center gap-2">
+                    <selectedItem.icon />
+                    {selectedItem.label}
+                </div>
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="protected">{visibilityMap.protected}</SelectItem>
-                <SelectItem value="guests">{visibilityMap.guests}</SelectItem>
-                {config.publicPage && <SelectItem value="public">{visibilityMap.public}</SelectItem>}
+                {Object.keys(secondaryInfoMap).map(k => {
+                    const item = secondaryInfoMap[k as keyof typeof secondaryInfoMap];
+
+                    return (
+                        <SelectItem value={k} key={k}>
+                            <item.icon />
+                            {item.label}
+                        </SelectItem>
+                    );
+                })}
             </SelectContent>
         </Select>
     );

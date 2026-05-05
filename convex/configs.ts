@@ -3,8 +3,9 @@ import { query } from "@db/server";
 import { adminMutation } from "./customFunctions";
 
 export const ConfigUpdate = z.object({
-    showOwnerOnCard: z.boolean(),
-    showLocationOnCard: z.boolean(),
+    cardSecondaryInfo: z.union([z.literal("nothing"), z.literal("location"), z.literal("brand"), z.literal("size"), z.literal("owner")]),
+    cardShowOwnerColor: z.boolean(),
+    defaultShowDecommissioned: z.boolean(),
     enableSneakPick: z.boolean(),
     homePageSections: z.array(z.string()),
     publicPage: z.boolean(),

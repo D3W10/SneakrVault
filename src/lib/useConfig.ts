@@ -28,8 +28,9 @@ export function useConfig() {
 }
 
 const defaultConfig = {
-    showOwnerOnCard: true,
-    showLocationOnCard: true,
+    cardSecondaryInfo: "location",
+    cardShowOwnerColor: true,
+    defaultShowDecommissioned: false,
     enableSneakPick: true,
     homePageSections: ["SneakPick", "Birthday", "Grid", "Count"],
     publicPage: false,
