@@ -15,5 +15,3 @@ export interface Search {
     type?: Doc<"sneakers">["type"];
     decommissioned?: Doc<"sneakers">["decommissioned"];
 }
-
-export const sneakerTypes = ["Sneakers", "Shoes", "Boots", "Flip-flops"] as const;

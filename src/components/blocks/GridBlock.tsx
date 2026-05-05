@@ -3,6 +3,7 @@ import { IconLayoutGrid, IconSearch } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
 import bridge from "@/data/bridge";
+import { useConfig } from "@/lib/useConfig";
 import { creationSort, filterBySearch, hasSearched } from "@/lib/utils";
 import type { SessionState } from "@/data/session";
 import type { Search } from "@/lib/models";
@@ -18,7 +19,8 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
         queryKey: ["sneakers"],
         queryFn: bridge.sneakers.get,
     });
-    const searched = hasSearched(search);
+    const { config } = useConfig();
+    const searched = hasSearched(search, config);
     const filtered = filterBySearch(sneakers ?? [], search);
 
     return (

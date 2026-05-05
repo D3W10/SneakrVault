@@ -1,13 +1,22 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Search, Sneaker } from "@/lib/models";
+import type { Config } from "@/lib/useConfig";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function hasSearched(search: Search) {
-    return search.term.length > 0 || search.location || search.brand || search.owner || search.type || search.decommissioned !== undefined;
+export function hasSearched(search: Search, config: Config) {
+    return search.term.length > 0 || search.location || search.brand || search.owner || search.type !== allToUndefined(config.defaultTypeFilter) || search.decommissioned !== decommissionTransformer(config.defaultShowDecommissioned);
+}
+
+export function allToUndefined<T>(value: T | "all"): T | undefined {
+    return value === "all" ? undefined : value;
+}
+
+export function decommissionTransformer(value: boolean | undefined) {
+    return value ? false : undefined;
 }
 
 export function filterBySearch(sneakers: Sneaker[], search: Search) {

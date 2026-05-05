@@ -27,7 +27,7 @@ function SneakerDetails() {
     const [addToCollectionOpen, setAddToCollectionOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [acqDate, setAcqDate] = useState(new Date());
-    const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number; } | null>(null);
+    const [bdayStats, setBdayStats] = useState<{ years: number; daysUntil: number } | null>(null);
     const canGoBack = useCanGoBack();
     const { config } = useConfig();
     const navigate = useNavigate();
@@ -45,16 +45,13 @@ function SneakerDetails() {
     const showOriginalOwner = !config.publicPage || config.originalOwnerVisibility === "public" || (config.originalOwnerVisibility === "guests" && auth.isAuthenticated) || (config.originalOwnerVisibility === "protected" && auth.isAuthenticated && auth.role !== "guest");
 
     function handleBack() {
-        if (canGoBack)
-            router.history.back();
-        else
-            navigate({ to: "/" });
+        if (canGoBack) router.history.back();
+        else navigate({ to: "/" });
     }
 
     useEffect(() => {
         if (!isPending) {
-            if (!sneaker)
-                navigate({ to: "/" });
+            if (!sneaker) navigate({ to: "/" });
             else {
                 setAcqDate(sneaker.date ? parseISO(sneaker.date) : new Date());
 
@@ -65,13 +62,12 @@ function SneakerDetails() {
                     const birthdayDate = parseISO(sneaker.date);
                     let currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today)));
 
-                    if (isBefore(currentYearBirthday, today))
-                        currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today) + 1));
+                    if (isBefore(currentYearBirthday, today)) currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today) + 1));
 
                     if (isWithinInterval(currentYearBirthday, { start: today, end: nextWeek }))
                         setBdayStats({
                             years: differenceInYears(currentYearBirthday, birthdayDate),
-                            daysUntil: differenceInCalendarDays(currentYearBirthday, today)
+                            daysUntil: differenceInCalendarDays(currentYearBirthday, today),
                         });
                 }
             }
@@ -101,11 +97,13 @@ function SneakerDetails() {
                         </Button>
                         {auth.role !== "guest" && (
                             <DropdownMenu>
-                                <DropdownMenuTrigger render={
-                                    <Button variant="outline" size="icon">
-                                        <IconDots className="size-5" />
-                                    </Button>
-                                } />
+                                <DropdownMenuTrigger
+                                    render={
+                                        <Button variant="outline" size="icon">
+                                            <IconDots className="size-5" />
+                                        </Button>
+                                    }
+                                />
                                 <DropdownMenuContent className="w-42" align="end" sideOffset={8}>
                                     <DropdownMenuItem onClick={() => setEditOpen(true)}>
                                         <IconPencil className="size-4" />
@@ -149,51 +147,51 @@ function SneakerDetails() {
                     {sneaker ? (
                         (sneaker.size || sneaker.brand._id || (showLocation && sneaker.location._id) || sneaker.decommissioned || hasPick) && (
                             <div className="flex -m-1 p-1 gap-3 flex-1 overflow-x-auto scrollbar-hidden">
-                                {sneaker.size &&
-                                    <p className="w-fit px-3 py-1.5 flex items-center shrink-0 text-sm font-semibold bg-accent rounded-md ring ring-border">{sneaker.size}</p>
-                                }
-                                {sneaker.brand._id &&
+                                {sneaker.size && <p className="w-fit px-3 py-1.5 flex items-center shrink-0 text-sm font-semibold bg-accent rounded-md ring ring-border">{sneaker.size}</p>}
+                                {sneaker.brand._id && (
                                     <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 shrink-0 bg-accent rounded-md ring ring-border">
                                         {sneaker.brand.iconUrl && <img src={sneaker.brand.iconUrl} alt={sneaker.brand.name} className="size-4 object-contain" />}
                                         <p className="text-sm font-semibold">{sneaker.brand.name}</p>
                                     </div>
-                                }
-                                {showLocation && sneaker.location._id &&
+                                )}
+                                {showLocation && sneaker.location._id && (
                                     <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 shrink-0 bg-accent rounded-md ring ring-border">
                                         <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
                                         <p className="text-sm font-semibold">{sneaker.location.name}</p>
                                     </div>
-                                }
-                                {sneaker.decommissioned &&
-                                    <p className="w-fit px-3 py-1.5 flex items-center shrink-0 text-primary text-sm font-semibold bg-primary/15 rounded-md">Decommissioned</p>
-                                }
+                                )}
+                                {sneaker.decommissioned && <p className="w-fit px-3 py-1.5 flex items-center shrink-0 text-primary text-sm font-semibold bg-primary/15 rounded-md">Decommissioned</p>}
                                 {hasPick && (
                                     <div className="w-fit px-3 py-1.5 flex items-center gap-2.5 shrink-0 bg-accent rounded-md ring ring-border">
-                                        <div className="size-2.5 bg-(--user-color) rounded-full before:size-2.5 before:block before:bg-(--user-color) before:rounded-full before:animate-ping" style={{ "--user-color": sneaker.pickFor.color || "var(--color-muted-foreground)" } as React.CSSProperties} />
-                                        <p className="text-muted-foreground text-sm font-medium">In use by <span className="text-foreground font-bold">{sneaker.pickFor.username}</span></p>
+                                        <div
+                                            className="size-2.5 bg-(--user-color) rounded-full before:size-2.5 before:block before:bg-(--user-color) before:rounded-full before:animate-ping"
+                                            style={{ "--user-color": sneaker.pickFor.color || "var(--color-muted-foreground)" } as React.CSSProperties}
+                                        />
+                                        <p className="text-muted-foreground text-sm font-medium">
+                                            In use by <span className="text-foreground font-bold">{sneaker.pickFor.username}</span>
+                                        </p>
                                     </div>
                                 )}
                             </div>
                         )
-                    ) : <Skeleton className="w-3/7 h-8 rounded-md" />}
+                    ) : (
+                        <Skeleton className="w-3/7 h-8 rounded-md" />
+                    )}
                     <div className="flex max-md:flex-col gap-4 md:gap-6">
-                        {showDescription && (
-                            sneaker ? (
+                        {showDescription &&
+                            (sneaker ? (
                                 <div className="h-fit min-h-40 flex-1 p-4 bg-accent rounded-xl ring ring-border space-y-2">
                                     <div className="flex items-center gap-2">
                                         <IconMenu3 className="size-4 text-primary" />
                                         <h3 className="font-bold">Description</h3>
                                     </div>
-                                    {sneaker.description ?
-                                        <p className="max-md:text-sm font-medium text-muted-foreground whitespace-pre-line">{sneaker.description}</p>
-                                    :
-                                        <p className="max-md:text-sm italic text-muted-foreground">No description</p>
-                                    }
+                                    {sneaker.description ? <p className="max-md:text-sm font-medium text-muted-foreground whitespace-pre-line">{sneaker.description}</p> : <p className="max-md:text-sm italic text-muted-foreground">No description</p>}
                                 </div>
-                            ) : <Skeleton className="h-40 flex-1 rounded-xl" />
-                        )}
+                            ) : (
+                                <Skeleton className="h-40 flex-1 rounded-xl" />
+                            ))}
                         <div className={cn("md:w-86 flex flex-col gap-4 md:gap-6", showDescription ? "max-md:flex-1" : "flex-1")}>
-                            {config.enableSneakPick && <SneakPickSelector sneaker={sneaker} auth={auth} />}
+                            {config.sneakPickEnabled && <SneakPickSelector sneaker={sneaker} />}
                             {sneaker ? (
                                 <div className="w-full p-4 bg-accent rounded-xl ring ring-border space-y-4">
                                     <div className="flex items-center gap-2">
@@ -276,7 +274,9 @@ function SneakerDetails() {
                                         </InfoBox>
                                     )}
                                 </div>
-                            ) : <Skeleton className="w-full h-60 rounded-xl" />}
+                            ) : (
+                                <Skeleton className="w-full h-60 rounded-xl" />
+                            )}
                         </div>
                     </div>
                 </div>

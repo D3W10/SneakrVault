@@ -3,6 +3,7 @@ import { addDays, compareAsc, endOfDay, getYear, isBefore, isWithinInterval, par
 import { IconCake } from "@tabler/icons-react";
 import { SneakerCard } from "@/components/SneakerCard";
 import bridge from "@/data/bridge";
+import { useConfig } from "@/lib/useConfig";
 import { hasSearched } from "@/lib/utils";
 import type { Search } from "@/lib/models";
 
@@ -15,6 +16,7 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
         queryKey: ["sneakers"],
         queryFn: bridge.sneakers.get,
     });
+    const { config } = useConfig();
 
     const today = startOfDay(new Date());
     const nextWeek = endOfDay(addDays(today, 7));
@@ -43,7 +45,7 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
             return compareAsc(currentA, currentB);
         });
 
-    if (!hasSearched(search) && upcomingBirthdays.length !== 0) {
+    if (!hasSearched(search, config) && upcomingBirthdays.length !== 0) {
         return (
             <div className="px-6 md:px-8 flex flex-col gap-4">
                 <div className="flex items-center gap-2">

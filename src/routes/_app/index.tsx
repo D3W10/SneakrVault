@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { IconFilter2, IconPlus, IconSearch, IconX } from "@tabler/icons-react";
@@ -14,11 +14,11 @@ import { Header } from "@/components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
-import { sneakerTypes, type Search } from "@/lib/models";
 import { useLogout } from "@/lib/useLogout";
 import { useConfig } from "@/lib/useConfig";
 import { useOutsideClick } from "@/lib/useOutsideClick";
-import { cn } from "@/lib/utils";
+import { allToUndefined, cn, decommissionTransformer } from "@/lib/utils";
+import type { Search } from "@/lib/models";
 import type { Id } from "@db/dataModel";
 
 export const Route = createFileRoute("/_app/")({
@@ -32,6 +32,7 @@ function Index() {
     const [searchOpen, setSearchOpen] = useState(false);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [scrolling, setScrolling] = useState(false);
+    const { config } = useConfig();
     const logout = useLogout();
     const { data: brands } = useQuery({
         queryKey: ["brands"],
@@ -45,9 +46,9 @@ function Index() {
         queryKey: ["owners"],
         queryFn: bridge.users.getOwners,
     });
-    const configs = useConfig();
     const containerRef = useRef<HTMLDivElement>(null);
     const { auth } = Route.useRouteContext();
+    const sneakerTypes = ["Sneakers", "Shoes", "Boots", "Flip-flops"] as const;
 
     function addSneaker() {
         setAddDialogOpen(true);
@@ -55,13 +56,17 @@ function Index() {
 
     function onMobileChange(term: string) {
         setFiltersOpen(false);
-        setSearch({ ...search, term })
+        setSearch({ ...search, term });
     }
 
     function closeSearch() {
         setSearchOpen(false);
         setFiltersOpen(false);
     }
+
+    useEffect(() => {
+        setSearch({ ...search, type: allToUndefined(config.defaultTypeFilter), decommissioned: decommissionTransformer(config.defaultShowDecommissioned) });
+    }, [config.defaultTypeFilter, config.defaultShowDecommissioned]);
 
     useOutsideClick(containerRef, () => setFiltersOpen(false));
 
@@ -100,19 +105,8 @@ function Index() {
                                         <InputGroupAddon>
                                             <IconSearch className="size-4 text-muted-foreground" />
                                         </InputGroupAddon>
-                                        <InputGroupInput
-                                            className="max-md:hidden"
-                                            value={search.term}
-                                            placeholder="Search sneakers..."
-                                            onFocus={() => setFiltersOpen(true)}
-                                            onChange={e => setSearch({ ...search, term: e.target.value })}
-                                        />
-                                        <InputGroupInput
-                                            className="md:hidden"
-                                            value={search.term}
-                                            placeholder="Search sneakers..."
-                                            onChange={e => onMobileChange(e.target.value)}
-                                        />
+                                        <InputGroupInput className="max-md:hidden" value={search.term} placeholder="Search sneakers..." onFocus={() => setFiltersOpen(true)} onChange={e => setSearch({ ...search, term: e.target.value })} />
+                                        <InputGroupInput className="md:hidden" value={search.term} placeholder="Search sneakers..." onChange={e => onMobileChange(e.target.value)} />
                                     </InputGroup>
                                     <Button className="md:hidden" variant="outline" size="icon" onClick={() => setFiltersOpen(!filtersOpen)}>
                                         <IconFilter2 className="size-5" />
@@ -128,24 +122,9 @@ function Index() {
                                         options={[...(locations ?? []).map(l => ({ id: l._id, label: l.name })), { id: "outside", label: "Outside" }] as { id: Id<"locations"> | "outside" | undefined; label: string }[]}
                                         setFilter={l => setSearch({ ...search, location: l })}
                                     />
-                                    <FilterGroup
-                                        name="Brand"
-                                        current={search.brand}
-                                        options={(brands ?? []).map(b => ({ id: b._id, label: b.name }))}
-                                        setFilter={b => setSearch({ ...search, brand: b })}
-                                    />
-                                    <FilterGroup
-                                        name="Owner"
-                                        current={search.owner}
-                                        options={(owners ?? []).map(o => ({ id: o._id, label: o.username }))}
-                                        setFilter={o => setSearch({ ...search, owner: o })}
-                                    />
-                                    <FilterGroup
-                                        name="Type"
-                                        current={search.type}
-                                        options={sneakerTypes.map(o => ({ id: o, label: o }))}
-                                        setFilter={t => setSearch({ ...search, type: t })}
-                                    />
+                                    <FilterGroup name="Brand" current={search.brand} options={(brands ?? []).map(b => ({ id: b._id, label: b.name }))} setFilter={b => setSearch({ ...search, brand: b })} />
+                                    <FilterGroup name="Owner" current={search.owner} options={(owners ?? []).map(o => ({ id: o._id, label: o.username }))} setFilter={o => setSearch({ ...search, owner: o })} />
+                                    <FilterGroup name="Type" current={search.type} options={sneakerTypes.map(o => ({ id: o, label: o }))} setFilter={t => setSearch({ ...search, type: t })} />
                                     <FilterGroup
                                         name="Decommissioned"
                                         current={search.decommissioned}
@@ -165,8 +144,8 @@ function Index() {
                 outScrolling={setScrolling}
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
-                {config.homePageSections.map((section, idx) => {
-                    if (section === "SneakPick") return config.enableSneakPick && <SneakPickBlock key={idx} search={search} />;
+                {config.homepageSections.map((section, idx) => {
+                    if (section === "SneakPick") return config.sneakPickEnabled && <SneakPickBlock key={idx} search={search} />;
                     else if (section === "Birthday") return <BirthdayBlock key={idx} search={search} />;
                     else if (section === "Grid") return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
                     else if (section === "Count") return <CountBlock key={idx} search={search} />;

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { SneakerPhoto } from "@/components/SneakerPhoto";
 import bridge from "@/data/bridge";
+import { useConfig } from "@/lib/useConfig";
 import { useOutsideClick } from "@/lib/useOutsideClick";
 import { cn, hasSearched } from "@/lib/utils";
 import { Route } from "@/routes/__root";
@@ -23,8 +24,9 @@ export function SneakPickBlock({ search }: SneakPickBlockProps) {
         queryKey: ["sneakers", "picked"],
         queryFn: bridge.sneakers.getPicked,
     });
+    const { config } = useConfig();
 
-    if (!sneakers?.length || hasSearched(search)) return null;
+    if (!sneakers?.length || hasSearched(search, config)) return null;
 
     return (
         <div className="px-6 md:px-8 py-px flex gap-4 overflow-x-auto">
