@@ -63,6 +63,7 @@ export default defineSchema({
     configs: defineTable({
         cardSecondaryInfo: v.union(v.literal("nothing"), v.literal("location"), v.literal("brand"), v.literal("size"), v.literal("owner")),
         cardShowOwnerColor: v.boolean(),
+        defaultTypeFilter: v.union(v.literal("all"), v.literal("Sneakers"), v.literal("Shoes"), v.literal("Boots"), v.literal("Flip-flops")),
         defaultShowDecommissioned: v.boolean(),
         enableSneakPick: v.boolean(),
         homePageSections: v.array(v.string()),

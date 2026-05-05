@@ -18,10 +18,8 @@ export function Header({ left, right, outScrolling }: HeaderProps) {
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 10)
-                setScroll(true);
-            else
-                setScroll(false);
+            if (window.scrollY > 10) setScroll(true);
+            else setScroll(false);
         };
 
         window.addEventListener("scroll", handleScroll);

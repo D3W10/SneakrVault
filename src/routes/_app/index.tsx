@@ -68,11 +68,13 @@ function Index() {
     return (
         <div className="min-h-screen">
             <Header
-                left={auth.role !== "guest" && (
-                    <Button className="md:hidden" variant="outline" size="icon" onClick={addSneaker}>
-                        <IconPlus className="size-5" />
-                    </Button>
-                )}
+                left={
+                    auth.role !== "guest" && (
+                        <Button className="md:hidden" variant="outline" size="icon" onClick={addSneaker}>
+                            <IconPlus className="size-5" />
+                        </Button>
+                    )
+                }
                 right={
                     <>
                         <AddSneakerDialog open={addDialogOpen} setOpen={setAddDialogOpen} />
@@ -84,7 +86,14 @@ function Index() {
                                 <IconPlus className="size-5" />
                             </Button>
                         )}
-                        <div ref={containerRef} className={cn("max-md:fixed max-md:left-0 max-md:right-0 max-md:p-6 max-md:ring max-md:transition-all max-md:duration-300", !searchOpen ? "max-md:-top-22 max-md:ring-transparent" : "max-md:top-0 max-md:ring-border ", !scrolling ? "max-md:bg-background" : "max-md:bg-accent")}>
+                        <div
+                            ref={containerRef}
+                            className={cn(
+                                "max-md:fixed max-md:left-0 max-md:right-0 max-md:p-6 max-md:ring max-md:transition-all max-md:duration-300",
+                                !searchOpen ? "max-md:-top-22 max-md:ring-transparent" : "max-md:top-0 max-md:ring-border ",
+                                !scrolling ? "max-md:bg-background" : "max-md:bg-accent",
+                            )}
+                        >
                             <Popover open={filtersOpen}>
                                 <PopoverTrigger nativeButton={false} render={<div className="md:w-88 max-md:py-1 flex gap-2" />} tabIndex={-1}>
                                     <InputGroup className="w-full bg-secondary">
@@ -140,7 +149,10 @@ function Index() {
                                     <FilterGroup
                                         name="Decommissioned"
                                         current={search.decommissioned}
-                                        options={[{ id: true, label: "List" }, { id: false, label: "All" }]}
+                                        options={[
+                                            { id: true, label: "List" },
+                                            { id: false, label: "All" },
+                                        ]}
                                         unsetText="Hidden"
                                         setFilter={d => setSearch({ ...search, decommissioned: d })}
                                     />
@@ -153,17 +165,12 @@ function Index() {
                 outScrolling={setScrolling}
             />
             <div className="max-w-7xl mx-auto pt-4 pb-20 flex flex-col gap-8">
-                {configs.homePageSections.map((section, idx) => {
-                    if (section === "SneakPick")
-                        return configs.enableSneakPick && <SneakPickBlock key={idx} search={search} />;
-                    else if (section === "Birthday")
-                        return <BirthdayBlock key={idx} search={search} />;
-                    else if (section === "Grid")
-                        return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
-                    else if (section === "Count")
-                        return <CountBlock key={idx} search={search} />;
-                    else
-                        return null;
+                {config.homePageSections.map((section, idx) => {
+                    if (section === "SneakPick") return config.enableSneakPick && <SneakPickBlock key={idx} search={search} />;
+                    else if (section === "Birthday") return <BirthdayBlock key={idx} search={search} />;
+                    else if (section === "Grid") return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
+                    else if (section === "Count") return <CountBlock key={idx} search={search} />;
+                    else return null;
                 })}
             </div>
         </div>
@@ -183,22 +190,11 @@ function FilterGroup<T>({ name, current, options, unsetText, setFilter }: Filter
         <div className="space-y-1.5">
             <h4 className="font-semibold text-xs text-muted-foreground">{name}</h4>
             <div className="flex flex-wrap gap-1.5">
-                <Button
-                    className="h-7 text-xs rounded-full"
-                    size="sm"
-                    variant={current === undefined ? "default" : "outline"}
-                    onClick={() => setFilter(undefined)}
-                >
+                <Button className="h-7 text-xs rounded-full" size="sm" variant={current === undefined ? "default" : "outline"} onClick={() => setFilter(undefined)}>
                     {unsetText ?? "All"}
                 </Button>
                 {options.map((l, i) => (
-                    <Button
-                        key={i}
-                        className="h-7 text-xs rounded-full"
-                        size="sm"
-                        variant={current === l.id ? "default" : "outline"}
-                        onClick={() => setFilter(l.id)}
-                    >
+                    <Button key={i} className="h-7 text-xs rounded-full" size="sm" variant={current === l.id ? "default" : "outline"} onClick={() => setFilter(l.id)}>
                         {l.label}
                     </Button>
                 ))}

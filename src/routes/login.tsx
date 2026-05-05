@@ -24,16 +24,17 @@ function LoginComponent() {
         setError("");
 
         try {
-            const result = await login({ data: {
-                username,
-                password,
-            }});
+            const result = await login({
+                data: {
+                    username,
+                    password,
+                },
+            });
 
             if (result.success) {
                 await router.invalidate();
                 await router.navigate({ to: "/" });
-            } else
-                setError(result.error || "Invalid credentials");
+            } else setError(result.error || "Invalid credentials");
         } catch (err) {
             console.error(err);
             setError(String(err));
@@ -87,7 +88,9 @@ function LoginComponent() {
                             </Field>
                         </FieldGroup>
                     </FieldSet>
-                    <Button type="submit" disabled={!username || !password || loading}>{loading ? <Spinner /> : "Login"}</Button>
+                    <Button type="submit" disabled={!username || !password || loading}>
+                        {loading ? <Spinner /> : "Login"}
+                    </Button>
                 </FieldGroup>
             </form>
             <p className={cn("h-6 text-muted-foreground font-semibold transition-opacity duration-200", !error ? "opacity-0" : "opacity-100")}>{error}</p>

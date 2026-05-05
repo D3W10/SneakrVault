@@ -24,9 +24,7 @@ export function AddUserDialog(props: AddUserDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={rest.setOpen}>
-            <DialogContent showCloseButton={false}>
-                {open && <AddUserDialogContent {...rest} />}
-            </DialogContent>
+            <DialogContent showCloseButton={false}>{open && <AddUserDialogContent {...rest} />}</DialogContent>
         </Dialog>
     );
 }
@@ -122,9 +120,7 @@ function AddUserDialogContent({ setOpen, user, isCurrentUser = false }: Omit<Add
                     <Field className="flex-2">
                         <Label htmlFor="userRole">Role</Label>
                         <Select value={role} disabled={isCurrentUser || isSaving} onValueChange={e => setRole(e ?? "guest")}>
-                            <SelectTrigger className="w-full">
-                                {role[0].toUpperCase() + role.slice(1)}
-                            </SelectTrigger>
+                            <SelectTrigger className="w-full">{role[0].toUpperCase() + role.slice(1)}</SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="guest">Guest</SelectItem>
                                 <SelectItem value="member">Member</SelectItem>
@@ -148,7 +144,7 @@ function AddUserDialogContent({ setOpen, user, isCurrentUser = false }: Omit<Add
             </FieldGroup>
             <DialogFooter>
                 <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                <Button type="submit" className="sm:w-31" disabled={isSaving || !username || !role || !color || !isColorValid || !user && !password}>
+                <Button type="submit" className="sm:w-31" disabled={isSaving || !username || !role || !color || !isColorValid || (!user && !password)}>
                     {!isSaving ? "Save changes" : <Spinner />}
                 </Button>
             </DialogFooter>

@@ -16,9 +16,7 @@ export function SneakerPhoto({ sneaker, className, hideText = false }: SneakerPh
             {isAvailable && sneaker?.photoUrl ? (
                 <img src={sneaker.photoUrl} alt={`${sneaker.name} ${sneaker.color}`} className="size-full bg-white/4 rounded-lg object-contain" onError={() => setIsAvailable(false)} />
             ) : (
-                <div className="size-full flex justify-center items-center text-foreground/50 bg-white/4 rounded-lg">
-                    {!hideText && <span className="text-xs uppercase font-bold">No Image</span>}
-                </div>
+                <div className="size-full flex justify-center items-center text-foreground/50 bg-white/4 rounded-lg">{!hideText && <span className="text-xs uppercase font-bold">No Image</span>}</div>
             )}
         </div>
     );

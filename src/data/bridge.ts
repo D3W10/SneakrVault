@@ -38,13 +38,9 @@ async function handleMutation(mutationFn: () => Promise<unknown>, errorMessage: 
     }
 }
 
-const getSneakers = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.sneakers.get, await generateAuthPayload()), "Failed to get sneakers"),
-);
+const getSneakers = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.sneakers.get, await generateAuthPayload()), "Failed to get sneakers"));
 
-const getPickedSneakers = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.sneakers.getPickedSneakers, await generateAuthPayload()), "Failed to get picked sneakers"),
-);
+const getPickedSneakers = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.sneakers.getPickedSneakers, await generateAuthPayload()), "Failed to get picked sneakers"));
 
 const addSneaker = createServerFn({ method: "POST" })
     .inputValidator(SneakerInsert)
@@ -85,13 +81,9 @@ const deleteSneaker = createServerFn({ method: "POST" })
         ),
     );
 
-const getBrands = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.brands.get, await generateAuthPayload()), "Failed to get brands"),
-);
+const getBrands = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.brands.get, await generateAuthPayload()), "Failed to get brands"));
 
-const generateUploadUrl = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().mutation(api.storage.generateUploadUrl, await generateAuthPayload()), "Failed to generate upload url"),
-);
+const generateUploadUrl = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().mutation(api.storage.generateUploadUrl, await generateAuthPayload()), "Failed to generate upload url"));
 
 const addBrand = createServerFn({ method: "POST" })
     .inputValidator(BrandInsert)
@@ -132,9 +124,7 @@ const deleteBrand = createServerFn({ method: "POST" })
         ),
     );
 
-const getLocations = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.locations.get, await generateAuthPayload()), "Failed to get locations"),
-);
+const getLocations = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.locations.get, await generateAuthPayload()), "Failed to get locations"));
 
 const addLocation = createServerFn({ method: "POST" })
     .inputValidator(LocationInsert)
@@ -175,13 +165,9 @@ const deleteLocation = createServerFn({ method: "POST" })
         ),
     );
 
-const getUsers = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.users.get, await generateAuthPayload()), "Failed to get users"),
-);
+const getUsers = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.users.get, await generateAuthPayload()), "Failed to get users"));
 
-const getOwners = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.users.getOwners, await generateAuthPayload()), "Failed to get owners"),
-);
+const getOwners = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.users.getOwners, await generateAuthPayload()), "Failed to get owners"));
 
 const addUser = createServerFn({ method: "POST" })
     .inputValidator(UserInsert.omit({ passwordHash: true }).extend({ password: z.string() }))
@@ -227,9 +213,7 @@ const deleteUser = createServerFn({ method: "POST" })
         ),
     );
 
-const getCollections = createServerFn({ method: "GET" }).handler(() =>
-    handleQuery(async () => getClient().query(api.collections.get, await generateAuthPayload()), "Failed to get collections"),
-);
+const getCollections = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.collections.get, await generateAuthPayload()), "Failed to get collections"));
 
 const addCollection = createServerFn({ method: "POST" })
     .inputValidator(CollectionInsert)

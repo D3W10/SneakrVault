@@ -29,9 +29,7 @@ export function AddSneakerDialog(props: AddSneakerDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={rest.setOpen}>
-            <DialogContent showCloseButton={false}>
-                {open && <AddSneakerDialogContent {...rest} />}
-            </DialogContent>
+            <DialogContent showCloseButton={false}>{open && <AddSneakerDialogContent {...rest} />}</DialogContent>
         </Dialog>
     );
 }
@@ -78,8 +76,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
         if (/\d\/\d/g.test(size)) {
             for (const frac of size.matchAll(/(\d)\/(\d)/g)) {
                 const char = fractions[`${frac[1]}/${frac[2]}`];
-                if (char)
-                    size = size.replace(frac[0], char);
+                if (char) size = size.replace(frac[0], char);
             }
         }
 
@@ -112,8 +109,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 body: photo,
             });
             photoId = (await upload.json()).storageId;
-        } else
-            photoId = photo;
+        } else photoId = photo;
 
         if (!sneaker) {
             const result = await bridge.sneakers.add({
@@ -128,9 +124,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     date: date?.toISOString(),
                     style: style || undefined,
                     type,
-                    originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local"
-                        ? { type: "local", id: originalOwnerId }
-                        : { type: "outside", name: originalOwnerName },
+                    originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local" ? { type: "local", id: originalOwnerId } : { type: "outside", name: originalOwnerName },
                     decommissioned,
                     stockxUrl,
                 },
@@ -154,9 +148,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     date: date?.toISOString(),
                     style: style || undefined,
                     type,
-                    originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local"
-                        ? { type: "local", id: originalOwnerId }
-                        : { type: "outside", name: originalOwnerName },
+                    originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local" ? { type: "local", id: originalOwnerId } : { type: "outside", name: originalOwnerName },
                     decommissioned,
                     stockxUrl,
                 },
@@ -175,12 +167,10 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     }
 
     useEffect(() => {
-        if (!sneaker?.originalOwner._id)
-            return;
+        if (!sneaker?.originalOwner._id) return;
 
         const match = owners?.find(o => o._id === sneaker.originalOwner._id);
-        if (match)
-            setOriginalOwnerName(match.username);
+        if (match) setOriginalOwnerName(match.username);
     }, [owners, sneaker]);
 
     const selBrand = brands?.find(b => b._id === brand);
@@ -218,7 +208,9 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                 <Label htmlFor="sneakerBrand">Brand</Label>
                                 <Select value={brand} disabled={isSaving} onValueChange={e => setBrand(e ?? "")}>
                                     <SelectTrigger className="w-full">
-                                        {!selBrand ? "Select a brand" : (
+                                        {!selBrand ? (
+                                            "Select a brand"
+                                        ) : (
                                             <div className="flex items-center gap-2">
                                                 {selBrand.iconUrl && <img src={selBrand.iconUrl} alt={selBrand.name} className="size-4 object-contain" />}
                                                 {selBrand.name}
@@ -238,12 +230,12 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                             <Field>
                                 <Label htmlFor="sneakerLocation">Location</Label>
                                 <Select value={location} disabled={isSaving} onValueChange={e => setLocation(e ?? "outside")}>
-                                    <SelectTrigger className="w-full">
-                                        {!selLocation ? "Select a location" : typeof selLocation === "object" ? selLocation.name : "Outside"}
-                                    </SelectTrigger>
+                                    <SelectTrigger className="w-full">{!selLocation ? "Select a location" : typeof selLocation === "object" ? selLocation.name : "Outside"}</SelectTrigger>
                                     <SelectContent>
                                         {(locations ?? []).map(l => (
-                                            <SelectItem value={l._id} key={l._id}>{l.name}</SelectItem>
+                                            <SelectItem value={l._id} key={l._id}>
+                                                {l.name}
+                                            </SelectItem>
                                         ))}
                                         <SelectItem value="outside">Outside</SelectItem>
                                     </SelectContent>
@@ -307,16 +299,17 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                             <Field>
                                 <Label htmlFor="sneakerDate">Acquisition Date</Label>
                                 <Popover>
-                                    <PopoverTrigger disabled={isSaving} render={<Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">{date ? format(date, "PPP") : <span>Pick a date</span>}<IconChevronDown data-icon="inline-end" /></Button>} />
+                                    <PopoverTrigger
+                                        disabled={isSaving}
+                                        render={
+                                            <Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">
+                                                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                                <IconChevronDown data-icon="inline-end" />
+                                            </Button>
+                                        }
+                                    />
                                     <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            captionLayout="dropdown"
-                                            required
-                                            selected={date ?? undefined}
-                                            defaultMonth={date ?? undefined}
-                                            onSelect={setDate}
-                                        />
+                                        <Calendar mode="single" captionLayout="dropdown" required selected={date ?? undefined} defaultMonth={date ?? undefined} onSelect={setDate} />
                                     </PopoverContent>
                                 </Popover>
                             </Field>
@@ -325,11 +318,19 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                 <Combobox items={owners ?? []} value={originalOwnerId} disabled={isSaving} onValueChange={e => e && (e === "unknown" ? onCustomSelect("Unknown") : onSelect(e))}>
                                     <ComboboxInput placeholder="Select an owner" value={originalOwnerName} ref={originalOwnerCombobox} disabled={isSaving} onChange={e => onCustomSelect(e.target.value)}>
                                         <InputGroupAddon className="pl-2.5 pr-0.5">
-                                            <div className="size-2.5 rounded-full" style={{ backgroundColor: owners?.find(o => o._id === originalOwnerId)?.color || "var(--color-muted-foreground)" }} />
+                                            <div
+                                                className="size-2.5 rounded-full"
+                                                style={{
+                                                    backgroundColor: owners?.find(o => o._id === originalOwnerId)?.color || "var(--color-muted-foreground)",
+                                                }}
+                                            />
                                         </InputGroupAddon>
                                     </ComboboxInput>
                                     <ComboboxContent anchor={originalOwnerCombobox}>
-                                        <ComboboxEmpty>Create "{originalOwnerName.slice(0, 12)}{originalOwnerName.length > 12 && "..."}"</ComboboxEmpty>
+                                        <ComboboxEmpty>
+                                            Create "{originalOwnerName.slice(0, 12)}
+                                            {originalOwnerName.length > 12 && "..."}"
+                                        </ComboboxEmpty>
                                         <ComboboxList className="pb-0">
                                             {(owner: User) => (
                                                 <ComboboxItem key={owner._id} value={owner._id}>
@@ -369,7 +370,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <DialogFooter>
                     <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
+                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || (stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl))}>
                         {!isSaving ? "Save changes" : <Spinner />}
                     </Button>
                 </DialogFooter>

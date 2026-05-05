@@ -30,6 +30,7 @@ export function useConfig() {
 const defaultConfig = {
     cardSecondaryInfo: "location",
     cardShowOwnerColor: true,
+    defaultTypeFilter: "all",
     defaultShowDecommissioned: false,
     enableSneakPick: true,
     homePageSections: ["SneakPick", "Birthday", "Grid", "Count"],

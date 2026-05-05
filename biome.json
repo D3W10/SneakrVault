@@ -6,7 +6,7 @@
     "formatter": {
         "indentStyle": "space",
         "indentWidth": 4,
-        "lineWidth": 160
+        "lineWidth": 500
     },
     "linter": {
         "domains": {

@@ -24,25 +24,16 @@ export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
     return (
         <div className="px-6 md:px-8 flex flex-col gap-4">
             <div className="flex items-center gap-2">
-                {!searched ? (
-                    <IconLayoutGrid className="size-6 text-primary" />
-                ) : (
-                    <IconSearch className="size-6 text-primary" />
-                )}
+                {!searched ? <IconLayoutGrid className="size-6 text-primary" /> : <IconSearch className="size-6 text-primary" />}
                 <h2 className="text-xl font-bold text-white">{!searched ? "All Sneakers" : "Search Results"}</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {isPending ? (
-                    Array(15).fill(null).map((_, i) => <SneakerCardSkeleton key={i} />)
+                    Array(15)
+                        .fill(null)
+                        .map((_, i) => <SneakerCardSkeleton key={i} />)
                 ) : filtered.length !== 0 ? (
-                    filtered
-                        .sort(creationSort)
-                        .map(s => (
-                            <SneakerCard
-                                key={s._id}
-                                sneaker={s}
-                            />
-                        ))
+                    filtered.sort(creationSort).map(s => <SneakerCard key={s._id} sneaker={s} />)
                 ) : (
                     <div className="py-20 flex flex-col items-center gap-4 col-span-full font-medium text-center text-muted-foreground">
                         {!searched ? (

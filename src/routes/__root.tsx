@@ -17,17 +17,14 @@ export const Route = createRootRouteWithContext<{
         const returnAuth = () => ({ auth: { ...auth, role: auth.isAuthenticated ? auth.role : "guest" } });
 
         if (location.pathname.startsWith("/login")) {
-            if (auth.isAuthenticated)
-                throw redirect({ to: "/" });
+            if (auth.isAuthenticated) throw redirect({ to: "/" });
 
             return returnAuth();
         }
 
-        if (!auth.isAuthenticated && !configs?.publicPage)
-            throw redirect({ to: "/login" });
+        if (!auth.isAuthenticated && !configs?.publicPage) throw redirect({ to: "/login" });
 
-        if (auth.role !== "admin" && location.pathname.startsWith("/manage"))
-            throw redirect({ to: "/" });
+        if (auth.role !== "admin" && location.pathname.startsWith("/manage")) throw redirect({ to: "/" });
 
         return returnAuth();
     },
@@ -69,9 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <HeadContent />
             </head>
             <body>
-                <TanStackQueryProvider>
-                    {children}
-                </TanStackQueryProvider>
+                <TanStackQueryProvider>{children}</TanStackQueryProvider>
                 <TanStackDevtools
                     config={{
                         position: "bottom-right",
@@ -90,5 +85,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <Scripts />
             </body>
         </html>
-    )
+    );
 }

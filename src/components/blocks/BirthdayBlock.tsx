@@ -18,31 +18,30 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
 
     const today = startOfDay(new Date());
     const nextWeek = endOfDay(addDays(today, 7));
-    const upcomingBirthdays = (sneakers ?? []).filter(s => {
-        if (!s.date) return false;
+    const upcomingBirthdays = (sneakers ?? [])
+        .filter(s => {
+            if (!s.date) return false;
 
-        const birthdayDate = parseISO(s.date);
-        let currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today)));
+            const birthdayDate = parseISO(s.date);
+            let currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today)));
 
-        if (isBefore(currentYearBirthday, today))
-            currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today) + 1));
+            if (isBefore(currentYearBirthday, today)) currentYearBirthday = startOfDay(setYear(birthdayDate, getYear(today) + 1));
 
-        return isWithinInterval(currentYearBirthday, { start: today, end: nextWeek });
-    }).sort((a, b) => {
-        if (!a.date || !b.date) return 0;
+            return isWithinInterval(currentYearBirthday, { start: today, end: nextWeek });
+        })
+        .sort((a, b) => {
+            if (!a.date || !b.date) return 0;
 
-        const bdayA = parseISO(a.date);
-        let currentA = startOfDay(setYear(bdayA, getYear(today)));
-        if (isBefore(currentA, today))
-            currentA = startOfDay(setYear(bdayA, getYear(today) + 1));
+            const bdayA = parseISO(a.date);
+            let currentA = startOfDay(setYear(bdayA, getYear(today)));
+            if (isBefore(currentA, today)) currentA = startOfDay(setYear(bdayA, getYear(today) + 1));
 
-        const bdayB = parseISO(b.date);
-        let currentB = startOfDay(setYear(bdayB, getYear(today)));
-        if (isBefore(currentB, today))
-            currentB = startOfDay(setYear(bdayB, getYear(today) + 1));
+            const bdayB = parseISO(b.date);
+            let currentB = startOfDay(setYear(bdayB, getYear(today)));
+            if (isBefore(currentB, today)) currentB = startOfDay(setYear(bdayB, getYear(today) + 1));
 
-        return compareAsc(currentA, currentB);
-    });
+            return compareAsc(currentA, currentB);
+        });
 
     if (!hasSearched(search) && upcomingBirthdays.length !== 0) {
         return (
@@ -53,11 +52,7 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
                 </div>
                 <div className="p-px pb-4 flex gap-4 overflow-x-auto">
                     {upcomingBirthdays.map(s => (
-                        <SneakerCard 
-                            key={s._id} 
-                            sneaker={s} 
-                            birthday 
-                        />
+                        <SneakerCard key={s._id} sneaker={s} birthday />
                     ))}
                 </div>
             </div>
