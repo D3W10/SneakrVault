@@ -18,10 +18,9 @@ import { Header } from "@/components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
-import { useConfig } from "@/lib/useConfig";
+import { useConfig, type Config } from "@/lib/useConfig";
 import { useLogout } from "@/lib/useLogout";
 import { cn } from "@/lib/utils";
-import type { DataModel } from "@db/dataModel";
 
 export const Route = createFileRoute("/_app/manage/{-$tab}")({
     component: ManagePage,
@@ -132,6 +131,9 @@ function ManagePage() {
                                         <Switch checked={config.sneakPickEnabled} onCheckedChange={v => updateConfig.mutate({ ...config, sneakPickEnabled: v })} />
                                     </ConfigItem>
                                     <ConfigItem title="Homepage sections" description="Customize the order of the sections that appear on the home page"></ConfigItem>
+                                    <ConfigItem title="Cover frame" description="Whether the photos of pairs should cover the square they're displayed in.">
+                                        <Switch checked={config.coverFrame} onCheckedChange={v => updateConfig.mutate({ ...config, coverFrame: v })} />
+                                    </ConfigItem>
                                 </ConfigSection>
                                 <ConfigSection title="Security">
                                     <ConfigItem title="Public page" description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!">
@@ -287,7 +289,7 @@ function ConfigItem({ title, description, children, wrap = false, caution = fals
     );
 }
 
-function InfoSelect({ value, onChange }: { value: DataModel["configs"]["document"]["cardSecondaryInfo"]; onChange: (value: DataModel["configs"]["document"]["cardSecondaryInfo"]) => unknown }) {
+function InfoSelect({ value, onChange }: { value: Config["cardSecondaryInfo"]; onChange: (value: Config["cardSecondaryInfo"]) => unknown }) {
     const secondaryInfoMap = {
         nothing: { icon: IconForbid2, label: "Nothing" },
         location: { icon: IconMapPin, label: "Location" },
@@ -321,7 +323,7 @@ function InfoSelect({ value, onChange }: { value: DataModel["configs"]["document
     );
 }
 
-function PairTypeSelect({ value, onChange }: { value: DataModel["configs"]["document"]["defaultTypeFilter"]; onChange: (value: DataModel["configs"]["document"]["defaultTypeFilter"]) => unknown }) {
+function PairTypeSelect({ value, onChange }: { value: Config["defaultTypeFilter"]; onChange: (value: Config["defaultTypeFilter"]) => unknown }) {
     const pairTypeMap = {
         all: "All types",
         Sneakers: "Sneakers",
@@ -344,7 +346,7 @@ function PairTypeSelect({ value, onChange }: { value: DataModel["configs"]["docu
     );
 }
 
-function VisibilitySelect({ value, onChange }: { value: DataModel["configs"]["document"]["locationVisibility"]; onChange: (value: DataModel["configs"]["document"]["locationVisibility"]) => unknown }) {
+function VisibilitySelect({ value, onChange }: { value: Config["locationVisibility"]; onChange: (value: Config["locationVisibility"]) => unknown }) {
     const { config } = useConfig();
 
     const visibilityMap = {

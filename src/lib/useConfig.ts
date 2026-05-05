@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import bridge from "@/data/bridge";
 import type { DataModel } from "@db/dataModel";
 
-export type Config = Omit<DataModel["configs"]["document"], "_id" | "_creationTime">;
+export type Config = Required<Omit<DataModel["configs"]["document"], "_id" | "_creationTime">>;
 
 export function useConfig() {
     const [config, setConfig] = useState<Config>(defaultConfig);
@@ -34,6 +34,7 @@ const defaultConfig = {
     defaultShowDecommissioned: false,
     sneakPickEnabled: true,
     homepageSections: ["SneakPick", "Birthday", "Grid", "Count"],
+    coverFrame: true,
     publicPage: false,
     locationVisibility: "protected",
     descriptionVisibility: "protected",

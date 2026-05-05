@@ -29,13 +29,13 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
             params={{ id: sneaker._id }}
             className={cn("min-w-60 block relative p-2 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0", !birthday ? "w-full" : "max-w-84 pr-8 shrink-0")}
         >
-            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="w-fit h-full flex items-center gap-4 relative z-1">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="h-full flex items-center gap-4 relative z-1">
                 <SneakerPhoto sneaker={sneaker} />
-                <div className="min-w-0 flex flex-col justify-center gap-y-2">
+                <div className="min-w-0 flex flex-col justify-center gap-y-2 flex-1">
                     <div>
-                        <h3 className="text-lg text-white group-hover:text-primary-200 font-bold tracking-tight truncate transition-colors">{sneaker.name}</h3>
-                        <h3 className="text-sm text-zinc-300 group-hover:text-primary-100 font-medium truncate transition-colors">{sneaker.color}</h3>
+                        <h3 className="text-base md:text-lg text-foreground font-bold tracking-tight truncate transition-colors">{sneaker.name}</h3>
+                        <h4 className="text-sm text-secondary-foreground font-medium truncate transition-colors">{sneaker.color}</h4>
                     </div>
                     <div className="flex items-center gap-1.5 text-zinc-400 transition-colors *:[svg]:size-4 *:[svg]:shrink-0 *:[svg]:text-primary">
                         {!birthday ? (
@@ -95,7 +95,7 @@ function SecondaryInfo({ value, children }: { value?: string; children: React.Re
     return (
         <>
             {children}
-            <span className="text-sm font-semibold opacity-75 group-hover:opacity-100 truncate transition">{value ?? "Unknown"}</span>
+            <span className="text-sm text-muted-foreground font-semibold opacity-75 group-hover:opacity-100 truncate transition duration-300">{value ?? "Unknown"}</span>
         </>
     );
 }
