@@ -16,16 +16,19 @@ export const SneakerInsert = z.object({
     date: z.string().optional(),
     style: z.string().optional(),
     type: z.union([z.literal("Sneakers"), z.literal("Shoes"), z.literal("Boots"), z.literal("Flip-flops")]),
-    originalOwner: z.union([
-        z.object({
-            type: z.literal("local"),
-            id: zid("users"),
-        }),
-        z.object({
-            type: z.literal("outside"),
-            name: z.string(),
-        })
-    ]).optional(),
+    originalOwner: z
+        .union([
+            z.object({
+                type: z.literal("local"),
+                id: zid("users"),
+            }),
+            z.object({
+                type: z.literal("outside"),
+                name: z.string(),
+            }),
+        ])
+        .optional(),
+    condition: z.number().optional(),
     decommissioned: z.boolean(),
     stockxUrl: z.string().optional(),
     goatUrl: z.string().optional(),
@@ -51,13 +54,7 @@ export const getPickedSneakers = guestQuery({
         const now = new Date().toISOString();
         const sneakers = await ctx.db
             .query("sneakers")
-            .filter(q =>
-                q.and(
-                    q.neq(q.field("pickFor"), undefined),
-                    q.neq(q.field("pickUntil"), undefined),
-                    q.lt(now, q.field("pickUntil")),
-                ),
-            )
+            .filter(q => q.and(q.neq(q.field("pickFor"), undefined), q.neq(q.field("pickUntil"), undefined), q.lt(now, q.field("pickUntil"))))
             .collect();
 
         return Promise.all(sneakers.map(s => transformSneaker(ctx, s)));
@@ -78,19 +75,22 @@ export const update = memberMutation({
         const { _id, photo, ...rest } = args;
 
         if (rest.pickFor && rest.pickUntil) {
-            const oldPicks = await ctx.db.query("sneakers").withIndex("by_pickFor", q => q.eq("pickFor", rest.pickFor)).collect();
-            await Promise.all(
-                oldPicks.map(p => ctx.db.patch(p._id, { pickFor: undefined, pickUntil: undefined }))
-            );
+            const oldPicks = await ctx.db
+                .query("sneakers")
+                .withIndex("by_pickFor", q => q.eq("pickFor", rest.pickFor))
+                .collect();
+            await Promise.all(oldPicks.map(p => ctx.db.patch(p._id, { pickFor: undefined, pickUntil: undefined })));
         }
 
-        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), _id)).first();
+        const sneaker = await ctx.db
+            .query("sneakers")
+            .filter(q => q.eq(q.field("_id"), _id))
+            .first();
         const patch = { ...rest } as z.infer<typeof SneakerInsert>;
 
         if (photo !== undefined) {
             patch.photo = photo === null ? undefined : photo;
-            if (sneaker?.photo)
-                await ctx.storage.delete(sneaker.photo);
+            if (sneaker?.photo) await ctx.storage.delete(sneaker.photo);
         }
 
         await ctx.db.patch(args._id, patch);
@@ -101,9 +101,11 @@ export const update = memberMutation({
 export const remove = memberMutation({
     args: { _id: zid("sneakers") },
     handler: async (ctx, args) => {
-        const sneaker = await ctx.db.query("sneakers").filter(q => q.eq(q.field("_id"), args._id)).first();
-        if (sneaker?.photo)
-            await ctx.storage.delete(sneaker.photo);
+        const sneaker = await ctx.db
+            .query("sneakers")
+            .filter(q => q.eq(q.field("_id"), args._id))
+            .first();
+        if (sneaker?.photo) await ctx.storage.delete(sneaker.photo);
 
         await ctx.db.delete(args._id);
         return { success: true };
@@ -114,13 +116,12 @@ async function transformSneaker(ctx: QueryCtx, sneaker: Doc<"sneakers">) {
     let brand = { _id: "", name: "Unknown", iconUrl: "" };
     if (sneaker.brand) {
         const doc = await ctx.db.get(sneaker.brand);
-        brand = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown", iconUrl: (doc?.icon && await ctx.storage.getUrl(doc.icon)) ?? "" };
+        brand = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown", iconUrl: (doc?.icon && (await ctx.storage.getUrl(doc.icon))) ?? "" };
     }
 
     let location = { _id: "", name: "Unknown" };
     if (sneaker.location) {
-        if (sneaker.location === "outside")
-            location = { _id: "outside", name: "Outside" };
+        if (sneaker.location === "outside") location = { _id: "outside", name: "Outside" };
         else {
             const doc = await ctx.db.get(sneaker.location);
             location = { _id: doc?._id ?? "", name: doc?.name ?? "Unknown" };
@@ -138,8 +139,7 @@ async function transformSneaker(ctx: QueryCtx, sneaker: Doc<"sneakers">) {
         if (sneaker.originalOwner.type === "local") {
             const doc = await ctx.db.get(sneaker.originalOwner.id);
             originalOwner = { _id: doc?._id ?? "", type: "local", username: doc?.username ?? "", color: doc?.color ?? "" };
-        } else
-            originalOwner = { _id: "", type: "outside", username: sneaker.originalOwner.name, color: "" };
+        } else originalOwner = { _id: "", type: "outside", username: sneaker.originalOwner.name, color: "" };
     }
 
     let pickFor = { _id: "", username: "", color: "" };
@@ -151,10 +151,10 @@ async function transformSneaker(ctx: QueryCtx, sneaker: Doc<"sneakers">) {
     return {
         ...sneaker,
         brand,
-        photoUrl: sneaker.photo && await ctx.storage.getUrl(sneaker.photo),
+        photoUrl: sneaker.photo && (await ctx.storage.getUrl(sneaker.photo)),
         location,
         owner,
         originalOwner,
-        pickFor
+        pickFor,
     };
 }

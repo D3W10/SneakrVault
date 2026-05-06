@@ -122,7 +122,7 @@ function ManagePage() {
                                     <ConfigItem title="Show owner color on card" description="Whether the accent color of the user who owns the pair should be displayed at the bottom right of the sneaker card.">
                                         <Switch checked={config.cardShowOwnerColor} onCheckedChange={v => updateConfig.mutate({ ...config, cardShowOwnerColor: v })} />
                                     </ConfigItem>
-                                    <ConfigItem title="Default type filter" description="Choose the default type of pairs to show on the library.">
+                                    <ConfigItem title="Default type filter" description="Choose the default type of pairs to show on the library." wrap="mobile">
                                         <PairTypeSelect value={config.defaultTypeFilter} onChange={v => updateConfig.mutate({ ...config, defaultTypeFilter: v })} />
                                     </ConfigItem>
                                     <ConfigItem title="Show decommisioned pairs" description="Whether decommissioned pairs should be displayed in the library by default, with no need to enable them on the filters.">
@@ -131,7 +131,16 @@ function ManagePage() {
                                     <ConfigItem title="SneakPick" description="Enables/Disabled the sneak pick feature. This allows users to select pairs to them to wear or pick for other users.">
                                         <Switch checked={config.sneakPickEnabled} onCheckedChange={v => updateConfig.mutate({ ...config, sneakPickEnabled: v })} />
                                     </ConfigItem>
-                                    <ConfigItem title="Homepage sections" description="Customize the order of the sections that appear on the home page" wrap="always">
+                                    <ConfigItem
+                                        title="Homepage sections"
+                                        description="Customize the order of the sections that appear on the home page"
+                                        wrap="always"
+                                        sideContent={
+                                            <Button variant="link" size="sm" onClick={() => updateConfig.mutate({ ...config, homepageSections: defaultConfig.homepageSections })}>
+                                                Reset
+                                            </Button>
+                                        }
+                                    >
                                         <HomepageSections />
                                     </ConfigItem>
                                     <ConfigItem title="Cover frame" description="Whether the photos of pairs should cover the square they're displayed in.">
@@ -222,17 +231,20 @@ function ConfigSection({ title, children }: { title: string; children?: React.Re
     );
 }
 
-function ConfigItem({ title, description, children, caution = false, wrap = "never" }: { title: string; description?: string; children?: React.ReactNode; caution?: boolean; wrap?: "never" | "mobile" | "always" }) {
+function ConfigItem({ title, description, children, sideContent, caution = false, wrap = "never" }: { title: string; description?: string; children?: React.ReactNode; sideContent?: React.ReactNode; caution?: boolean; wrap?: "never" | "mobile" | "always" }) {
     return (
         <div className={cn("flex gap-x-4 sm:gap-x-5 md:gap-x-6 gap-y-4", wrap === "mobile" && "max-sm:flex-col gap-y-3", wrap === "always" && "flex-col gap-y-3")}>
-            <div className="flex-1 space-y-1">
-                <h3 className="text-sm sm:text-base text-secondary-foreground font-bold">{title}</h3>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                    {description}
-                    {caution && <span className="text-secondary-foreground font-semibold"> Proceed with caution!</span>}
-                </p>
+            <div className="flex items-end gap-x-4 sm:gap-x-5 md:gap-x-6 flex-1">
+                <div className="flex-1 space-y-1">
+                    <h3 className="text-sm sm:text-base text-secondary-foreground font-bold">{title}</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                        {description}
+                        {caution && <span className="text-secondary-foreground font-semibold"> Proceed with caution!</span>}
+                    </p>
+                </div>
+                {sideContent}
             </div>
-            <div className={cn("flex items-center relative", wrap === "never" && "h-10 sm:h-11 md:h-12", wrap === "mobile" && "sm:h-11 md:h-12")}>{children}</div>
+            <div className={cn("flex items-center", wrap === "never" && "h-10 sm:h-11 md:h-12", wrap === "mobile" && "sm:h-11 md:h-12")}>{children}</div>
         </div>
     );
 }
@@ -333,50 +345,45 @@ function HomepageSections() {
     }
 
     return (
-        <>
-            <Button className="absolute -top-10 right-2.5" variant="link" size="sm" onClick={() => saveSections(defaultConfig.homepageSections)}>Reset</Button>
-            <div className="size-full space-y-2">
-                {validConfigSections.map((section, index) => {
-                    const SectionIcon = sectionIcons[section];
+        <div className="size-full space-y-2">
+            {validConfigSections.map((section, index) => {
+                const SectionIcon = sectionIcons[section];
 
-                    return (
-                        <div key={section} className="pl-4 pr-3 py-3 flex items-center gap-2 bg-accent rounded-lg ring ring-border">
-                            <div className="flex items-center gap-2 flex-1">
-                                <SectionIcon className="size-4 shrink-0 text-primary" />
-                                <p className="font-semibold">{section}</p>
-                                {section === "SneakPick" && !config.sneakPickEnabled && (
-                                    <p className="ml-4 text-xs text-muted-foreground font-semibold opacity-50 tracking-wide uppercase">Disabled</p>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => moveSection(index, -1)}>
-                                    <IconArrowUp className="size-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon-sm" disabled={index === validConfigSections.length - 1} onClick={() => moveSection(index, 1)}>
-                                    <IconArrowDown className="size-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon-sm" disabled={section === "Grid"} onClick={() => removeSection(index)}>
-                                    <IconTrash className="size-4" />
-                                </Button>
-                            </div>
+                return (
+                    <div key={section} className="pl-4 pr-3 py-3 flex items-center gap-2 bg-accent rounded-lg ring ring-border">
+                        <div className="flex items-center gap-2 flex-1">
+                            <SectionIcon className="size-4 shrink-0 text-primary" />
+                            <p className="font-semibold">{section}</p>
+                            {section === "SneakPick" && !config.sneakPickEnabled && <p className="ml-4 text-xs text-muted-foreground font-semibold opacity-50 tracking-wide uppercase">Disabled</p>}
                         </div>
-                    );
-                })}
-                {!!missingSections.length && (
-                    <div className="mt-6 space-y-3">
-                        <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Add blocks</p>
-                        <div className="flex flex-wrap gap-2">
-                            {missingSections.map(section => (
-                                <Button key={section} variant="outline" size="sm" onClick={() => addSection(section)}>
-                                    <IconPlus className="size-4" data-icon="inline-start" />
-                                    Add {section}
-                                </Button>
-                            ))}
+                        <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => moveSection(index, -1)}>
+                                <IconArrowUp className="size-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon-sm" disabled={index === validConfigSections.length - 1} onClick={() => moveSection(index, 1)}>
+                                <IconArrowDown className="size-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon-sm" disabled={section === "Grid"} onClick={() => removeSection(index)}>
+                                <IconTrash className="size-4" />
+                            </Button>
                         </div>
                     </div>
-                )}
-            </div>
-        </>
+                );
+            })}
+            {!!missingSections.length && (
+                <div className="mt-6 space-y-3">
+                    <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Add blocks</p>
+                    <div className="flex flex-wrap gap-2">
+                        {missingSections.map(section => (
+                            <Button key={section} variant="outline" size="sm" onClick={() => addSection(section)}>
+                                <IconPlus className="size-4" data-icon="inline-start" />
+                                Add {section}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -400,6 +407,7 @@ function VisibilitySelect({ value, onChange }: { value: Config["locationVisibili
                                 {visibilityMap[k as keyof typeof visibilityMap]}
                             </SelectItem>
                         );
+                    else return null;
                 })}
             </SelectContent>
         </Select>

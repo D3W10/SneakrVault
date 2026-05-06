@@ -49,6 +49,14 @@ function SneakerDetails() {
         else navigate({ to: "/" });
     }
 
+    function conditionToColor(condition: number) {
+        if (condition < 2) return "text-red-400 bg-red-500/10";
+        else if (condition < 4) return "text-orange-400 bg-orange-500/10";
+        else if (condition < 6) return "text-yellow-400 bg-yellow-500/10";
+        else if (condition < 8) return "text-lime-400 bg-lime-500/10";
+        else return "text-green-400 bg-green-500/10";
+    }
+
     useEffect(() => {
         if (!isPending) {
             if (!sneaker) navigate({ to: "/" });
@@ -233,6 +241,23 @@ function SneakerDetails() {
                                                         <div className="size-2.5 rounded-full" style={{ backgroundColor: sneaker.originalOwner.color || "var(--color-muted-foreground)" }} />
                                                         {sneaker.originalOwner.username}
                                                     </div>
+                                                </InfoBox>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(sneaker?.type || sneaker?.condition) && (
+                                        <div className="flex gap-x-5 gap-y-4">
+                                            {sneaker?.type && (
+                                                <InfoBox title="Type">
+                                                    <p className="w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md">{sneaker.type}</p>
+                                                </InfoBox>
+                                            )}
+                                            {sneaker?.condition && (
+                                                <InfoBox title="Condition">
+                                                    <p className={cn("w-fit px-3 py-1.5 flex items-center text-sm font-semibold bg-muted rounded-md", conditionToColor(sneaker.condition))}>
+                                                        {sneaker.condition}
+                                                        <span className="whitespace-pre opacity-50"> / 10</span>
+                                                    </p>
                                                 </InfoBox>
                                             )}
                                         </div>

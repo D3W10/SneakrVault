@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IconChevronDown, IconTrash } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
@@ -15,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import bridge from "@/data/bridge";
 import type { Sneaker, User } from "@/lib/models";
 
@@ -40,6 +42,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const [size, setSize] = useState(sneaker?.size?.toString() ?? "");
     const [brand, setBrand] = useState(sneaker?.brand._id ?? "");
     const [photo, setPhoto] = useState<File | null>();
+    const [description, setDescription] = useState(sneaker?.description ?? "");
     const [location, setLocation] = useState(sneaker?.location._id ?? "");
     const [owner, setOwner] = useState(sneaker?.owner._id ?? "");
     const [date, setDate] = useState<Date | null>(sneaker?.date ? new Date(sneaker.date) : null);
@@ -48,8 +51,12 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const [originalOwnerType, setOriginalOwnerType] = useState<"local" | "outside">(sneaker?.originalOwner._id ? "local" : sneaker?.originalOwner.username ? "outside" : "local");
     const [originalOwnerId, setOriginalOwnerId] = useState(sneaker?.originalOwner._id ?? "");
     const [originalOwnerName, setOriginalOwnerName] = useState(sneaker?.originalOwner.username ?? "");
+    const [condition, setCondition] = useState(sneaker?.condition);
+    const [isConditionValid, setIsConditionValid] = useState(true);
     const [decommissioned, setDecommissioned] = useState(sneaker?.decommissioned ?? false);
     const [stockxUrl, setStockxUrl] = useState(sneaker?.stockxUrl ?? "");
+    const [goatUrl, setGoatUrl] = useState(sneaker?.goatUrl ?? "");
+    const [authenticyTag, setAuthenticyTag] = useState(sneaker?.authenticyTag ?? "");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string>();
     const originalOwnerCombobox = useRef<HTMLDivElement>(null);
@@ -69,9 +76,10 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
 
     const fractions: Record<string, string> = { "1/2": "½", "1/3": "⅓", "2/3": "⅔" };
     const isValidStockxUrl = (url: string) => /^https:\/\/(www\.)?stockx\.com\/[a-zA-Z0-9-]+$/g.test(url);
+    const isValidGoatUrl = (url: string) => /^https:\/\/(www\.)?goat\.com\/sneakers\/[a-zA-Z0-9-]+$/g.test(url);
 
     function parseSize(size: string) {
-        if (!/^[\d\.\/½⅓⅔]*$/.test(size)) return;
+        if (!/^[\d./½⅓⅔]*$/.test(size)) return;
 
         if (/\d\/\d/g.test(size)) {
             for (const frac of size.matchAll(/(\d)\/(\d)/g)) {
@@ -119,14 +127,18 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     size: size || undefined,
                     brand: brand || undefined,
                     photo: photoId ?? undefined,
+                    description: description || undefined,
                     location: location || undefined,
                     owner: owner || undefined,
                     date: date?.toISOString(),
                     style: style || undefined,
                     type,
                     originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local" ? { type: "local", id: originalOwnerId } : { type: "outside", name: originalOwnerName },
+                    condition: condition || undefined,
                     decommissioned,
-                    stockxUrl,
+                    stockxUrl: stockxUrl || undefined,
+                    goatUrl: goatUrl || undefined,
+                    authenticyTag: authenticyTag || undefined,
                 },
             });
             if (!result.success) {
@@ -143,14 +155,18 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     size: size || undefined,
                     brand: brand || undefined,
                     photo: photoId,
+                    description: description || undefined,
                     location: location || undefined,
                     owner: owner || undefined,
                     date: date?.toISOString(),
                     style: style || undefined,
                     type,
                     originalOwner: !originalOwnerId && !originalOwnerName ? undefined : originalOwnerType === "local" ? { type: "local", id: originalOwnerId } : { type: "outside", name: originalOwnerName },
+                    condition: condition || undefined,
                     decommissioned,
-                    stockxUrl,
+                    stockxUrl: stockxUrl || undefined,
+                    goatUrl: goatUrl || undefined,
+                    authenticyTag: authenticyTag || undefined,
                 },
             });
             if (!result.success) {
@@ -184,25 +200,34 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                     <DialogTitle>{!sneaker ? "Add sneaker" : "Edit sneaker"}</DialogTitle>
                     <TabsList variant="line">
                         <TabsTrigger value="basic">Basic</TabsTrigger>
-                        <TabsTrigger value="additional">Additional</TabsTrigger>
+                        <TabsTrigger value="details">Details</TabsTrigger>
+                        <TabsTrigger value="extra">Extra</TabsTrigger>
                     </TabsList>
                 </DialogHeader>
                 <TabsContent value="basic">
                     <FieldGroup>
                         <Field>
                             <Label htmlFor="sneakerName">Name</Label>
-                            <Input id="sneakerName" name="name" maxLength={30} placeholder="Nike Air Max Plus" disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
+                            <Input id="sneakerName" name="name" maxLength={40} placeholder="Nike Air Max Plus" disabled={isSaving} value={name} onChange={e => setName(e.target.value)} />
                         </Field>
                         <div className="flex gap-2">
                             <Field className="flex-4">
                                 <Label htmlFor="sneakerColor">Color</Label>
-                                <Input id="sneakerColor" name="color" maxLength={50} placeholder="Triple Black" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
+                                <Input id="sneakerColor" name="color" maxLength={60} placeholder="Triple Black" disabled={isSaving} value={color} onChange={e => setColor(e.target.value)} />
                             </Field>
                             <Field className="flex-1">
                                 <Label htmlFor="sneakerSize">Size</Label>
-                                <Input id="sneakerSize" name="size" placeholder="10" disabled={isSaving} value={size} onChange={e => parseSize(e.target.value)} />
+                                <Input id="sneakerSize" name="size" maxLength={6} placeholder="10" disabled={isSaving} value={size} onChange={e => parseSize(e.target.value)} />
                             </Field>
                         </div>
+                        <Field>
+                            <Label htmlFor="sneakerDescription">Description</Label>
+                            <Textarea id="sneakerDescription" name="description" className="h-25 resize-none" placeholder="Bought in London..." disabled={isSaving} value={description} onChange={e => setDescription(e.target.value)} />
+                        </Field>
+                    </FieldGroup>
+                </TabsContent>
+                <TabsContent value="details">
+                    <FieldGroup>
                         <div className="flex gap-2">
                             <Field>
                                 <Label htmlFor="sneakerBrand">Brand</Label>
@@ -256,10 +281,6 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                 )}
                             </div>
                         </Field>
-                    </FieldGroup>
-                </TabsContent>
-                <TabsContent value="additional">
-                    <FieldGroup>
                         <div className="flex gap-2">
                             <Field>
                                 <Label htmlFor="sneakerType">Type</Label>
@@ -275,6 +296,25 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                     </SelectContent>
                                 </Select>
                             </Field>
+                            <Field>
+                                <Label htmlFor="sneakerDate">Acquisition Date</Label>
+                                <Popover>
+                                    <PopoverTrigger
+                                        disabled={isSaving}
+                                        render={
+                                            <Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">
+                                                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                                <IconChevronDown data-icon="inline-end" />
+                                            </Button>
+                                        }
+                                    />
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar mode="single" captionLayout="dropdown" required selected={date ?? undefined} defaultMonth={date ?? undefined} onSelect={setDate} />
+                                    </PopoverContent>
+                                </Popover>
+                            </Field>
+                        </div>
+                        <div className="flex gap-2">
                             <Field>
                                 <Label htmlFor="sneakerOwner">Owner</Label>
                                 <Select value={owner} disabled={isSaving} onValueChange={e => setOwner(e ?? "")}>
@@ -293,25 +333,6 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </Field>
-                        </div>
-                        <div className="flex gap-2">
-                            <Field>
-                                <Label htmlFor="sneakerDate">Acquisition Date</Label>
-                                <Popover>
-                                    <PopoverTrigger
-                                        disabled={isSaving}
-                                        render={
-                                            <Button variant={"outline"} data-empty={!date} className="pl-2.5 justify-between font-normal data-[empty=true]:text-muted-foreground">
-                                                {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                                <IconChevronDown data-icon="inline-end" />
-                                            </Button>
-                                        }
-                                    />
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar mode="single" captionLayout="dropdown" required selected={date ?? undefined} defaultMonth={date ?? undefined} onSelect={setDate} />
-                                    </PopoverContent>
-                                </Popover>
                             </Field>
                             <Field>
                                 <Label htmlFor="sneakerOriginalOwner">Original owner</Label>
@@ -351,16 +372,34 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                                 </Combobox>
                             </Field>
                         </div>
+                    </FieldGroup>
+                </TabsContent>
+                <TabsContent value="extra">
+                    <FieldGroup>
+                        <div className="flex gap-2">
+                            <Field className="flex-5 sm:flex-7">
+                                <Label htmlFor="sneakerStyle">Style code</Label>
+                                <Input id="sneakerStyle" name="style" placeholder="604133-050" disabled={isSaving} value={style} onChange={e => setStyle(e.target.value)} />
+                            </Field>
+                            <Field className="flex-2">
+                                <Label htmlFor="sneakerCondition">Condition</Label>
+                                <ConditionInput disabled={isSaving} value={condition} onChange={e => setCondition(e)} onValidityChange={setIsConditionValid} />
+                            </Field>
+                        </div>
                         <div className="flex gap-2">
                             <Field className="flex-2" data-invalid={stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)}>
                                 <Label htmlFor="sneakerStockX">StockX Url</Label>
                                 <Input id="sneakerStockX" name="stockx" inputMode="url" placeholder="https://stockx.com/nike-air-max-plus-triple-black" disabled={isSaving} value={stockxUrl} onChange={e => setStockxUrl(e.target.value)} />
                             </Field>
                             <Field className="flex-1">
-                                <Label htmlFor="sneakerStyle">Style code</Label>
-                                <Input id="sneakerStyle" name="style" placeholder="604133-050" disabled={isSaving} value={style} onChange={e => setStyle(e.target.value)} />
+                                <Label htmlFor="sneakerTag">Authenticy Tag</Label>
+                                <Input id="sneakerTag" name="tag" placeholder="58070046JUN" disabled={isSaving} value={authenticyTag} onChange={e => setAuthenticyTag(e.target.value)} />
                             </Field>
                         </div>
+                        <Field data-invalid={goatUrl.length !== 0 && !isValidGoatUrl(goatUrl)}>
+                            <Label htmlFor="sneakerGoat">Goat Url</Label>
+                            <Input id="sneakerGoat" name="goat" inputMode="url" placeholder="https://www.goat.com/sneakers/air-max-plus-triple-black-604133-050" disabled={isSaving} value={goatUrl} onChange={e => setGoatUrl(e.target.value)} />
+                        </Field>
                         <Field orientation="horizontal" className="w-fit">
                             <Checkbox id="sneakerDecommissioned" disabled={isSaving} checked={decommissioned} onCheckedChange={e => setDecommissioned(!!e)} />
                             <FieldLabel htmlFor="sneakerDecommissioned">Decommissioned</FieldLabel>
@@ -370,11 +409,46 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <DialogFooter>
                     <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || (stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl))}>
+                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !isConditionValid || (stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)) || (goatUrl.length !== 0 && !isValidGoatUrl(goatUrl))}>
                         {!isSaving ? "Save changes" : <Spinner />}
                     </Button>
                 </DialogFooter>
             </Tabs>
         </form>
+    );
+}
+
+function ConditionInput({ disabled, value, onChange, onValidityChange }: { disabled: boolean; value: number | undefined; onChange: (value: number | undefined) => unknown; onValidityChange: (valid: boolean) => unknown }) {
+    const [valueDisplay, setValueDisplay] = useState(value?.toString() ?? "");
+
+    const isValid = (display: string) => display === "" || /^(?:\.5|[0-9]|10|[0-9]\.?|[0-9]\.5)$/.test(display);
+    const commit = (display: string) => {
+        if (display === "" || display.endsWith(".")) return;
+        onChange(display.startsWith(".") ? Number(`0${display}`) : Number(display));
+    };
+
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const nextValue = e.target.value;
+        if (!isValid(nextValue)) return;
+
+        setValueDisplay(nextValue);
+        onValidityChange(!nextValue.endsWith(".") && nextValue !== ".");
+        if (nextValue === "") onChange(undefined);
+        else if (!nextValue.endsWith(".") && !nextValue.startsWith(".")) commit(nextValue);
+    }
+
+    useEffect(() => {
+        const nextValue = value?.toString() ?? "";
+        setValueDisplay(nextValue);
+        onValidityChange(isValid(nextValue));
+    }, [value]);
+
+    return (
+        <ButtonGroup>
+            <Input id="sneakerCondition" name="condition" placeholder="7.5" disabled={disabled} value={valueDisplay} onChange={handleChange} onBlur={() => commit(valueDisplay)} />
+            <Button className="pl-2.5 pr-2 max-sm:text-base text-muted-foreground font-semibold pointer-events-none" variant="outline">
+                / 10
+            </Button>
+        </ButtonGroup>
     );
 }

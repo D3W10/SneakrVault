@@ -22,7 +22,10 @@ export const get = adminQuery({
 export const getOwners = guestQuery({
     args: {},
     handler: async ctx => {
-        return await ctx.db.query("users").filter(q => q.eq(q.field("role"), "member") || q.eq(q.field("role"), "admin")).collect();
+        return await ctx.db
+            .query("users")
+            .filter(q => q.eq(q.field("role"), "member") || q.eq(q.field("role"), "admin"))
+            .collect();
     },
 });
 
@@ -31,12 +34,7 @@ export const getByUsername = guestQuery({
     handler: async (ctx, args) => {
         return await ctx.db
             .query("users")
-            .filter(q =>
-                q.and(
-                    q.eq(q.field("username"), args.username),
-                    q.eq(q.field("active"), true),
-                ),
-            )
+            .filter(q => q.and(q.eq(q.field("username"), args.username), q.eq(q.field("active"), true)))
             .first();
     },
 });

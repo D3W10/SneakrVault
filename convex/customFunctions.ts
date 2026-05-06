@@ -18,8 +18,7 @@ const ROLE_PRIORITY: Record<AuthRole, number> = {
 
 async function validateAuthInput(args: { signature: string; timestamp: number; authRole: AuthRole }, minimumRole: AuthRole) {
     const now = Date.now();
-    if (Math.abs(now - args.timestamp) > 60_000)
-        throw new Error("Unauthorized: Request expired");
+    if (Math.abs(now - args.timestamp) > 60_000) throw new Error("Unauthorized: Request expired");
 
     const encoder = new TextEncoder();
     const data = encoder.encode(`${process.env.CONVEX_SERVER_SECRET}:${args.timestamp}:${args.authRole}`);
@@ -29,18 +28,15 @@ async function validateAuthInput(args: { signature: string; timestamp: number; a
         .map(b => b.toString(16).padStart(2, "0"))
         .join("");
 
-    if (args.signature !== expectedSignature)
-        throw new Error("Unauthorized: Invalid signature");
+    if (args.signature !== expectedSignature) throw new Error("Unauthorized: Invalid signature");
 
-    if (ROLE_PRIORITY[args.authRole] < ROLE_PRIORITY[minimumRole])
-        throw new Error("Forbidden: Insufficient role");
+    if (ROLE_PRIORITY[args.authRole] < ROLE_PRIORITY[minimumRole]) throw new Error("Forbidden: Insufficient role");
 }
 
 export const guestQuery = zCustomQuery(query, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        (!(await ctx.db.query("configs").first())?.publicPage)
-            await validateAuthInput(args, "guest");
+        if (!(await ctx.db.query("configs").first())?.publicPage) await validateAuthInput(args, "guest");
 
         return { ctx, args: {} };
     },
@@ -65,8 +61,7 @@ export const adminQuery = zCustomQuery(query, {
 export const guestMutation = zCustomMutation(mutation, {
     args: AUTH_ARGS,
     input: async (ctx, args) => {
-        (!(await ctx.db.query("configs").first())?.publicPage)
-            await validateAuthInput(args, "guest");
+        if (!(await ctx.db.query("configs").first())?.publicPage) await validateAuthInput(args, "guest");
 
         return { ctx, args: {} };
     },

@@ -22,7 +22,7 @@ export function decommissionTransformer(value: boolean | undefined) {
 export function filterBySearch(sneakers: Sneaker[], search: Search) {
     return sneakers.filter(
         sneaker =>
-            (sneaker.name.toLowerCase().includes(search.term.toLowerCase()) || (sneaker.color && sneaker.color.toLowerCase().includes(search.term.toLowerCase()))) &&
+            (sneaker.name.toLowerCase().includes(search.term.toLowerCase()) || sneaker.color?.toLowerCase().includes(search.term.toLowerCase())) &&
             (!search.location || sneaker.location._id === search.location) &&
             (!search.brand || sneaker.brand._id === search.brand) &&
             (!search.owner || sneaker.owner._id === search.owner) &&

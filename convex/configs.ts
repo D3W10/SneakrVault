@@ -28,10 +28,9 @@ export const update = adminMutation({
     args: ConfigUpdate,
     handler: async (ctx, args) => {
         const config = await ctx.db.query("configs").first();
-        if (!config)
-            await ctx.db.insert("configs", args);
-        else
-            await ctx.db.patch(config._id, args);
+
+        if (!config) await ctx.db.insert("configs", args);
+        else await ctx.db.patch(config._id, args);
 
         return { success: true };
     },

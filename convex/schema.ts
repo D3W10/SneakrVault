@@ -14,14 +14,19 @@ export default defineSchema({
         date: v.optional(v.string()),
         style: v.optional(v.string()),
         type: v.union(v.literal("Sneakers"), v.literal("Shoes"), v.literal("Boots"), v.literal("Flip-flops")),
-        originalOwner: v.optional(v.union(v.object({
-            type: v.literal("local"),
-            id: v.id("users"),
-        }),
-        v.object({
-            type: v.literal("outside"),
-            name: v.string(),
-        }))),
+        originalOwner: v.optional(
+            v.union(
+                v.object({
+                    type: v.literal("local"),
+                    id: v.id("users"),
+                }),
+                v.object({
+                    type: v.literal("outside"),
+                    name: v.string(),
+                }),
+            ),
+        ),
+        condition: v.optional(v.number()),
         decommissioned: v.boolean(),
         stockxUrl: v.optional(v.string()),
         goatUrl: v.optional(v.string()),
@@ -45,16 +50,14 @@ export default defineSchema({
         role: v.union(v.literal("guest"), v.literal("member"), v.literal("admin")),
         color: v.string(),
         active: v.boolean(),
-    })
-        .index("by_username", ["username"]),
+    }).index("by_username", ["username"]),
     loginAttempts: defineTable({
         key: v.string(),
         failedCount: v.number(),
         windowStartMs: v.number(),
         lockUntilMs: v.number(),
         updatedAtMs: v.number(),
-    })
-        .index("by_key", ["key"]),
+    }).index("by_key", ["key"]),
     collections: defineTable({
         name: v.string(),
         cover: v.array(v.string()),
