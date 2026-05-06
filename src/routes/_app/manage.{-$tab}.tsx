@@ -18,7 +18,7 @@ import { Header } from "@/components/Header";
 import { UserMenu } from "@/components/UserMenu";
 import { checkAuth } from "@/data/auth";
 import bridge from "@/data/bridge";
-import { useConfig, type Config } from "@/lib/useConfig";
+import { defaultConfig, useConfig, type Config } from "@/lib/useConfig";
 import { useLogout } from "@/lib/useLogout";
 import { cn } from "@/lib/utils";
 
@@ -232,7 +232,7 @@ function ConfigItem({ title, description, children, caution = false, wrap = "nev
                     {caution && <span className="text-secondary-foreground font-semibold"> Proceed with caution!</span>}
                 </p>
             </div>
-            <div className={cn("flex items-center", wrap === "never" && "h-10 sm:h-11 md:h-12", wrap === "mobile" && "sm:h-11 md:h-12")}>{children}</div>
+            <div className={cn("flex items-center relative", wrap === "never" && "h-10 sm:h-11 md:h-12", wrap === "mobile" && "sm:h-11 md:h-12")}>{children}</div>
         </div>
     );
 }
@@ -296,7 +296,7 @@ function PairTypeSelect({ value, onChange }: { value: Config["defaultTypeFilter"
 
 function HomepageSections() {
     const { config, updateConfig } = useConfig();
-    const availableSections = ["SneakPick", "Birthday", "Grid", "Count"] as const;
+    const availableSections = defaultConfig.homepageSections;
     const validConfigSections = config.homepageSections.filter(s => availableSections.includes(s as (typeof availableSections)[number]));
     const missingSections = availableSections.filter(s => !validConfigSections.includes(s));
     const sectionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -333,44 +333,50 @@ function HomepageSections() {
     }
 
     return (
-        <div className="size-full space-y-2">
-            {validConfigSections.map((section, index) => {
-                const SectionIcon = sectionIcons[section];
+        <>
+            <Button className="absolute -top-10 right-2.5" variant="link" size="sm" onClick={() => saveSections(defaultConfig.homepageSections)}>Reset</Button>
+            <div className="size-full space-y-2">
+                {validConfigSections.map((section, index) => {
+                    const SectionIcon = sectionIcons[section];
 
-                return (
-                    <div key={section} className="pl-4 pr-3 py-3 flex items-center gap-2 bg-accent rounded-lg ring ring-border">
-                        <div className="flex items-center gap-2 flex-1">
-                            <SectionIcon className="size-4 shrink-0 text-primary" />
-                            <p className="font-semibold">{section}</p>
+                    return (
+                        <div key={section} className="pl-4 pr-3 py-3 flex items-center gap-2 bg-accent rounded-lg ring ring-border">
+                            <div className="flex items-center gap-2 flex-1">
+                                <SectionIcon className="size-4 shrink-0 text-primary" />
+                                <p className="font-semibold">{section}</p>
+                                {section === "SneakPick" && !config.sneakPickEnabled && (
+                                    <p className="ml-4 text-xs text-muted-foreground font-semibold opacity-50 tracking-wide uppercase">Disabled</p>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => moveSection(index, -1)}>
+                                    <IconArrowUp className="size-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon-sm" disabled={index === validConfigSections.length - 1} onClick={() => moveSection(index, 1)}>
+                                    <IconArrowDown className="size-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon-sm" disabled={section === "Grid"} onClick={() => removeSection(index)}>
+                                    <IconTrash className="size-4" />
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => moveSection(index, -1)}>
-                                <IconArrowUp className="size-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon-sm" disabled={index === validConfigSections.length - 1} onClick={() => moveSection(index, 1)}>
-                                <IconArrowDown className="size-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon-sm" disabled={section === "Grid"} onClick={() => removeSection(index)}>
-                                <IconTrash className="size-4" />
-                            </Button>
+                    );
+                })}
+                {!!missingSections.length && (
+                    <div className="mt-6 space-y-3">
+                        <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Add blocks</p>
+                        <div className="flex flex-wrap gap-2">
+                            {missingSections.map(section => (
+                                <Button key={section} variant="outline" size="sm" onClick={() => addSection(section)}>
+                                    <IconPlus className="size-4" data-icon="inline-start" />
+                                    Add {section}
+                                </Button>
+                            ))}
                         </div>
                     </div>
-                );
-            })}
-            {!!missingSections.length && (
-                <div className="mt-6 space-y-3">
-                    <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Add blocks</p>
-                    <div className="flex flex-wrap gap-2">
-                        {missingSections.map(section => (
-                            <Button key={section} variant="outline" size="sm" onClick={() => addSection(section)}>
-                                <IconPlus className="size-4" data-icon="inline-start" />
-                                Add {section}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        </>
     );
 }
 

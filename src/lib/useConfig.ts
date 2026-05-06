@@ -27,7 +27,7 @@ export function useConfig() {
     return { isPending, config, updateConfig };
 }
 
-const defaultConfig = {
+export const defaultConfig = {
     cardSecondaryInfo: "location",
     cardShowOwnerColor: true,
     defaultTypeFilter: "all",
