@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconCheck, IconForbid2, IconMapPin, IconPencil, IconPlus, IconRosetteDiscountCheck, IconRuler2, IconTrash, IconUser } from "@tabler/icons-react";
+import { IconArrowDown, IconArrowUp, IconCake, IconCheck, IconForbid2, IconHexagon, IconLayoutGrid, IconMapPin, IconNumber123, IconPencil, IconPlus, IconRosetteDiscountCheck, IconRuler2, IconTrash, IconUser } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -50,6 +50,7 @@ function ManagePage() {
     const logout = useLogout();
     const tabs = ["configurations", "users", "locations", "brands"] as const;
     const activeTab = tabs.includes(tab as (typeof tabs)[number]) ? tab : tabs[0];
+
     function changePageSecurity(publicPage: boolean) {
         const patch = { ...config, publicPage };
         const derivateKeys = ["locationVisibility", "descriptionVisibility", "originalOwnerVisibility"] as const;
@@ -115,7 +116,7 @@ function ManagePage() {
                         {!cip && (
                             <>
                                 <ConfigSection title="Personalization">
-                                    <ConfigItem title="Card secondary info" description="Choose which info should additionally be displayed on the sneaker cards." wrap>
+                                    <ConfigItem title="Card secondary info" description="Choose which info should additionally be displayed on the sneaker cards." wrap="mobile">
                                         <InfoSelect value={config.cardSecondaryInfo} onChange={v => updateConfig.mutate({ ...config, cardSecondaryInfo: v })} />
                                     </ConfigItem>
                                     <ConfigItem title="Show owner color on card" description="Whether the accent color of the user who owns the pair should be displayed at the bottom right of the sneaker card.">
@@ -130,7 +131,9 @@ function ManagePage() {
                                     <ConfigItem title="SneakPick" description="Enables/Disabled the sneak pick feature. This allows users to select pairs to them to wear or pick for other users.">
                                         <Switch checked={config.sneakPickEnabled} onCheckedChange={v => updateConfig.mutate({ ...config, sneakPickEnabled: v })} />
                                     </ConfigItem>
-                                    <ConfigItem title="Homepage sections" description="Customize the order of the sections that appear on the home page"></ConfigItem>
+                                    <ConfigItem title="Homepage sections" description="Customize the order of the sections that appear on the home page" wrap="always">
+                                        <HomepageSections />
+                                    </ConfigItem>
                                     <ConfigItem title="Cover frame" description="Whether the photos of pairs should cover the square they're displayed in.">
                                         <Switch checked={config.coverFrame} onCheckedChange={v => updateConfig.mutate({ ...config, coverFrame: v })} />
                                     </ConfigItem>
@@ -139,76 +142,18 @@ function ManagePage() {
                                     <ConfigItem title="Public page" description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!">
                                         <Switch checked={config.publicPage} onCheckedChange={changePageSecurity} />
                                     </ConfigItem>
-                                    <ConfigItem title="Location visibility" description="Choose who can view the location of your pairs." wrap caution>
+                                    <ConfigItem title="Location visibility" description="Choose who can view the location of your pairs." caution wrap="mobile">
                                         <VisibilitySelect value={config.locationVisibility} onChange={v => updateConfig.mutate({ ...config, locationVisibility: v })} />
                                     </ConfigItem>
-                                    <ConfigItem title="Description visibility" description="Choose who can view the descriptions of your pairs." wrap>
+                                    <ConfigItem title="Description visibility" description="Choose who can view the descriptions of your pairs." wrap="mobile">
                                         <VisibilitySelect value={config.descriptionVisibility} onChange={v => updateConfig.mutate({ ...config, descriptionVisibility: v })} />
                                     </ConfigItem>
-                                    <ConfigItem title="Original Owner visibility" description="Choose who can view the original owner of your pairs." wrap>
+                                    <ConfigItem title="Original Owner visibility" description="Choose who can view the original owner of your pairs." wrap="mobile">
                                         <VisibilitySelect value={config.originalOwnerVisibility} onChange={v => updateConfig.mutate({ ...config, originalOwnerVisibility: v })} />
                                     </ConfigItem>
                                 </ConfigSection>
                             </>
                         )}
-
-                        {/* <div className="flex flex-col gap-6 max-w-xl py-6">
-                       
-                            <div className="flex flex-col gap-2 mt-4">
-                                <span className="text-base font-medium">Home Page Sections Order</span>
-                                <div className="flex flex-col gap-2">
-                                    {normalizedSections.map((section, idx, arr) => (
-                                        <div
-                                            key={`${section}-${idx}`}
-                                            className="flex items-center justify-between p-3 border border-border rounded-md bg-secondary/50"
-                                            draggable
-                                            onDragStart={event => event.dataTransfer.setData("text/plain", idx.toString())}
-                                            onDragOver={event => event.preventDefault()}
-                                            onDrop={event => {
-                                                const from = Number(event.dataTransfer.getData("text/plain"));
-                                                const to = idx;
-                                                if (Number.isNaN(from) || from === to) return;
-                                                const newArr = [...arr];
-                                                const [moved] = newArr.splice(from, 1);
-                                                newArr.splice(to, 0, moved);
-                                                configs && updateConfig.mutate({ data: { ...configs, homepageSections: newArr } });
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <IconGripVertical className="size-4 text-muted-foreground" />
-                                                <span className="font-medium text-sm">{section}</span>
-                                            </div>
-                                            <div className="flex gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon-sm"
-                                                    disabled={arr.length <= 1}
-                                                    onClick={() => {
-                                                        const newArr = arr.filter((_, i) => i !== idx);
-                                                        configs && updateConfig.mutate({ data: { ...configs, homepageSections: newArr } });
-                                                    }}
-                                                >
-                                                    <IconTrash className="size-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {availableSections.filter(section => !normalizedSections.includes(section)).map(section => (
-                                        <Button
-                                            key={section}
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => configs && updateConfig.mutate({ data: { ...configs, homepageSections: [...normalizedSections, section] } })}
-                                        >
-                                            <IconPlus className="size-4" data-icon="inline-start" />
-                                            Add {section}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div> */}
                     </TabsContent>
                     <TabsContent value={tabs[1]}>
                         <Table>
@@ -274,9 +219,9 @@ function ConfigSection({ title, children }: { title: string; children?: React.Re
     );
 }
 
-function ConfigItem({ title, description, children, wrap = false, caution = false }: { title: string; description?: string; children?: React.ReactNode; wrap?: boolean; caution?: boolean }) {
+function ConfigItem({ title, description, children, caution = false, wrap = "never" }: { title: string; description?: string; children?: React.ReactNode; caution?: boolean; wrap?: "never" | "mobile" | "always" }) {
     return (
-        <div className={cn("flex", !wrap ? "gap-4 sm:gap-5 md:gap-6" : "max-sm:flex-col gap-1.5 sm:gap-5 md:gap-6")}>
+        <div className={cn("flex gap-x-4 sm:gap-x-5 md:gap-x-6 gap-y-4", wrap === "mobile" && "max-sm:flex-col gap-y-3", wrap === "always" && "flex-col gap-y-3")}>
             <div className="flex-1 space-y-1">
                 <h3 className="text-sm sm:text-base text-secondary-foreground font-bold">{title}</h3>
                 <p className="text-xs md:text-sm text-muted-foreground">
@@ -284,7 +229,7 @@ function ConfigItem({ title, description, children, wrap = false, caution = fals
                     {caution && <span className="text-secondary-foreground font-semibold"> Proceed with caution!</span>}
                 </p>
             </div>
-            <div className="h-10 sm:h-11 md:h-12 flex items-center">{children}</div>
+            <div className={cn("flex items-center", wrap === "never" && "h-10 sm:h-11 md:h-12", wrap === "mobile" && "sm:h-11 md:h-12")}>{children}</div>
         </div>
     );
 }
@@ -343,6 +288,86 @@ function PairTypeSelect({ value, onChange }: { value: Config["defaultTypeFilter"
                 ))}
             </SelectContent>
         </Select>
+    );
+}
+
+function HomepageSections() {
+    const { config, updateConfig } = useConfig();
+    const availableSections = ["SneakPick", "Birthday", "Grid", "Count"] as const;
+    const validConfigSections = config.homepageSections.filter(s => availableSections.includes(s as (typeof availableSections)[number]));
+    const missingSections = availableSections.filter(s => !validConfigSections.includes(s));
+    const sectionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+        SneakPick: IconHexagon,
+        Birthday: IconCake,
+        Grid: IconLayoutGrid,
+        Count: IconNumber123,
+    };
+
+    function saveSections(homepageSections: Config["homepageSections"]) {
+        updateConfig.mutate({ ...config, homepageSections });
+    }
+
+    function moveSection(index: number, direction: -1 | 1) {
+        const targetIndex = index + direction;
+
+        if (targetIndex < 0 || targetIndex >= validConfigSections.length) return;
+
+        const nextSections = [...validConfigSections];
+        const [section] = nextSections.splice(index, 1);
+
+        if (!section) return;
+
+        nextSections.splice(targetIndex, 0, section);
+        saveSections(nextSections);
+    }
+
+    function removeSection(index: number) {
+        saveSections(validConfigSections.filter((_, currentIndex) => currentIndex !== index));
+    }
+
+    function addSection(section: (typeof availableSections)[number]) {
+        saveSections([...validConfigSections, section]);
+    }
+
+    return (
+        <div className="size-full space-y-2">
+            {validConfigSections.map((section, index) => {
+                const SectionIcon = sectionIcons[section];
+
+                return (
+                    <div key={section} className="pl-4 pr-3 py-3 flex items-center gap-2 bg-accent rounded-lg ring ring-border">
+                        <div className="flex items-center gap-2 flex-1">
+                            <SectionIcon className="size-4 shrink-0 text-primary" />
+                            <p className="font-semibold">{section}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => moveSection(index, -1)}>
+                                <IconArrowUp className="size-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon-sm" disabled={index === validConfigSections.length - 1} onClick={() => moveSection(index, 1)}>
+                                <IconArrowDown className="size-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon-sm" disabled={section === "Grid"} onClick={() => removeSection(index)}>
+                                <IconTrash className="size-4" />
+                            </Button>
+                        </div>
+                    </div>
+                );
+            })}
+            {!!missingSections.length && (
+                <div className="mt-6 space-y-3">
+                    <p className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Add blocks</p>
+                    <div className="flex flex-wrap gap-2">
+                        {missingSections.map(section => (
+                            <Button key={section} variant="outline" size="sm" onClick={() => addSection(section)}>
+                                <IconPlus className="size-4" data-icon="inline-start" />
+                                Add {section}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
