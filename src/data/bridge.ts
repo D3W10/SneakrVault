@@ -7,6 +7,8 @@ import { SneakerInsert, SneakerRemove, SneakerUpdate } from "convex/sneakers";
 import { CollectionInsert, CollectionRemove, CollectionUpdate } from "convex/collections";
 import { ConfigUpdate } from "convex/configs";
 import { generateAuthPayload, getClient } from "@/data/auth";
+import { getAppSessionConfig } from "@/data/session";
+import { getErrorMessage } from "@/lib/utils";
 import { api } from "@db/api";
 
 type SuccessResult = { success: true; error?: string };
@@ -25,17 +27,23 @@ async function handleQuery<T>(queryFn: () => Promise<T>, errorMessage: string): 
     try {
         return await queryFn();
     } catch (error) {
-        throw new Error(error instanceof Error ? error.message : errorMessage);
+        throw new Error(getErrorMessage(error, errorMessage));
     }
 }
 
 async function handleMutation(mutationFn: () => Promise<unknown>, errorMessage: string): Promise<Result> {
     try {
-        await mutationFn();
+        const result = await mutationFn();
+        if (isErrorResult(result)) return result;
+
         return { success: true };
     } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : errorMessage };
+        return { success: false, error: getErrorMessage(error, errorMessage) };
     }
+}
+
+function isErrorResult(result: unknown): result is ErrorResult {
+    return typeof result === "object" && result !== null && "success" in result && (result as { success?: unknown }).success === false && typeof (result as { error?: unknown }).error === "string";
 }
 
 const getSneakers = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.sneakers.get, await generateAuthPayload()), "Failed to get sneakers"));
@@ -167,6 +175,10 @@ const deleteLocation = createServerFn({ method: "POST" })
 
 const getUsers = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.users.get, await generateAuthPayload()), "Failed to get users"));
 
+const getUserByUsername = createServerFn({ method: "GET" })
+    .inputValidator((data: { username: string }) => data)
+    .handler(async ({ data }) => handleQuery(async () => getClient().query(api.users.getByUsername, { username: data.username, ...(await generateAuthPayload()) }), "Failed to get user by username"));
+
 const getOwners = createServerFn({ method: "GET" }).handler(() => handleQuery(async () => getClient().query(api.users.getOwners, await generateAuthPayload()), "Failed to get owners"));
 
 const addUser = createServerFn({ method: "POST" })
@@ -187,17 +199,34 @@ const addUser = createServerFn({ method: "POST" })
 const editUser = createServerFn({ method: "POST" })
     .inputValidator(UserUpdate.omit({ passwordHash: true }).extend({ password: z.string().optional() }))
     .handler(async ({ data }) => {
+        const { getSession } = await import("@tanstack/react-start/server");
+        const session = await getSession(getAppSessionConfig());
         const { password, ...rest } = data;
         const passwordHash = password ? await encryptPassword(password) : undefined;
-        return handleMutation(
-            async () =>
-                getClient().mutation(api.users.update, {
-                    ...rest,
-                    ...(passwordHash ? { passwordHash } : {}),
-                    ...(await generateAuthPayload()),
-                }),
-            "Failed to edit user",
-        );
+
+        if (session.data.isAuthenticated && session.data._id === data._id && session.data.role !== "admin") {
+            return handleMutation(
+                async () =>
+                    getClient().mutation(api.users.updateSelf, {
+                        _id: data._id,
+                        username: rest.username,
+                        ...(passwordHash ? { passwordHash } : {}),
+                        color: rest.color,
+                        ...(await generateAuthPayload()),
+                    }),
+                "Failed to edit user",
+            );
+        } else {
+            return handleMutation(
+                async () =>
+                    getClient().mutation(api.users.update, {
+                        ...rest,
+                        ...(passwordHash ? { passwordHash } : {}),
+                        ...(await generateAuthPayload()),
+                    }),
+                "Failed to edit user",
+            );
+        }
     });
 
 const deleteUser = createServerFn({ method: "POST" })
@@ -292,6 +321,7 @@ export default {
     users: {
         get: getUsers,
         getOwners: getOwners,
+        getByUsername: getUserByUsername,
         add: addUser,
         edit: editUser,
         remove: deleteUser,

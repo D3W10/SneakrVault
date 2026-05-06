@@ -1,4 +1,4 @@
-import { useSession } from "@tanstack/react-start/server";
+import type { SessionConfig } from "@tanstack/react-start/server";
 import type { Doc, Id } from "@db/dataModel";
 
 export type SessionState = {
@@ -20,8 +20,8 @@ function getSessionSecret() {
     return secret;
 }
 
-export function useAppSession() {
-    return useSession<SessionState>({
+export function getAppSessionConfig(): SessionConfig {
+    return {
         name: SESSION_COOKIE_NAME,
         password: getSessionSecret(),
         cookie: {
@@ -31,5 +31,5 @@ export function useAppSession() {
             maxAge: SESSION_MAX_AGE_SECONDS,
             path: "/",
         },
-    });
+    };
 }

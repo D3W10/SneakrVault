@@ -4,7 +4,7 @@ import { z } from "zod";
 import bridge from "@/data/bridge";
 import { getContext } from "@/integrations/query";
 import { api } from "@db/api";
-import type { SessionState } from "@/data/session";
+import { getAppSessionConfig, type SessionState } from "@/data/session";
 
 const MIN_AUTH_RESPONSE_MS = 300;
 
@@ -31,8 +31,8 @@ export const login = createServerFn({ method: "POST" })
             await waitForMinimumDuration(startedAt);
 
             if (isMatch) {
-                const session = await getAppSession();
-                await session.update({
+                const { updateSession } = await import("@tanstack/react-start/server");
+                await updateSession(getAppSessionConfig(), {
                     isAuthenticated: true,
                     _id: user._id,
                     username: user.username,
@@ -58,12 +58,13 @@ export const login = createServerFn({ method: "POST" })
     });
 
 export const logout = createServerFn({ method: "POST" }).handler(async () => {
-    const session = await getAppSession();
-    await session.clear();
+    const { clearSession } = await import("@tanstack/react-start/server");
+    await clearSession(getAppSessionConfig());
 });
 
 export const checkAuth = createServerFn({ method: "GET" }).handler(async () => {
-    return (await getAppSession()).data;
+    const { getSession } = await import("@tanstack/react-start/server");
+    return (await getSession(getAppSessionConfig())).data as Partial<SessionState>;
 });
 
 export const getConvexQueryAuthPayload = createServerFn({ method: "GET" }).handler(async () => {
@@ -89,7 +90,8 @@ async function waitForMinimumDuration(startedAt: number) {
 
 export async function generateAuthPayload(requireAuth = true) {
     const config = await getConfig();
-    const session = await getAppSession();
+    const { getSession } = await import("@tanstack/react-start/server");
+    const session = await getSession(getAppSessionConfig());
     if ((requireAuth && !config?.publicPage && !session.data.isAuthenticated) || !process.env.CONVEX_SERVER_SECRET) throw new Error("Unauthorized");
 
     const authRole = session.data.isAuthenticated ? (session.data.role ?? "guest") : "guest";
@@ -130,11 +132,6 @@ async function getCryptoHelpers() {
         timingSafeEqual,
         scrypt: promisify(scryptCallback),
     };
-}
-
-async function getAppSession() {
-    // biome-ignore lint/correctness/useHookAtTopLevel: This allows the hook to be used outside a component
-    return (await import("./session")).useAppSession();
 }
 
 async function getConfig() {

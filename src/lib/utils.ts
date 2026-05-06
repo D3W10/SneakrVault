@@ -19,6 +19,10 @@ export function decommissionTransformer(value: boolean | undefined) {
     return value ? false : undefined;
 }
 
+export function getErrorMessage(error: unknown, fallback: string) {
+    return error instanceof Error ? error.message.trim() : typeof error === "string" ? error.trim() : fallback;
+}
+
 export function filterBySearch(sneakers: Sneaker[], search: Search) {
     return sneakers.filter(
         sneaker =>

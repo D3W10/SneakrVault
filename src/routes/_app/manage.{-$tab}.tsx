@@ -46,7 +46,6 @@ function ManagePage() {
     });
     const { tab } = Route.useParams();
     const navigate = useNavigate();
-    const { auth } = Route.useRouteContext();
     const logout = useLogout();
     const tabs = ["configurations", "users", "locations", "brands"] as const;
     const activeTab = tabs.includes(tab as (typeof tabs)[number]) ? tab : tabs[0];
@@ -64,7 +63,7 @@ function ManagePage() {
 
     return (
         <div className="min-h-screen">
-            <Header right={<UserMenu auth={auth} logout={logout} />} />
+            <Header right={<UserMenu logout={logout} />} />
             <div className="max-w-7xl mx-auto px-6 md:px-8 pt-4 pb-20">
                 <Tabs className="gap-4" value={activeTab} onValueChange={value => navigate({ to: "/manage/{-$tab}", params: { tab: value } })}>
                     <div className="w-full flex justify-between">
@@ -422,7 +421,7 @@ function UserTableRow({ user }: { user: Awaited<ReturnType<typeof bridge.users.g
         queryFn: checkAuth,
     });
 
-    const isCurrentUser = session?.username === user.username;
+    const isCurrentUser = session?._id === user._id;
 
     return (
         <TableRow className="h-10">
@@ -439,7 +438,7 @@ function UserTableRow({ user }: { user: Awaited<ReturnType<typeof bridge.users.g
                         <IconTrash />
                     </Button>
                 )}
-                <AddUserDialog open={editDialogOpen} setOpen={setEditDialogOpen} user={user} isCurrentUser={isCurrentUser} />
+                <AddUserDialog open={editDialogOpen} setOpen={setEditDialogOpen} user={user} isCurrentUser={isCurrentUser} adminEdit />
                 <DeleteUserDialog open={deleteDialogOpen} setOpen={setDeleteDialogOpen} _id={user._id} />
             </TableCell>
         </TableRow>

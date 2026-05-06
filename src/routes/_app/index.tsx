@@ -138,7 +138,7 @@ function Index() {
                                 </PopoverContent>
                             </Popover>
                         </div>
-                        <UserMenu auth={auth} logout={logout} />
+                        <UserMenu logout={logout} />
                     </>
                 }
                 outScrolling={setScrolling}

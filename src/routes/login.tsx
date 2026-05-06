@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { login } from "@/data/auth";
-import { cn } from "@/lib/utils";
+import { cn, getErrorMessage } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
     component: LoginComponent,
@@ -37,7 +37,7 @@ function LoginComponent() {
             } else setError(result.error || "Invalid credentials");
         } catch (err) {
             console.error(err);
-            setError(String(err));
+            setError(getErrorMessage(err, "Something went wrong"));
         } finally {
             setLoading(false);
         }

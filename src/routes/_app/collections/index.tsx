@@ -73,7 +73,7 @@ function CollectionsList() {
                                 <IconX className="size-5" />
                             </Button>
                         </div>
-                        <UserMenu auth={auth} logout={logout} />
+                        <UserMenu logout={logout} />
                     </>
                 }
                 outScrolling={setScrolling}
