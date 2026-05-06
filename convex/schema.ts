@@ -68,6 +68,7 @@ export default defineSchema({
         sneakPickEnabled: v.optional(v.boolean()),
         homepageSections: v.optional(v.array(v.string())),
         coverFrame: v.optional(v.boolean()),
+        showCountOnSearch: v.optional(v.boolean()),
         publicPage: v.optional(v.boolean()),
         locationVisibility: v.optional(v.union(v.literal("public"), v.literal("guests"), v.literal("protected"))),
         descriptionVisibility: v.optional(v.union(v.literal("public"), v.literal("guests"), v.literal("protected"))),

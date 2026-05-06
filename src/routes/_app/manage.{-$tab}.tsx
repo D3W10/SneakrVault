@@ -137,6 +137,9 @@ function ManagePage() {
                                     <ConfigItem title="Cover frame" description="Whether the photos of pairs should cover the square they're displayed in.">
                                         <Switch checked={config.coverFrame} onCheckedChange={v => updateConfig.mutate({ ...config, coverFrame: v })} />
                                     </ConfigItem>
+                                    <ConfigItem title="Display count when searching" description="Whether to display the count when searching pairs.">
+                                        <Switch checked={config.showCountOnSearch} onCheckedChange={v => updateConfig.mutate({ ...config, showCountOnSearch: v })} />
+                                    </ConfigItem>
                                 </ConfigSection>
                                 <ConfigSection title="Security">
                                     <ConfigItem title="Public page" description="Allow anyone to view your sneaker collection without the need to log in. This will also allow them to see information about the pairs!">

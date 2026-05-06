@@ -5,21 +5,21 @@ import { SneakerCard, SneakerCardSkeleton } from "@/components/SneakerCard";
 import bridge from "@/data/bridge";
 import { useConfig } from "@/lib/useConfig";
 import { creationSort, filterBySearch, hasSearched } from "@/lib/utils";
-import type { SessionState } from "@/data/session";
+import { Route } from "@/routes/__root";
 import type { Search } from "@/lib/models";
 
 interface GridBlockProps {
     search: Search;
     onAdd: () => unknown;
-    auth: Partial<SessionState>;
 }
 
-export function GridBlock({ search, onAdd, auth }: GridBlockProps) {
+export function GridBlock({ search, onAdd }: GridBlockProps) {
     const { isPending, data: sneakers } = useQuery({
         queryKey: ["sneakers"],
         queryFn: bridge.sneakers.get,
     });
     const { config } = useConfig();
+    const { auth } = Route.useRouteContext();
     const searched = hasSearched(search, config);
     const filtered = filterBySearch(sneakers ?? [], search);
 

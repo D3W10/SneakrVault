@@ -6,10 +6,9 @@ import type { Search } from "@/lib/models";
 
 interface CountBlockProps {
     search: Search;
-    hideOnSearch?: boolean;
 }
 
-export function CountBlock({ search, hideOnSearch }: CountBlockProps) {
+export function CountBlock({ search }: CountBlockProps) {
     const { data: sneakers } = useQuery({
         queryKey: ["sneakers"],
         queryFn: bridge.sneakers.get,
@@ -18,7 +17,7 @@ export function CountBlock({ search, hideOnSearch }: CountBlockProps) {
     const searched = hasSearched(search, config);
     const length = filterBySearch(sneakers ?? [], search).length;
 
-    if (hideOnSearch && searched) return null;
+    if (!config.showCountOnSearch && searched) return null;
 
     return (
         <div className="px-6 md:px-8 flex flex-col gap-4">

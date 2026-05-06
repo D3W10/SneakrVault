@@ -147,7 +147,7 @@ function Index() {
                 {config.homepageSections.map((section, idx) => {
                     if (section === "SneakPick") return config.sneakPickEnabled && <SneakPickBlock key={idx} search={search} />;
                     else if (section === "Birthday") return <BirthdayBlock key={idx} search={search} />;
-                    else if (section === "Grid") return <GridBlock key={idx} search={search} onAdd={addSneaker} auth={auth} />;
+                    else if (section === "Grid") return <GridBlock key={idx} search={search} onAdd={addSneaker} />;
                     else if (section === "Count") return <CountBlock key={idx} search={search} />;
                     else return null;
                 })}

@@ -35,6 +35,7 @@ const defaultConfig = {
     sneakPickEnabled: true,
     homepageSections: ["SneakPick", "Birthday", "Grid", "Count"],
     coverFrame: true,
+    showCountOnSearch: true,
     publicPage: false,
     locationVisibility: "protected",
     descriptionVisibility: "protected",
