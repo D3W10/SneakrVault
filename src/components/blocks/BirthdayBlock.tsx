@@ -52,7 +52,7 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
                     <IconCake className="size-6 text-primary" />
                     <h2 className="text-xl font-bold text-white">Upcoming Birthdays</h2>
                 </div>
-                <div className="px-6 md:px-8 pt-px pb-4 flex gap-4 overflow-x-auto">
+                <div className="px-6 md:px-8 pt-px pb-4 flex gap-4 overflow-x-auto scrollbar-hidden">
                     {upcomingBirthdays.map(s => (
                         <SneakerCard key={s._id} sneaker={s} birthday />
                     ))}

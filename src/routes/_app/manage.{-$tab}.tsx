@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IconArrowDown, IconArrowUp, IconCake, IconCheck, IconForbid2, IconHexagon, IconLayoutGrid, IconMapPin, IconNumber123, IconPencil, IconPlus, IconRosetteDiscountCheck, IconRuler2, IconTrash, IconUser } from "@tabler/icons-react";
+import { IconArrowDown, IconArrowUp, IconCake, IconCheck, IconExternalLink, IconForbid2, IconHexagon, IconLayoutGrid, IconMapPin, IconNumber123, IconPencil, IconPlus, IconRosetteDiscountCheck, IconRuler2, IconTrash, IconUser } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,6 +21,7 @@ import bridge from "@/data/bridge";
 import { defaultConfig, useConfig, type Config } from "@/lib/useConfig";
 import { useLogout } from "@/lib/useLogout";
 import { cn } from "@/lib/utils";
+import packageJson from "#/package.json";
 
 export const Route = createFileRoute("/_app/manage/{-$tab}")({
     component: ManagePage,
@@ -165,6 +166,16 @@ function ManagePage() {
                                 </ConfigSection>
                             </>
                         )}
+                        <ConfigSection>
+                            <ConfigItem title="SneakrVault" description={`Version v${packageJson.version}`} wrap="mobile">
+                                <a href={packageJson.repository.url.replace(/git\+|\.git/g, "")} target="_blank" rel="noreferrer">
+                                    <Button variant="outline">
+                                        <IconExternalLink className="size-4" data-icon="inline-start" />
+                                        View source
+                                    </Button>
+                                </a>
+                            </ConfigItem>
+                        </ConfigSection>
                     </TabsContent>
                     <TabsContent value={tabs[1]}>
                         <Table>
@@ -221,10 +232,10 @@ function ManagePage() {
     );
 }
 
-function ConfigSection({ title, children }: { title: string; children?: React.ReactNode }) {
+function ConfigSection({ title, children }: { title?: string; children?: React.ReactNode }) {
     return (
         <div className="space-y-4">
-            <h2 className="pl-5 text-2xl md:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>
+            {title && <h2 className="pl-5 text-2xl md:text-3xl text-transparent font-black bg-linear-to-b from-zinc-50 to-zinc-600 bg-clip-text tracking-tight">{title}</h2>}
             <div className="px-5 py-4 bg-accent rounded-2xl ring ring-border divide-y divide-border *:pt-4 *:pb-4 *:first:pt-0 *:last:pb-0">{children}</div>
         </div>
     );

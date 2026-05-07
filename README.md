@@ -6,7 +6,7 @@
     <p align="center">
         <a href="#about">About</a>
         ·
-        <a href="https://ghostty.org/download">Releases</a>
+        <a href="https://github.com/D3W10/SneakrVault/releases">Releases</a>
         ·
         <a href="CONTRIBUTING.md">Contributing</a>
     </p>
