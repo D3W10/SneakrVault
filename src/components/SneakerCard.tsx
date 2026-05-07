@@ -27,7 +27,7 @@ export function SneakerCard({ sneaker, birthday }: SneakerCardProps) {
         <Link
             to="/sneakers/$id"
             params={{ id: sneaker._id }}
-            className={cn("min-w-60 block relative p-2 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0", !birthday ? "w-full" : "max-w-84 pr-8 shrink-0")}
+            className={cn("min-w-68 block relative p-2 pr-4 bg-secondary rounded-2xl hover:shadow-2xl hover:shadow-primary/5 group ring ring-border/75 hover:border-white/20 overflow-hidden transition-shadow duration-300 z-0", !birthday ? "w-full" : "max-w-[82vw] shrink-0")}
         >
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="h-full flex items-center gap-4 relative z-1">

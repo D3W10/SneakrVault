@@ -47,12 +47,12 @@ export function BirthdayBlock({ search }: BirthdayBlockProps) {
 
     if (!hasSearched(search, config) && upcomingBirthdays.length !== 0) {
         return (
-            <div className="px-6 md:px-8 flex flex-col gap-4">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-4">
+                <div className="px-6 md:px-8 flex items-center gap-2">
                     <IconCake className="size-6 text-primary" />
                     <h2 className="text-xl font-bold text-white">Upcoming Birthdays</h2>
                 </div>
-                <div className="p-px pb-4 flex gap-4 overflow-x-auto">
+                <div className="px-6 md:px-8 pt-px pb-4 flex gap-4 overflow-x-auto">
                     {upcomingBirthdays.map(s => (
                         <SneakerCard key={s._id} sneaker={s} birthday />
                     ))}
