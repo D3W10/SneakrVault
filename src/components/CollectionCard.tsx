@@ -25,7 +25,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
 export function CollectionCardSkeleton() {
     return (
         <div className="w-full p-2 flex items-center gap-4 relative bg-secondary rounded-2xl ring ring-border">
-            <Skeleton className="size-18 shrink-0 rounded-lg" />
+            <Skeleton className="size-20 md:size-22 shrink-0 rounded-lg" />
             <div className="flex flex-col justify-center flex-1">
                 <Skeleton className="w-1/2 h-5.5 mb-2" />
                 <Skeleton className="w-1/5 h-4.5" />

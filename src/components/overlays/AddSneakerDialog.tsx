@@ -41,6 +41,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const [name, setName] = useState(sneaker?.name ?? "");
     const [color, setColor] = useState(sneaker?.color ?? "");
     const [size, setSize] = useState(sneaker?.size?.toString() ?? "");
+    const [isSizeValid, setIsSizeValid] = useState(true);
     const [brand, setBrand] = useState(sneaker?.brand._id ?? "");
     const [photo, setPhoto] = useState<File | null>();
     const [description, setDescription] = useState(sneaker?.description ?? "");
@@ -82,16 +83,20 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
     const isValidGoatUrl = (url: string) => /^https:\/\/(www\.)?goat\.com\/sneakers\/[a-zA-Z0-9-_]+$/g.test(url);
 
     function parseSize(size: string) {
-        if (!/^[\d./½⅓⅔]*$/.test(size)) return;
+        size = size.trimEnd();
+
+        const parts = size.split(".");
+        if (!/^[\d./½⅓⅔]*$/.test(size) || (size.length <= 2 && size.slice(-1) === "/") || /\d{4,}/g.test(parts[0]) || /\d{3,}/g.test(parts[1])) return;
 
         if (/\d\/\d/g.test(size)) {
             for (const frac of size.matchAll(/(\d)\/(\d)/g)) {
                 const char = fractions[`${frac[1]}/${frac[2]}`];
-                if (char) size = size.replace(frac[0], char);
+                if (char) size = size.replace(frac[0], ` ${char}`);
             }
         }
 
         setSize(size);
+        setIsSizeValid(!size.includes("/") && /(\.\d)?/g.test(size));
     }
 
     function onSelect(val: string) {
@@ -270,7 +275,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                             </Field>
                             <Field className="flex-1">
                                 <Label htmlFor="sneakerSize">Size</Label>
-                                <Input id="sneakerSize" name="size" maxLength={6} placeholder="10" disabled={isSaving} value={size} onChange={e => parseSize(e.target.value)} />
+                                <Input id="sneakerSize" name="size" maxLength={8} placeholder="10" disabled={isSaving} value={size} onChange={e => parseSize(e.target.value)} />
                             </Field>
                         </div>
                         <Field>
@@ -509,7 +514,7 @@ function AddSneakerDialogContent({ setOpen, sneaker }: Omit<AddSneakerDialogProp
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <DialogFooter>
                     <DialogClose disabled={isSaving} render={<Button variant="outline">Cancel</Button>} />
-                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !isConditionValid || (stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)) || (goatUrl.length !== 0 && !isValidGoatUrl(goatUrl))}>
+                    <Button type="submit" className="sm:w-31" disabled={isSaving || !name || !isSizeValid || !isConditionValid || (stockxUrl.length !== 0 && !isValidStockxUrl(stockxUrl)) || (goatUrl.length !== 0 && !isValidGoatUrl(goatUrl))}>
                         {!isSaving ? "Save changes" : <Spinner />}
                     </Button>
                 </DialogFooter>

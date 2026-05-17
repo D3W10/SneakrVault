@@ -131,7 +131,7 @@ function SneakerDetails() {
                     </>
                 }
             />
-            <div className="max-w-7xl mx-auto pt-4 max-md:pb-40 max-md:pwa:pb-44 flex flex-col gap-6">
+            <div className="max-w-7xl mx-auto pt-4 max-md:pb-44 max-md:pwa:pb-48 flex flex-col gap-6">
                 <div className="w-full px-6 md:px-8 flex gap-5 sm:gap-6 md:gap-8">
                     {sneaker ? (
                         <>
@@ -183,7 +183,7 @@ function SneakerDetails() {
                             </div>
                         )
                     ) : (
-                        <Skeleton className="w-3/7 h-8 rounded-md" />
+                        <Skeleton className="w-3/7 h-8 mx-6 md:mx-8 rounded-md" />
                     )}
                     <div className="px-6 md:px-8 flex max-md:flex-col gap-4 md:gap-6">
                         {showDescription &&
