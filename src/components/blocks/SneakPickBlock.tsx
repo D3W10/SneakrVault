@@ -84,7 +84,7 @@ function PickTimeSelect({ sneaker, self = false }: PickTimeSelectProps) {
         queryKey: ["owners"],
         queryFn: bridge.users.getOwners,
         enabled: !self,
-        select: users => users.filter(u => u.active && u._id !== auth?._id),
+        select: users => users.filter(u => u._id !== auth?._id),
     });
     const queryClient = useQueryClient();
     const ref = useRef<HTMLDivElement>(null);
@@ -117,7 +117,7 @@ function PickTimeSelect({ sneaker, self = false }: PickTimeSelectProps) {
 
     const selUser = users?.find(o => o._id === pickFor);
 
-    if (!self && users?.length === 1) return null;
+    if (!self && users?.length === 0) return null;
 
     return (
         <div ref={ref} className="min-h-9 relative">
