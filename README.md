@@ -33,7 +33,8 @@ SneakrVault is a self-hosted sneaker collection management web application that 
 
 It provides a user-friendly interface for anyone to add new pairs plus an admininstrator dashboard to manage users, brands and locations. Some of the features include:
 - Search pairs with multiple filters;
-- Ability to create multiple accounts (including admin and guest accounts);
+- Personalize your homepage to your liking;
+- Private or public page with the ability to create accounts (including member and guest accounts);
 - Assign locations and owners to pairs, great when you have a shared collection;
 - A system that allow users to pick sneakers for one another;
 - Organize pairs into collections for better management.
