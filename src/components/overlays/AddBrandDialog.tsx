@@ -130,7 +130,7 @@ function AddBrandDialogContent({ setOpen, brand }: Omit<AddBrandDialogProps, "op
                             <IconTrash className="size-4" />
                         </Button>
                     </div>
-                    <div className="mt-2 grid grid-cols-10 gap-2">
+                    <div className="mt-2 flex max-sm:flex-wrap max-sm:justify-center sm:grid sm:grid-cols-10 gap-2">
                         {brandPresets.map(b => {
                             const slug = b.replace(/\s+/g, "");
 
@@ -138,7 +138,7 @@ function AddBrandDialogContent({ setOpen, brand }: Omit<AddBrandDialogProps, "op
                                 <Button
                                     key={b}
                                     variant="outline"
-                                    className="w-full h-auto p-1.25 aspect-square"
+                                    className="size-8 sm:w-full sm:h-auto p-1.25 aspect-square"
                                     size="icon"
                                     onClick={() => {
                                         setName(b);
